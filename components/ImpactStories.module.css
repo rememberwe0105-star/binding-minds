@@ -1,0 +1,77 @@
+.section {
+  padding: 64px 0;
+  background: var(--bm-bg-warm);
+}
+
+.sectionHeader {
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  color: var(--bm-text-dark);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.6s ease 0.08s, transform 0.6s ease 0.08s;
+}
+
+.sectionHeader.visible,
+.sectionTitle.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.readMore {
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.readMore:hover {
+  color: var(--bm-terracotta);
+}
+
+.storyCard {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, opacity 0.7s ease;
+  border-color: rgba(143, 151, 121, 0.1);
+  opacity: 0;
+  transform: translateY(30px);
+}
+
+.storyCard.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.storyCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 16px 48px rgba(143, 151, 121, 0.15);
+}
+
+.imageSection {
+  position: relative;
+  overflow: hidden;
+}
+
+.imageWrapper {
+  position: relative;
+  height: 220px;
+  width: 100%;
+}
+
+.imageSection img {
+  transition: transform 0.4s ease;
+}
+
+.storyCard:hover .imageSection img {
+  transform: scale(1.05);
+}
+
+.categoryBadge {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 2;
+}

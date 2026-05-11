@@ -1,0 +1,43 @@
+.topBar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.searchInput {
+  flex: 1;
+}
+
+.mobileFilterBtn {
+  display: none;
+}
+
+.resultBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 24px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(143, 151, 121, 0.1);
+}
+
+.desktopClear {}
+
+.sidebar {
+  display: block;
+}
+
+/* 모바일: 사이드바 숨기고 필터 버튼 표시 */
+@media (max-width: 62em) {
+  .mobileFilterBtn {
+    display: flex;
+  }
+
+  .sidebar {
+    display: none;
+  }
+
+  .desktopClear {
+    display: none;
+  }
+}

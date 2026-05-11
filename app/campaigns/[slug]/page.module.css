@@ -1,0 +1,149 @@
+.page {
+  min-height: 100vh;
+  padding: 24px 0 80px;
+  background: var(--bm-bg-warm);
+}
+
+.notFound {
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.backLink {
+  display: inline-block;
+  text-decoration: none;
+  color: var(--bm-text-muted);
+  margin-bottom: 20px;
+  transition: color 0.2s ease;
+}
+
+.backLink:hover {
+  color: var(--bm-terracotta);
+}
+
+/* 2컬럼 레이아웃 */
+.layout {
+  display: flex;
+  gap: 40px;
+}
+
+.mainColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.sideColumn {
+  flex: 0 0 360px;
+}
+
+/* 히어로 이미지 */
+.heroImage {
+  position: relative;
+  height: 400px;
+  width: 100%;
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.heroBadge {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  z-index: 2;
+}
+
+.campaignTitle {
+  font-size: 2rem;
+  color: var(--bm-text-dark);
+  line-height: 1.2;
+}
+
+/* 상세 설명 */
+.longDescription {
+  padding-bottom: 40px;
+  border-bottom: 1px solid rgba(143, 151, 121, 0.1);
+}
+
+.descH2 {
+  font-size: 1.5rem;
+  color: var(--bm-text-dark);
+}
+
+.descH3 {
+  font-size: 1.15rem;
+  color: var(--bm-sage-dark);
+}
+
+.listItem {
+  position: relative;
+}
+
+/* 기부 위젯 */
+.donateWidget {
+  position: sticky;
+  top: 88px;
+  background: white;
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(143, 151, 121, 0.1);
+}
+
+.taxHint {
+  background: rgba(143, 151, 121, 0.08);
+  padding: 10px 14px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.donateBtn {
+  font-weight: 700;
+  font-size: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.donateBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(226, 114, 91, 0.3);
+}
+
+/* 관련 캠페인 */
+.relatedTitle {
+  font-size: 1.6rem;
+  color: var(--bm-text-dark);
+}
+
+/* 반응형 */
+@media (max-width: 62em) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sideColumn {
+    flex: none;
+    width: 100%;
+  }
+
+  .donateWidget {
+    position: static;
+  }
+
+  .heroImage {
+    height: 280px;
+  }
+
+  .campaignTitle {
+    font-size: 1.6rem;
+  }
+}
+
+@media (max-width: 36em) {
+  .heroImage {
+    height: 220px;
+    border-radius: 12px;
+  }
+
+  .donateWidget {
+    padding: 20px;
+  }
+}

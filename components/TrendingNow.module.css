@@ -1,0 +1,67 @@
+.section {
+  padding: 32px 0 48px;
+  background: white;
+  border-top: 1px solid rgba(143, 151, 121, 0.08);
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.section.visible { opacity: 1; transform: translateY(0); }
+.section.hidden { opacity: 0; transform: translateY(20px); }
+
+.scrollContainer {
+  display: flex;
+  gap: 16px;
+  overflow-x: auto;
+  scroll-snap-type: x mandatory;
+  padding-bottom: 8px;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollContainer::-webkit-scrollbar { display: none; }
+
+.miniCard {
+  flex: 0 0 210px;
+  scroll-snap-align: start;
+  cursor: pointer;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border-color: rgba(143, 151, 121, 0.1);
+}
+
+.miniCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 10px 30px rgba(143, 151, 121, 0.15);
+}
+
+.miniImageSection {
+  position: relative;
+  overflow: hidden;
+}
+
+.miniImageWrapper {
+  position: relative;
+  height: 130px;
+  width: 100%;
+}
+
+.miniImageSection img {
+  transition: transform 0.4s ease;
+}
+
+.miniCard:hover .miniImageSection img {
+  transform: scale(1.05);
+}
+
+.scrollBtn { transition: background 0.2s ease; }
+.scrollBtn:hover { background: var(--bm-bg-cream); }
+
+.seeAll { text-decoration: none; transition: opacity 0.2s ease; }
+.seeAll:hover { opacity: 0.7; }
+
+@media (max-width: 36em) {
+  .miniCard { flex: 0 0 170px; }
+  .miniImageWrapper { height: 100px; }
+  .scrollBtn { display: none; }
+}

@@ -1,0 +1,104 @@
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background-color: rgba(250, 249, 246, 0.6);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid transparent;
+  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+}
+
+.header.scrolled {
+  background-color: rgba(250, 249, 246, 0.92);
+  backdrop-filter: blur(20px);
+  border-bottom: 1px solid rgba(143, 151, 121, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: 68px;
+}
+
+.logo {
+  cursor: pointer;
+  transition: opacity 0.2s ease;
+}
+
+.logo:hover {
+  opacity: 0.8;
+}
+
+.nav {
+  flex: 1;
+  justify-content: center;
+}
+
+.link {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--bm-text-muted);
+  text-decoration: none;
+  padding: 6px 0;
+  position: relative;
+  transition: color 0.2s ease;
+}
+
+.link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--bm-terracotta);
+  transition: width 0.3s ease;
+  border-radius: 1px;
+}
+
+.link:hover {
+  color: var(--bm-text-dark);
+}
+
+.link:hover::after {
+  width: 100%;
+}
+
+.mobileLink {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--bm-text-dark);
+  text-decoration: none;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--bm-bg-cream);
+  transition: color 0.2s ease;
+}
+
+.mobileLink:hover {
+  color: var(--bm-terracotta);
+}
+
+.userBtn {
+  padding: 4px 8px;
+  border-radius: 24px;
+  transition: background 0.2s ease;
+}
+
+.userBtn:hover {
+  background: rgba(143, 151, 121, 0.08);
+}
+
+.userName {
+  max-width: 120px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (max-width: 48em) {
+  .userName {
+    display: none;
+  }
+}

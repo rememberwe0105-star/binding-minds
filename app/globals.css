@@ -1,49 +1,63 @@
+/* Binding Minds — 글로벌 스타일 */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
-
-html {
-  height: 100%;
-}
-
-html,
-body {
-  max-width: 100vw;
-  overflow-x: hidden;
-}
-
-body {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  color: var(--foreground);
-  background: var(--background);
-  font-family: Arial, Helvetica, sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+  --bm-bg-warm: #FAF9F6;
+  --bm-bg-cream: #F5F0E8;
+  --bm-text-dark: #3D3229;
+  --bm-text-muted: #6B5E50;
+  --bm-sage: #8F9779;
+  --bm-sage-dark: #6c7854;
+  --bm-sage-light: #c5cdb7;
+  --bm-terracotta: #E2725B;
+  --bm-terracotta-dark: #c14025;
 }
 
 * {
   box-sizing: border-box;
-  padding: 0;
   margin: 0;
+  padding: 0;
 }
 
-a {
-  color: inherit;
-  text-decoration: none;
+body {
+  background-color: var(--bm-bg-warm);
+  color: var(--bm-text-dark);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
+/* 부드러운 스크롤 */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Fade-in 애니메이션 */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }
+
+.fadeInUp {
+  animation: fadeInUp 0.7s ease-out forwards;
+}
+
+/* 스크롤 reveal 애니메이션 유틸리티 */
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.revealDelay1 { transition-delay: 0.1s; }
+.revealDelay2 { transition-delay: 0.2s; }
+.revealDelay3 { transition-delay: 0.3s; }
+.revealDelay4 { transition-delay: 0.4s; }

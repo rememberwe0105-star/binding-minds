@@ -1,0 +1,20 @@
+.page { min-height: 100vh; background: var(--bm-bg-warm); }
+
+.heroSection { padding: 60px 0 40px; }
+.heroTitle { font-size: 2.4rem; color: var(--bm-text-dark); line-height: 1.15; }
+
+.section { padding: 48px 0 64px; }
+.sectionTitle { font-size: 1.6rem; color: var(--bm-text-dark); }
+
+.accordionItem {
+  border-color: rgba(143, 151, 121, 0.12) !important;
+  background: white;
+}
+
+.contactCard {
+  border-color: rgba(143, 151, 121, 0.1);
+}
+
+@media (max-width: 48em) {
+  .heroTitle { font-size: 1.6rem; }
+}

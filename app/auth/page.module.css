@@ -1,0 +1,104 @@
+.page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  background: var(--bm-bg-warm);
+  position: relative;
+  overflow: hidden;
+}
+
+/* 유기적 블롭 배경 */
+.blobLeft {
+  position: absolute;
+  top: 10%;
+  left: -120px;
+  width: 350px;
+  height: 350px;
+  border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
+  background: linear-gradient(135deg, rgba(143, 151, 121, 0.1), rgba(197, 205, 183, 0.15));
+  animation: morphBlob 14s ease-in-out infinite;
+  z-index: 0;
+}
+
+.blobRight {
+  position: absolute;
+  bottom: 5%;
+  right: -100px;
+  width: 300px;
+  height: 300px;
+  border-radius: 45% 55% 60% 40% / 55% 45% 55% 45%;
+  background: linear-gradient(135deg, rgba(226, 114, 91, 0.06), rgba(245, 240, 232, 0.2));
+  animation: morphBlob 18s ease-in-out infinite reverse;
+  z-index: 0;
+}
+
+@keyframes morphBlob {
+  0%, 100% { border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%; transform: rotate(0deg) scale(1); }
+  33% { border-radius: 45% 55% 40% 60% / 55% 45% 60% 40%; transform: rotate(4deg) scale(1.02); }
+  66% { border-radius: 55% 45% 60% 40% / 40% 60% 45% 55%; transform: rotate(-2deg) scale(0.98); }
+}
+
+.container {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+}
+
+.card {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 36px;
+  box-shadow: 0 12px 48px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(143, 151, 121, 0.08);
+  animation: fadeInUp 0.5s ease-out;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.title {
+  font-size: 1.6rem;
+  color: var(--bm-text-dark);
+  margin-bottom: 4px;
+}
+
+.googleBtn {
+  font-weight: 600;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.googleBtn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+}
+
+.submitBtn {
+  font-weight: 700;
+  font-size: 1rem;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.submitBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(226, 114, 91, 0.3);
+}
+
+/* 모바일 */
+@media (max-width: 36em) {
+  .page {
+    padding: 20px 12px;
+  }
+
+  .card {
+    padding: 28px 20px;
+    border-radius: 16px;
+  }
+
+  .title {
+    font-size: 1.3rem;
+  }
+}
