@@ -1,11 +1,19 @@
 import { NextResponse } from 'next/server';
 import Stripe from 'stripe';
 
-// 서버 사이드 Stripe 인스턴스
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!);
+// 런타임에만 초기화 (빌드 타임 에러 방지)
+function getStripeServer() {
+  const key = process.env.STRIPE_SECRET_KEY;
+  if (!key) {
+    throw new Error('STRIPE_SECRET_KEY is not configured');
+  }
+  return new Stripe(key);
+}
 
 export async function POST(req: Request) {
   try {
+    const stripe = getStripeServer();
+
     const body = await req.json();
     const {
       amount,        // NZD 단위 (정수, e.g. 50)
