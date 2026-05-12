@@ -5,7 +5,7 @@
   background-color: rgba(250, 249, 246, 0.6);
   backdrop-filter: blur(8px);
   border-bottom: 1px solid transparent;
-  transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, backdrop-filter 0.3s ease;
+  transition: background-color 0.35s var(--bm-ease-out), border-color 0.35s var(--bm-ease-out), box-shadow 0.35s var(--bm-ease-out), backdrop-filter 0.35s var(--bm-ease-out);
 }
 
 .header.scrolled {
@@ -54,7 +54,7 @@
   width: 0;
   height: 2px;
   background: var(--bm-terracotta);
-  transition: width 0.3s ease;
+  transition: width 0.3s var(--bm-ease-out);
   border-radius: 1px;
 }
 

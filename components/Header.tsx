@@ -14,7 +14,7 @@ import {
   UnstyledButton,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLeaf, IconLogout, IconLayoutDashboard, IconChevronDown } from '@tabler/icons-react';
+import { IconLeaf, IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import classes from './Header.module.css';
@@ -114,6 +114,13 @@ export function Header() {
                   href="/dashboard"
                 >
                   My Dashboard
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconSettings size={16} />}
+                  component={Link}
+                  href="/settings"
+                >
+                  Settings
                 </Menu.Item>
                 <Menu.Divider />
                 <Menu.Item

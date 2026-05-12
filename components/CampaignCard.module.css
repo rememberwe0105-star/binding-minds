@@ -7,14 +7,14 @@
   height: 100%;
   display: flex;
   flex-direction: column;
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.35s var(--bm-ease-out), box-shadow 0.35s var(--bm-ease-out);
   border-color: rgba(143, 151, 121, 0.1);
   cursor: pointer;
 }
 
 .card:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 16px 48px rgba(143, 151, 121, 0.18);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 40px rgba(143, 151, 121, 0.15);
 }
 
 .imageSection {
@@ -29,7 +29,7 @@
 }
 
 .imageSection img {
-  transition: transform 0.4s ease;
+  transition: transform 0.5s var(--bm-ease-out);
 }
 
 .card:hover .imageSection img {

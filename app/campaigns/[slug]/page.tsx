@@ -1,6 +1,7 @@
 'use client';
 
 import { use, useState } from 'react';
+import { useDisclosure } from '@mantine/hooks';
 import {
   Container,
   Title,
@@ -27,6 +28,7 @@ import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
+import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import {
   campaigns,
   getCampaignBySlug,
@@ -46,6 +48,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
   const campaign = getCampaignBySlug(slug);
   const [donationAmount, setDonationAmount] = useState('50');
   const [customAmount, setCustomAmount] = useState('');
+  const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
   // 캠페인이 없으면 404
   if (!campaign) {
@@ -257,6 +260,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   size="lg"
                   radius="xl"
                   className={classes.donateBtn}
+                  onClick={openModal}
                 >
                   Donate {actualAmount ? `$${actualAmount}` : ''} Now
                 </Button>
@@ -284,6 +288,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
         </Container>
       </main>
       <Footer />
+      <DonationCheckoutModal opened={modalOpened} onClose={closeModal} campaign={campaign} />
     </>
   );
 }

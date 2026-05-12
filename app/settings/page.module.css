@@ -1,0 +1,30 @@
+.page {
+  padding: 100px 0 80px;
+  background: var(--bm-bg-warm);
+  min-height: 100vh;
+}
+
+.heading {
+  font-size: 1.6rem;
+  color: var(--bm-text-dark);
+}
+
+.tabList {
+  margin-bottom: 4px;
+}
+
+.saveBtn {
+  font-weight: 600;
+  transition: transform 0.25s var(--bm-ease-out), box-shadow 0.25s var(--bm-ease-out);
+}
+
+.saveBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(143, 151, 121, 0.25);
+}
+
+@media (max-width: 36em) {
+  .page {
+    padding: 80px 0 48px;
+  }
+}

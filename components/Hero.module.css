@@ -49,7 +49,7 @@
 /* 텍스트 영역 */
 .textBlock {
   flex: 1;
-  animation: fadeInUp 0.7s ease-out;
+  animation: fadeInUp 0.7s var(--bm-ease-out);
 }
 
 @keyframes fadeInUp {
@@ -95,7 +95,7 @@
   font-weight: 600;
   padding-left: 26px;
   padding-right: 26px;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s var(--bm-ease-out), box-shadow 0.25s var(--bm-ease-out);
 }
 .ctaPrimary:hover {
   transform: translateY(-2px);
@@ -104,23 +104,23 @@
 
 .ctaSecondary {
   font-weight: 600;
-  transition: transform 0.2s ease;
+  transition: transform 0.25s var(--bm-ease-out);
 }
 .ctaSecondary:hover { transform: translateY(-2px); }
 
 /* 캠페인 카드 영역 */
 .campaignBlock {
   flex: 0 0 380px;
-  animation: fadeInUp 0.9s ease-out 0.15s both;
+  animation: fadeInUp 0.9s var(--bm-ease-out) 0.15s both;
 }
 
 .campaignCard {
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  transition: transform 0.35s var(--bm-ease-out), box-shadow 0.35s var(--bm-ease-out);
   border: 1px solid rgba(143, 151, 121, 0.1);
 }
 .campaignCard:hover {
-  transform: translateY(-6px);
-  box-shadow: 0 20px 60px rgba(143, 151, 121, 0.2);
+  transform: translateY(-4px);
+  box-shadow: 0 16px 50px rgba(143, 151, 121, 0.18);
 }
 
 .campaignImageSection {
@@ -135,7 +135,7 @@
 }
 
 .campaignImageSection img {
-  transition: transform 0.4s ease;
+  transition: transform 0.5s var(--bm-ease-out);
 }
 
 .campaignCard:hover .campaignImageSection img {
@@ -144,7 +144,7 @@
 
 .supportBtn {
   font-weight: 600;
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transition: transform 0.25s var(--bm-ease-out), box-shadow 0.25s var(--bm-ease-out);
 }
 .supportBtn:hover {
   transform: translateY(-1px);

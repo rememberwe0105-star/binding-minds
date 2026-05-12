@@ -4,11 +4,19 @@
   padding: 40px 0 80px;
 }
 
+/* 인사 섹션 */
 .greeting {
   font-size: 1.6rem;
   color: var(--bm-text-dark);
 }
 
+/* 탭 영역 */
+.tabList {
+  border-bottom: 2px solid rgba(143, 151, 121, 0.1);
+  margin-bottom: 32px;
+}
+
+/* 통계 카드 */
 .statCard {
   border-color: rgba(143, 151, 121, 0.1);
   transition: transform 0.2s ease, box-shadow 0.2s ease;
@@ -19,10 +27,252 @@
   box-shadow: 0 8px 24px rgba(143, 151, 121, 0.1);
 }
 
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bm-text-dark);
+  line-height: 1.1;
+}
+
+/* --- 월별 차트 --- */
+.chartCard {
+  border-color: rgba(143, 151, 121, 0.1);
+}
+
+.chartContainer {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 160px;
+  padding-top: 16px;
+}
+
+.chartBar {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  height: 100%;
+  justify-content: flex-end;
+}
+
+.barFill {
+  width: 100%;
+  max-width: 40px;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(180deg, var(--bm-sage) 0%, var(--bm-sage-dark) 100%);
+  transition: height 0.5s ease, opacity 0.3s ease;
+  min-height: 4px;
+}
+
+.barFill:hover {
+  opacity: 0.8;
+}
+
+.barLabel {
+  font-size: 0.65rem;
+  color: var(--bm-text-muted);
+  text-align: center;
+}
+
+.barAmount {
+  font-size: 0.6rem;
+  font-weight: 600;
+  color: var(--bm-text-dark);
+  min-height: 14px;
+}
+
+/* --- 최근 기부 미니 리스트 --- */
+.recentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(143, 151, 121, 0.06);
+}
+
+.recentItem:last-child {
+  border-bottom: none;
+}
+
+/* --- Donation History 탭 --- */
+.filterBar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+.searchInput {
+  flex: 1;
+  min-width: 200px;
+}
+
+.tableWrapper {
+  overflow-x: auto;
+}
+
+.campaignLink {
+  color: var(--bm-text-dark);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+
+.campaignLink:hover {
+  color: var(--bm-terracotta);
+}
+
+/* --- Tax Summary 탭 --- */
+.taxHero {
+  background: linear-gradient(135deg, var(--bm-sage-dark) 0%, var(--bm-sage) 100%);
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.taxHeroBlob {
+  position: absolute;
+  top: -60px;
+  right: -80px;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+}
+
+.taxRefundAmount {
+  font-size: 3rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.1;
+}
+
+.calculatorCard {
+  border-color: rgba(143, 151, 121, 0.1);
+}
+
+.sliderContainer {
+  padding: 0 4px;
+}
+
+.refundResult {
+  background: rgba(143, 151, 121, 0.06);
+  border-radius: 12px;
+  padding: 20px;
+  text-align: center;
+}
+
+.refundValue {
+  font-size: 2.5rem;
+  font-weight: 900;
+  color: var(--bm-sage-dark);
+  line-height: 1.1;
+}
+
+.guideItem {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(143, 151, 121, 0.06);
+}
+
+.guideItem:last-child {
+  border-bottom: none;
+}
+
+/* --- Receipt Vault 탭 --- */
+.receiptCard {
+  border-color: rgba(143, 151, 121, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.receiptCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(143, 151, 121, 0.1);
+}
+
+.irdBadge {
+  background: rgba(143, 151, 121, 0.08);
+  color: var(--bm-sage-dark);
+  border: 1px solid rgba(143, 151, 121, 0.15);
+}
+
+/* --- Tax Card CTA --- */
 .taxCard {
   background: linear-gradient(135deg, var(--bm-sage-dark) 0%, var(--bm-sage) 100%);
 }
 
+/* --- 카테고리 차트 --- */
+.categoryBar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.categoryLabel {
+  min-width: 100px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--bm-text-dark);
+}
+
+.categoryFill {
+  height: 24px;
+  border-radius: 6px;
+  background: linear-gradient(90deg, var(--bm-sage) 0%, var(--bm-sage-dark) 100%);
+  transition: width 0.5s ease;
+  min-width: 8px;
+}
+
+.categoryAmount {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--bm-text-muted);
+  min-width: 50px;
+}
+
+/* --- 빈 상태 --- */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* --- 반응형 --- */
 @media (max-width: 48em) {
-  .greeting { font-size: 1.3rem; }
+  .greeting {
+    font-size: 1.3rem;
+  }
+
+  .taxHero {
+    padding: 24px;
+  }
+
+  .taxRefundAmount {
+    font-size: 2.2rem;
+  }
+
+  .refundValue {
+    font-size: 1.8rem;
+  }
+
+  .chartContainer {
+    height: 120px;
+  }
+
+  .filterBar {
+    flex-direction: column;
+  }
+
+  .searchInput {
+    min-width: auto;
+  }
+
+  .barLabel {
+    font-size: 0.55rem;
+  }
 }

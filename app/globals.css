@@ -9,6 +9,8 @@
   --bm-sage-light: #c5cdb7;
   --bm-terracotta: #E2725B;
   --bm-terracotta-dark: #c14025;
+  --bm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --bm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 * {
@@ -29,11 +31,68 @@ html {
   scroll-behavior: smooth;
 }
 
-/* Fade-in 애니메이션 */
+/* ── 스크롤 Reveal 애니메이션 시스템 ── */
+.reveal {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  will-change: opacity, transform;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger 딜레이 (카드가 순서대로 나타남) */
+.revealDelay1 { transition-delay: 0.08s; }
+.revealDelay2 { transition-delay: 0.16s; }
+.revealDelay3 { transition-delay: 0.24s; }
+.revealDelay4 { transition-delay: 0.32s; }
+.revealDelay5 { transition-delay: 0.40s; }
+.revealDelay6 { transition-delay: 0.48s; }
+
+/* 왼쪽에서 등장 */
+.revealLeft {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  will-change: opacity, transform;
+}
+.revealLeft.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 오른쪽에서 등장 */
+.revealRight {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  will-change: opacity, transform;
+}
+.revealRight.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* 스케일업 등장 */
+.revealScale {
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.7s var(--bm-ease-out), transform 0.7s var(--bm-ease-spring);
+  will-change: opacity, transform;
+}
+.revealScale.visible {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ── 페이지 진입 애니메이션 ── */
 @keyframes fadeInUp {
   from {
     opacity: 0;
-    transform: translateY(30px);
+    transform: translateY(24px);
   }
   to {
     opacity: 1;
@@ -42,22 +101,12 @@ html {
 }
 
 .fadeInUp {
-  animation: fadeInUp 0.7s ease-out forwards;
+  animation: fadeInUp 0.6s var(--bm-ease-out) forwards;
 }
 
-/* 스크롤 reveal 애니메이션 유틸리티 */
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+/* ── 링크/버튼 부드러운 전환 ── */
+a, button {
+  transition: color 0.2s ease, background-color 0.2s ease, 
+              border-color 0.2s ease, box-shadow 0.2s ease,
+              transform 0.2s ease;
 }
-
-.reveal.visible {
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.revealDelay1 { transition-delay: 0.1s; }
-.revealDelay2 { transition-delay: 0.2s; }
-.revealDelay3 { transition-delay: 0.3s; }
-.revealDelay4 { transition-delay: 0.4s; }

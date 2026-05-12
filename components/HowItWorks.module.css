@@ -1,0 +1,111 @@
+.section {
+  padding: 80px 0;
+  background: var(--bm-bg-cream);
+  position: relative;
+  overflow: hidden;
+}
+
+.heading {
+  font-size: 2.2rem;
+  color: var(--bm-text-dark);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 32px;
+  position: relative;
+}
+
+/* Connecting line between step icons (desktop only) */
+.connectingLine {
+  display: none;
+}
+
+@media (min-width: 62em) {
+  .connectingLine {
+    display: block;
+    position: absolute;
+    top: 72px;
+    left: 14%;
+    right: 14%;
+    height: 2px;
+    background: linear-gradient(
+      90deg,
+      var(--bm-sage-light) 0%,
+      var(--bm-terracotta) 50%,
+      var(--bm-sage-light) 100%
+    );
+    opacity: 0.4;
+    z-index: 0;
+  }
+}
+
+.stepCard {
+  text-align: center;
+  padding: 32px 20px;
+  border-radius: 16px;
+  background: white;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.04);
+  position: relative;
+  z-index: 1;
+  transition: transform 0.35s var(--bm-ease-out), box-shadow 0.35s var(--bm-ease-out);
+}
+
+.stepCard:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.08);
+}
+
+.stepNumber {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--bm-terracotta);
+  color: white;
+  font-size: 13px;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 3px 12px rgba(226, 114, 91, 0.3);
+}
+
+.stepIcon {
+  transition: transform 0.35s var(--bm-ease-spring);
+}
+
+.stepCard:hover .stepIcon {
+  transform: scale(1.1) rotate(4deg);
+}
+
+/* ── Responsive ── */
+@media (max-width: 62em) {
+  .grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+}
+
+@media (max-width: 36em) {
+  .section {
+    padding: 48px 0;
+  }
+
+  .heading {
+    font-size: 1.6rem;
+  }
+
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+
+  .stepCard {
+    padding: 24px 16px;
+  }
+}

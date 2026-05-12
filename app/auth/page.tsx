@@ -14,7 +14,7 @@ import {
   Anchor,
   Alert,
 } from '@mantine/core';
-import { IconLeaf, IconBrandGoogle, IconAlertCircle } from '@tabler/icons-react';
+import { IconLeaf, IconBrandGoogle, IconAlertCircle, IconTestPipe } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -99,6 +99,22 @@ export default function AuthPage() {
     setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
     setError('');
   };
+
+  // ── 🧪 DEV ONLY: 테스트 계정 원클릭 로그인 (배포 전 삭제) ──
+  const handleDemoLogin = async () => {
+    setError('');
+    setLoading(true);
+    try {
+      await logIn('testuser@bindingminds.co.nz', 'Test1234!');
+      router.push('/');
+    } catch (err: unknown) {
+      const firebaseError = err as { code?: string };
+      setError(getErrorMessage(firebaseError.code || ''));
+    } finally {
+      setLoading(false);
+    }
+  };
+  // ── END DEV ONLY ──
 
   return (
     <>
@@ -247,6 +263,37 @@ export default function AuthPage() {
                 {mode === 'login' ? 'Sign up' : 'Log in'}
               </Anchor>
             </Text>
+
+            {/* ── 🧪 DEV ONLY: Quick Demo Login (배포 전 삭제) ── */}
+            <Divider
+              label="developer shortcut"
+              labelPosition="center"
+              my={20}
+              color="rgba(143, 151, 121, 0.15)"
+              style={{ borderStyle: 'dashed' }}
+            />
+            <Button
+              fullWidth
+              variant="light"
+              color="gray"
+              size="md"
+              radius="xl"
+              leftSection={<IconTestPipe size={18} />}
+              onClick={handleDemoLogin}
+              loading={loading}
+              styles={{
+                root: {
+                  border: '1px dashed var(--bm-sage)',
+                  background: 'rgba(143, 151, 121, 0.06)',
+                },
+              }}
+            >
+              Quick Demo Login
+            </Button>
+            <Text ta="center" size="xs" mt={6} c="dimmed">
+              testuser@bindingminds.co.nz · Test1234!
+            </Text>
+            {/* ── END DEV ONLY ── */}
           </Box>
         </Container>
       </main>

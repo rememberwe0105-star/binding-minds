@@ -1,0 +1,84 @@
+.section {
+  padding: 80px 0;
+  background: linear-gradient(135deg, #3D3229 0%, #2a2118 100%);
+  position: relative;
+  overflow: hidden;
+}
+
+.heading {
+  font-size: 2.2rem;
+  color: white;
+}
+
+/* Background blobs */
+.bgBlob1 {
+  position: absolute;
+  top: -80px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(143, 151, 121, 0.12) 0%, transparent 70%);
+}
+
+.bgBlob2 {
+  position: absolute;
+  bottom: -60px;
+  left: -80px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(226, 114, 91, 0.08) 0%, transparent 70%);
+}
+
+.counterCard {
+  text-align: center;
+  padding: 32px 16px;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(8px);
+  transition: transform 0.35s var(--bm-ease-out), background 0.35s var(--bm-ease-out);
+}
+
+.counterCard:hover {
+  transform: translateY(-4px);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.iconWrapper {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+}
+
+.counterValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: white;
+  margin-bottom: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── Responsive ── */
+@media (max-width: 36em) {
+  .section {
+    padding: 48px 0;
+  }
+
+  .heading {
+    font-size: 1.6rem;
+  }
+
+  .counterValue {
+    font-size: 1.5rem;
+  }
+
+  .counterCard {
+    padding: 24px 12px;
+  }
+}
