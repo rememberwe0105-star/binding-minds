@@ -19,6 +19,7 @@ import {
 import { organizations as allOrganizations, filterOrganizations } from '@/data/organizations';
 import type { Organization } from '@/data/organizations';
 import type { Campaign } from '@/data/campaigns';
+import { useFavorites } from '@/contexts/FavoritesContext';
 import classes from './page.module.css';
 
 // 혼합 아이템 타입
@@ -58,6 +59,9 @@ export default function CampaignsPage() {
   const [selectedRegion, setSelectedRegion] = useState<Region | ''>('');
   const [sort, setSort] = useState<SortOption>('popular');
   const [listingType, setListingType] = useState<ListingType>('all');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+
+  const { isFavorite, getFavoriteCount } = useFavorites();
 
   // 페이지네이션 상태
   const [visibleCount, setVisibleCount] = useState(CAMPAIGNS_PER_PAGE);
@@ -93,8 +97,17 @@ export default function CampaignsPage() {
     return interleaveItems(filteredProjects, filteredOrgs);
   }, [listingType, filteredProjects, filteredOrgs]);
 
-  const visibleItems = mixedItems.slice(0, visibleCount);
-  const hasMore = visibleCount < mixedItems.length;
+  // favorites 필터 적용
+  const finalItems = useMemo((): MixedItem[] => {
+    if (!showFavoritesOnly) return mixedItems;
+    return mixedItems.filter((item) => {
+      if (item.type === 'project') return isFavorite('project', item.data.id);
+      return isFavorite('organization', item.data.id);
+    });
+  }, [mixedItems, showFavoritesOnly, isFavorite]);
+
+  const visibleItems = finalItems.slice(0, visibleCount);
+  const hasMore = visibleCount < finalItems.length;
   const totalCount = allCampaigns.length + allOrganizations.length;
 
   // 필터 변경 핸들러 (페이지네이션 리셋)
@@ -129,6 +142,7 @@ export default function CampaignsPage() {
     setSelectedRegion('');
     setSort('popular');
     setListingType('all');
+    setShowFavoritesOnly(false);
     setVisibleCount(CAMPAIGNS_PER_PAGE);
   };
 
@@ -168,11 +182,14 @@ export default function CampaignsPage() {
                 onRegionChange={handleRegionChange}
                 sort={sort}
                 onSortChange={handleSortChange}
-                resultCount={mixedItems.length}
+                resultCount={finalItems.length}
                 totalCount={totalCount}
                 onClearAll={handleClearAll}
                 listingType={listingType}
                 onListingTypeChange={handleListingTypeChange}
+                showFavoritesOnly={showFavoritesOnly}
+                onFavoritesToggle={setShowFavoritesOnly}
+                favoriteCount={getFavoriteCount()}
               />
             </div>
 
@@ -189,15 +206,18 @@ export default function CampaignsPage() {
                   onRegionChange={handleRegionChange}
                   sort={sort}
                   onSortChange={handleSortChange}
-                  resultCount={mixedItems.length}
+                  resultCount={finalItems.length}
                   totalCount={totalCount}
                   onClearAll={handleClearAll}
                   listingType={listingType}
                   onListingTypeChange={handleListingTypeChange}
+                  showFavoritesOnly={showFavoritesOnly}
+                  onFavoritesToggle={setShowFavoritesOnly}
+                  favoriteCount={getFavoriteCount()}
                 />
               </div>
 
-              {mixedItems.length === 0 ? (
+              {finalItems.length === 0 ? (
                 <Box className={classes.emptyState}>
                   <Text size="xl" fw={700} c="var(--bm-text-dark)" mb={8}>
                     No results found
@@ -247,7 +267,7 @@ export default function CampaignsPage() {
 
                   {!hasMore && mixedItems.length > CAMPAIGNS_PER_PAGE && (
                     <Text ta="center" size="sm" c="dimmed" mt={32}>
-                      You&apos;ve seen all {mixedItems.length} results 🎉
+                      You&apos;ve seen all {finalItems.length} results 🎉
                     </Text>
                   )}
                 </>

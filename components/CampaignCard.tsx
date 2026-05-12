@@ -5,6 +5,7 @@ import { IconShieldCheck } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { Campaign, getProgress, formatCurrency } from '@/data/campaigns';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import classes from './CampaignCard.module.css';
 
 interface CampaignCardProps {
@@ -52,6 +53,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
               🔥 {campaign.daysLeft} days left
             </Badge>
           )}
+          <FavoriteButton type="project" id={campaign.id} overlay />
         </Card.Section>
 
         {/* 콘텐츠 */}

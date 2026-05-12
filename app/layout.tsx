@@ -4,6 +4,7 @@ import './globals.css';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
 import { theme } from '../theme';
 import { AuthProvider } from '@/contexts/AuthContext';
+import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
 export const metadata: Metadata = {
   title: 'Binding Minds — Connecting Hearts, Changing the World',
@@ -58,7 +59,9 @@ export default function RootLayout({
       <body>
         <MantineProvider theme={theme}>
           <AuthProvider>
-            {children}
+            <FavoritesProvider>
+              {children}
+            </FavoritesProvider>
           </AuthProvider>
         </MantineProvider>
       </body>

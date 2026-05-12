@@ -1,8 +1,8 @@
 'use client';
 
-import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, SegmentedControl } from '@mantine/core';
+import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, SegmentedControl, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconFilter, IconX, IconClipboardList, IconBuilding, IconLayoutGrid } from '@tabler/icons-react';
+import { IconSearch, IconFilter, IconX, IconClipboardList, IconBuilding, IconLayoutGrid, IconHeartFilled } from '@tabler/icons-react';
 import { CATEGORIES, REGIONS, SORT_OPTIONS, type Category, type Region, type SortOption } from '@/data/campaigns';
 import type { ListingType } from '@/app/campaigns/page';
 import classes from './CampaignFilters.module.css';
@@ -21,6 +21,9 @@ interface CampaignFiltersProps {
   onClearAll: () => void;
   listingType: ListingType;
   onListingTypeChange: (type: ListingType) => void;
+  showFavoritesOnly: boolean;
+  onFavoritesToggle: (value: boolean) => void;
+  favoriteCount: number;
 }
 
 export function CampaignFilters({
@@ -37,10 +40,13 @@ export function CampaignFilters({
   onClearAll,
   listingType,
   onListingTypeChange,
+  showFavoritesOnly,
+  onFavoritesToggle,
+  favoriteCount,
 }: CampaignFiltersProps) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '' || listingType !== 'all';
+  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '' || listingType !== 'all' || showFavoritesOnly;
 
   const toggleCategory = (cat: Category) => {
     if (selectedCategories.includes(cat)) {
@@ -95,6 +101,29 @@ export function CampaignFilters({
           color="sage"
           className={classes.typeToggle}
         />
+      </Box>
+
+      {/* 찜 필터 */}
+      <Box mb={24}>
+        <Button
+          fullWidth
+          variant={showFavoritesOnly ? 'filled' : 'outline'}
+          color={showFavoritesOnly ? 'terracotta' : 'dark'}
+          radius="xl"
+          size="sm"
+          leftSection={<IconHeartFilled size={14} />}
+          rightSection={
+            favoriteCount > 0 ? (
+              <Badge size="xs" circle color={showFavoritesOnly ? 'white' : 'terracotta'} c={showFavoritesOnly ? 'var(--bm-terracotta)' : 'white'}>
+                {favoriteCount}
+              </Badge>
+            ) : null
+          }
+          onClick={() => onFavoritesToggle(!showFavoritesOnly)}
+          className={classes.favoritesBtn}
+        >
+          My Favorites
+        </Button>
       </Box>
 
       {/* 카테고리 */}

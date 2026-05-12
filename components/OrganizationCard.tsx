@@ -5,6 +5,7 @@ import { IconShieldCheck, IconBuilding, IconHeart, IconUsers } from '@tabler/ico
 import NextImage from 'next/image';
 import Link from 'next/link';
 import type { Organization } from '@/data/organizations';
+import { FavoriteButton } from '@/components/FavoriteButton';
 import classes from './OrganizationCard.module.css';
 
 interface OrganizationCardProps {
@@ -51,6 +52,7 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
           >
             {organization.category}
           </Badge>
+          <FavoriteButton type="organization" id={organization.id} overlay />
         </Card.Section>
 
         {/* 콘텐츠 */}
