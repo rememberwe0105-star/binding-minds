@@ -1,0 +1,173 @@
+.page {
+  padding-top: 0;
+  padding-bottom: 60px;
+  min-height: 100vh;
+  background: var(--bm-bg-warm);
+}
+
+/* ── Hero ── */
+.hero {
+  position: relative;
+  min-height: 420px;
+  display: flex;
+  align-items: flex-end;
+  overflow: hidden;
+}
+
+.heroImage {
+  position: absolute;
+  inset: 0;
+}
+
+.heroOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(45, 42, 38, 0.85) 0%,
+    rgba(45, 42, 38, 0.3) 60%,
+    transparent 100%
+  );
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  padding-top: 120px;
+  padding-bottom: 48px;
+}
+
+.backLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: rgba(255, 255, 255, 0.7);
+  text-decoration: none;
+  font-size: 14px;
+  margin-bottom: 16px;
+  transition: color 0.2s;
+}
+
+.backLink:hover {
+  color: #fff;
+}
+
+.heroTitle {
+  color: #fff;
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  line-height: 1.2;
+  margin-bottom: 12px;
+}
+
+.heroMission {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1.1rem;
+  line-height: 1.6;
+  max-width: 600px;
+}
+
+.donateBtn {
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.donateBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(226, 114, 91, 0.3);
+}
+
+.websiteBtn {
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #fff;
+}
+
+.websiteBtn:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.6);
+}
+
+/* ── Content ── */
+.contentArea {
+  padding-top: 48px;
+}
+
+.statCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding: 24px 16px;
+  border-radius: 16px;
+  background: #fff;
+  border: 1px solid rgba(143, 151, 121, 0.1);
+  transition: transform 0.2s;
+}
+
+.statCard:hover {
+  transform: translateY(-3px);
+}
+
+.descriptionBlock {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(143, 151, 121, 0.1);
+  padding: 32px;
+}
+
+.markdown h2,
+.descH2 {
+  font-size: 1.5rem;
+  color: var(--bm-text-dark);
+  margin-top: 0;
+  margin-bottom: 16px;
+}
+
+.markdown h3,
+.descH3 {
+  font-size: 1.1rem;
+  color: var(--bm-text-dark);
+  margin-top: 24px;
+  margin-bottom: 12px;
+}
+
+.markdown p {
+  color: var(--bm-text-muted);
+  line-height: 1.8;
+  margin-bottom: 16px;
+}
+
+.markdown ul {
+  padding-left: 20px;
+  margin-bottom: 16px;
+}
+
+.markdown li {
+  color: var(--bm-text-muted);
+  line-height: 1.8;
+  margin-bottom: 6px;
+}
+
+.markdown strong {
+  color: var(--bm-text-dark);
+}
+
+.infoCard {
+  background: #fff;
+  border-radius: 16px;
+  border: 1px solid rgba(143, 151, 121, 0.1);
+  padding: 24px;
+}
+
+@media (max-width: 48em) {
+  .hero {
+    min-height: 340px;
+  }
+
+  .heroContent {
+    padding-top: 100px;
+    padding-bottom: 32px;
+  }
+
+  .descriptionBlock {
+    padding: 20px;
+  }
+}

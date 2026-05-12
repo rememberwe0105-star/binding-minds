@@ -23,6 +23,11 @@
 
 .desktopClear {}
 
+.typeToggle {
+  background: rgba(143, 151, 121, 0.06);
+  border: 1px solid rgba(143, 151, 121, 0.12);
+}
+
 .sidebar {
   display: block;
 }

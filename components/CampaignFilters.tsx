@@ -1,9 +1,10 @@
 'use client';
 
-import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, Stack } from '@mantine/core';
+import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, SegmentedControl } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconFilter, IconX } from '@tabler/icons-react';
+import { IconSearch, IconFilter, IconX, IconClipboardList, IconBuilding, IconLayoutGrid } from '@tabler/icons-react';
 import { CATEGORIES, REGIONS, SORT_OPTIONS, type Category, type Region, type SortOption } from '@/data/campaigns';
+import type { ListingType } from '@/app/campaigns/page';
 import classes from './CampaignFilters.module.css';
 
 interface CampaignFiltersProps {
@@ -18,6 +19,8 @@ interface CampaignFiltersProps {
   resultCount: number;
   totalCount: number;
   onClearAll: () => void;
+  listingType: ListingType;
+  onListingTypeChange: (type: ListingType) => void;
 }
 
 export function CampaignFilters({
@@ -32,10 +35,12 @@ export function CampaignFilters({
   resultCount,
   totalCount,
   onClearAll,
+  listingType,
+  onListingTypeChange,
 }: CampaignFiltersProps) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '';
+  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '' || listingType !== 'all';
 
   const toggleCategory = (cat: Category) => {
     if (selectedCategories.includes(cat)) {
@@ -47,6 +52,51 @@ export function CampaignFilters({
 
   const FilterContent = () => (
     <>
+      {/* 타입 (상위 필터) */}
+      <Box mb={24}>
+        <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={12}>
+          Type
+        </Text>
+        <SegmentedControl
+          value={listingType}
+          onChange={(v) => onListingTypeChange(v as ListingType)}
+          data={[
+            {
+              value: 'all',
+              label: (
+                <Group gap={6} wrap="nowrap" justify="center">
+                  <IconLayoutGrid size={14} />
+                  <Text size="xs" fw={500}>All</Text>
+                </Group>
+              ),
+            },
+            {
+              value: 'projects',
+              label: (
+                <Group gap={6} wrap="nowrap" justify="center">
+                  <IconClipboardList size={14} />
+                  <Text size="xs" fw={500}>Projects</Text>
+                </Group>
+              ),
+            },
+            {
+              value: 'organizations',
+              label: (
+                <Group gap={6} wrap="nowrap" justify="center">
+                  <IconBuilding size={14} />
+                  <Text size="xs" fw={500}>Orgs</Text>
+                </Group>
+              ),
+            },
+          ]}
+          fullWidth
+          size="sm"
+          radius="xl"
+          color="sage"
+          className={classes.typeToggle}
+        />
+      </Box>
+
       {/* 카테고리 */}
       <Box mb={24}>
         <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={12}>
@@ -120,7 +170,7 @@ export function CampaignFilters({
       {/* 상단: 검색 + 모바일 필터 버튼 + 결과 수 */}
       <div className={classes.topBar}>
         <TextInput
-          placeholder="Search campaigns..."
+          placeholder="Search projects & organisations..."
           leftSection={<IconSearch size={18} />}
           value={search}
           onChange={(e) => onSearchChange(e.currentTarget.value)}
@@ -136,13 +186,13 @@ export function CampaignFilters({
           className={classes.mobileFilterBtn}
           radius="xl"
         >
-          Filters {hasActiveFilters && `(${selectedCategories.length + (selectedRegion ? 1 : 0)})`}
+          Filters {hasActiveFilters && `(${selectedCategories.length + (selectedRegion ? 1 : 0) + (listingType !== 'all' ? 1 : 0)})`}
         </Button>
       </div>
 
       <div className={classes.resultBar}>
         <Text size="sm" c="dimmed">
-          Showing <strong>{resultCount}</strong> of {totalCount} campaigns
+          Showing <strong>{resultCount}</strong> of {totalCount} results
         </Text>
         {hasActiveFilters && (
           <Button
@@ -167,7 +217,7 @@ export function CampaignFilters({
       <Drawer
         opened={drawerOpened}
         onClose={closeDrawer}
-        title="Filter Campaigns"
+        title="Filter Results"
         position="bottom"
         size="75%"
         hiddenFrom="md"
