@@ -49,7 +49,7 @@ export function FeaturedCharities() {
           {charities.map((charity, index) => {
             const progress = getProgress(charity);
             return (
-              <Link key={charity.id} href={`/campaigns/${charity.slug}`} style={{ textDecoration: 'none' }}>
+              <Link key={charity.id} href={`/projects/${charity.slug}`} style={{ textDecoration: 'none' }}>
               <Card
                 shadow="sm"
                 padding="lg"

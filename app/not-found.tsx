@@ -45,7 +45,7 @@ export default function NotFoundPage() {
             </Button>
             <Button
               component={Link}
-              href="/campaigns"
+              href="/projects"
               size="lg"
               radius="xl"
               variant="outline"

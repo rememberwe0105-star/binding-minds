@@ -98,9 +98,9 @@ export default function OrganizationDetailPage({
             <div className={classes.heroOverlay} />
           </div>
           <Container size="lg" className={classes.heroContent}>
-            <Link href="/campaigns" className={classes.backLink}>
+            <Link href="/charities" className={classes.backLink}>
               <IconArrowLeft size={16} />
-              Back to all
+              Back to Charities
             </Link>
             <Badge
               size="lg"

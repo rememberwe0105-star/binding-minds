@@ -59,8 +59,8 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
           <Container size="lg" className={classes.notFound}>
             <Title order={2}>Campaign not found</Title>
             <Text c="dimmed" mt={8} mb={24}>The campaign you&apos;re looking for doesn&apos;t exist.</Text>
-            <Button component={Link} href="/campaigns" variant="outline" color="sage" radius="xl">
-              Browse All Campaigns
+            <Button component={Link} href="/projects" variant="outline" color="sage" radius="xl">
+              Browse All Projects
             </Button>
           </Container>
         </main>
@@ -81,10 +81,10 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
       <main className={classes.page}>
         <Container size="lg">
           {/* 뒤로가기 */}
-          <Link href="/campaigns" className={classes.backLink}>
+          <Link href="/projects" className={classes.backLink}>
             <Group gap={6}>
               <IconArrowLeft size={18} />
-              <Text size="sm" fw={500}>Back to Campaigns</Text>
+              <Text size="sm" fw={500}>Back to Projects</Text>
             </Group>
           </Link>
 
@@ -276,7 +276,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
           {relatedCampaigns.length > 0 && (
             <Box mt={80}>
               <Title order={2} className={classes.relatedTitle} mb={24}>
-                More Campaigns You Might Like
+                More Projects You Might Like
               </Title>
               <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={20}>
                 {relatedCampaigns.map((c) => (

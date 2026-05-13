@@ -34,7 +34,7 @@ export default function CookiesPage() {
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>Managing Cookies</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8}>
-              You can control and manage cookies through your browser settings. Please note that disabling certain cookies may affect the functionality of our platform. For more information, contact us at privacy@bindingminds.co.nz.
+              You can control and manage cookies through your browser settings. Please note that disabling certain cookies may affect the functionality of our platform. For more information, contact us at privacy@deargiver.co.nz.
             </Text>
           </Box>
         </Container>

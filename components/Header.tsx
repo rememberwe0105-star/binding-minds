@@ -14,14 +14,16 @@ import {
   UnstyledButton,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLeaf, IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings } from '@tabler/icons-react';
+import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
 import classes from './Header.module.css';
 
 const navLinks = [
   { label: 'About Us', href: '/about' },
-  { label: 'Campaigns', href: '/campaigns' },
+  { label: 'Projects', href: '/projects' },
+  { label: 'Charities', href: '/charities' },
   { label: 'Blog', href: '/blog' },
 ];
 
@@ -63,9 +65,15 @@ export function Header() {
         {/* 로고 */}
         <Link href="/" style={{ textDecoration: 'none' }}>
           <Group gap={8} className={classes.logo}>
-            <IconLeaf size={28} color="var(--bm-terracotta)" stroke={2} />
-            <Text fw={700} size="xl" c="var(--bm-text-dark)">
-              Binding Minds
+            <NextImage
+              src="/images/dg-logo-v2.png"
+              alt="DearGiver"
+              width={32}
+              height={32}
+              style={{ objectFit: 'contain' }}
+            />
+            <Text fw={700} size="xl" c="var(--dg-teal-dark)">
+              DearGiver
             </Text>
           </Group>
         </Link>
@@ -99,10 +107,10 @@ export function Header() {
                     >
                       {getInitials(user.displayName)}
                     </Avatar>
-                    <Text size="sm" fw={500} c="var(--bm-text-dark)" className={classes.userName}>
+                    <Text size="sm" fw={500} c="var(--dg-text-dark)" className={classes.userName}>
                       {user.displayName || 'User'}
                     </Text>
-                    <IconChevronDown size={14} color="var(--bm-text-muted)" />
+                    <IconChevronDown size={14} color="var(--dg-text-muted)" />
                   </Group>
                 </UnstyledButton>
               </Menu.Target>
@@ -144,7 +152,7 @@ export function Header() {
               >
                 Log in
               </Button>
-              <Button component={Link} href="/campaigns" color="terracotta" size="sm" radius="xl">
+              <Button component={Link} href="/projects" color="terracotta" size="sm" radius="xl">
                 Give Today
               </Button>
             </>
@@ -161,7 +169,7 @@ export function Header() {
         onClose={close}
         size="70%"
         padding="md"
-        title="Binding Minds"
+        title="DearGiver"
         hiddenFrom="sm"
       >
         <Stack gap="md">
@@ -207,7 +215,7 @@ export function Header() {
               >
                 Log in
               </Button>
-              <Button component={Link} href="/campaigns" color="terracotta" fullWidth radius="xl" onClick={close}>
+              <Button component={Link} href="/projects" color="terracotta" fullWidth radius="xl" onClick={close}>
                 Give Today
               </Button>
             </>

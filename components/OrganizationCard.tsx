@@ -14,7 +14,7 @@ interface OrganizationCardProps {
 
 export function OrganizationCard({ organization }: OrganizationCardProps) {
   return (
-    <Link href={`/campaigns/org/${organization.slug}`} className={classes.cardLink}>
+    <Link href={`/charities/${organization.slug}`} className={classes.cardLink}>
       <Card
         shadow="sm"
         padding={0}

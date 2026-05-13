@@ -1,5 +1,5 @@
 // ==============================
-// Binding Minds — 블로그 데이터 모듈
+// DearGiver — 블로그 데이터 모듈
 // ==============================
 
 export interface BlogPost {
@@ -34,7 +34,7 @@ export const blogPosts: BlogPost[] = [
 
 ## The Numbers Tell a Story
 
-Thanks to 482 generous donors on Binding Minds, the campaign has raised $36,400 of its $50,000 goal. But beyond the financials, the real story is in the impact:
+Thanks to 482 generous donors on DearGiver, the campaign has raised $36,400 of its $50,000 goal. But beyond the financials, the real story is in the impact:
 
 - **12,000 native seedlings** planted across 15 conservation sites
 - **200+ volunteers** participating in monthly planting days
@@ -59,7 +59,7 @@ The planting days have become more than conservation events — they're communit
 
 With your continued support, we're targeting 25,000 trees by December 2026. Every $25 plants 5 native seedlings. Every donation, no matter the size, brings us closer to a greener Aotearoa.
 
-*Ready to contribute? [Find the campaign on Binding Minds](/campaigns/restore-native-forest) and make your donation today.*`,
+*Ready to contribute? [Find the campaign on DearGiver](/campaigns/restore-native-forest) and make your donation today.*`,
   },
   {
     id: 'blog-002',
@@ -73,7 +73,7 @@ With your continued support, we're targeting 25,000 trees by December 2026. Ever
     readTime: '7 min read',
     image: '/images/charity-education.png',
     featured: true,
-    content: `If you're donating to charity in New Zealand, you could be leaving money on the table. The IRD offers a generous 33.33% tax credit on donations to approved organisations — and with Binding Minds, claiming it has never been easier.
+    content: `If you're donating to charity in New Zealand, you could be leaving money on the table. The IRD offers a generous 33.33% tax credit on donations to approved organisations — and with DearGiver, claiming it has never been easier.
 
 ## Understanding the Tax Credit
 
@@ -94,7 +94,7 @@ If you donated **$1,500** throughout the year:
 ## Step-by-Step Claiming Process
 
 ### 1. Gather Your Receipts
-With Binding Minds, this step is automated. Your Receipt Vault consolidates all your donations into a single, IRD-ready tax summary. No more hunting through emails.
+With DearGiver, this step is automated. Your Receipt Vault consolidates all your donations into a single, IRD-ready tax summary. No more hunting through emails.
 
 ### 2. Log In to myIR
 Visit [ird.govt.nz](https://ird.govt.nz) and sign in to your myIR account.
@@ -103,7 +103,7 @@ Visit [ird.govt.nz](https://ird.govt.nz) and sign in to your myIR account.
 Under "Income Tax", select "Request a donation tax credit (TA)".
 
 ### 4. Enter Your Details
-Upload your Binding Minds tax summary or manually enter:
+Upload your DearGiver tax summary or manually enter:
 - Organisation name
 - Donation amount
 - Date of donation
@@ -118,7 +118,7 @@ IRD typically processes claims within 4-8 weeks. Your refund is deposited direct
 3. **Claim for your partner too** — If you file separately, ensure each partner claims their own donations
 4. **Set a reminder** — Mark 31 March in your calendar as the annual claim deadline
 
-## How Binding Minds Makes It Easy
+## How DearGiver Makes It Easy
 
 Our platform automatically:
 - ✅ Issues IRD-approved receipts for every donation
@@ -144,7 +144,7 @@ Our platform automatically:
 
 ## The Transformation
 
-The "Supporting Local Art" campaign, funded through Binding Minds, has commissioned 12 large-scale murals across four Wellington suburbs:
+The "Supporting Local Art" campaign, funded through DearGiver, has commissioned 12 large-scale murals across four Wellington suburbs:
 
 - **Newtown** — 3 murals celebrating the suburb's multicultural heritage
 - **Island Bay** — 2 marine-themed murals along the coastal walkway

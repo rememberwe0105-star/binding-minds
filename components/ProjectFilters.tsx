@@ -1,14 +1,12 @@
 'use client';
 
-import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, SegmentedControl, Badge } from '@mantine/core';
+import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconFilter, IconX, IconClipboardList, IconBuilding, IconLayoutGrid, IconHeartFilled } from '@tabler/icons-react';
+import { IconSearch, IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
 import { CATEGORIES, REGIONS, SORT_OPTIONS, type Category, type Region, type SortOption } from '@/data/campaigns';
-
-export type ListingType = 'all' | 'projects' | 'organizations';
 import classes from './CampaignFilters.module.css';
 
-interface CampaignFiltersProps {
+interface ProjectFiltersProps {
   search: string;
   onSearchChange: (value: string) => void;
   selectedCategories: Category[];
@@ -20,14 +18,12 @@ interface CampaignFiltersProps {
   resultCount: number;
   totalCount: number;
   onClearAll: () => void;
-  listingType: ListingType;
-  onListingTypeChange: (type: ListingType) => void;
   showFavoritesOnly: boolean;
   onFavoritesToggle: (value: boolean) => void;
   favoriteCount: number;
 }
 
-export function CampaignFilters({
+export function ProjectFilters({
   search,
   onSearchChange,
   selectedCategories,
@@ -39,15 +35,13 @@ export function CampaignFilters({
   resultCount,
   totalCount,
   onClearAll,
-  listingType,
-  onListingTypeChange,
   showFavoritesOnly,
   onFavoritesToggle,
   favoriteCount,
-}: CampaignFiltersProps) {
+}: ProjectFiltersProps) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '' || listingType !== 'all' || showFavoritesOnly;
+  const hasActiveFilters = selectedCategories.length > 0 || selectedRegion !== '' || search !== '' || showFavoritesOnly;
 
   const toggleCategory = (cat: Category) => {
     if (selectedCategories.includes(cat)) {
@@ -59,51 +53,6 @@ export function CampaignFilters({
 
   const FilterContent = () => (
     <>
-      {/* 타입 (상위 필터) */}
-      <Box mb={24}>
-        <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={12}>
-          Type
-        </Text>
-        <SegmentedControl
-          value={listingType}
-          onChange={(v) => onListingTypeChange(v as ListingType)}
-          data={[
-            {
-              value: 'all',
-              label: (
-                <Group gap={6} wrap="nowrap" justify="center">
-                  <IconLayoutGrid size={14} />
-                  <Text size="xs" fw={500}>All</Text>
-                </Group>
-              ),
-            },
-            {
-              value: 'projects',
-              label: (
-                <Group gap={6} wrap="nowrap" justify="center">
-                  <IconClipboardList size={14} />
-                  <Text size="xs" fw={500}>Projects</Text>
-                </Group>
-              ),
-            },
-            {
-              value: 'organizations',
-              label: (
-                <Group gap={6} wrap="nowrap" justify="center">
-                  <IconBuilding size={14} />
-                  <Text size="xs" fw={500}>Orgs</Text>
-                </Group>
-              ),
-            },
-          ]}
-          fullWidth
-          size="sm"
-          radius="xl"
-          color="sage"
-          className={classes.typeToggle}
-        />
-      </Box>
-
       {/* 찜 필터 */}
       <Box mb={24}>
         <Button
@@ -200,7 +149,7 @@ export function CampaignFilters({
       {/* 상단: 검색 + 모바일 필터 버튼 + 결과 수 */}
       <div className={classes.topBar}>
         <TextInput
-          placeholder="Search projects & organisations..."
+          placeholder="Search projects..."
           leftSection={<IconSearch size={18} />}
           value={search}
           onChange={(e) => onSearchChange(e.currentTarget.value)}
@@ -216,13 +165,13 @@ export function CampaignFilters({
           className={classes.mobileFilterBtn}
           radius="xl"
         >
-          Filters {hasActiveFilters && `(${selectedCategories.length + (selectedRegion ? 1 : 0) + (listingType !== 'all' ? 1 : 0)})`}
+          Filters {hasActiveFilters && `(${selectedCategories.length + (selectedRegion ? 1 : 0)})`}
         </Button>
       </div>
 
       <div className={classes.resultBar}>
         <Text size="sm" c="dimmed">
-          Showing <strong>{resultCount}</strong> of {totalCount} results
+          Showing <strong>{resultCount}</strong> of {totalCount} projects
         </Text>
         {hasActiveFilters && (
           <Button

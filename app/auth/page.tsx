@@ -105,7 +105,7 @@ export default function AuthPage() {
     setError('');
     setLoading(true);
     try {
-      await logIn('testuser@bindingminds.co.nz', 'Test1234!');
+      await logIn('testuser@deargiver.co.nz', 'Test1234!');
       router.push('/');
     } catch (err: unknown) {
       const firebaseError = err as { code?: string };
@@ -136,7 +136,7 @@ export default function AuthPage() {
             <Text ta="center" c="var(--bm-text-muted)" size="sm" mb={28}>
               {mode === 'login'
                 ? 'Sign in to manage your donations and track your impact.'
-                : 'Join Binding Minds and start making a difference today.'}
+                : 'Join DearGiver and start making a difference today.'}
             </Text>
 
             {/* Google 로그인 */}
@@ -291,7 +291,7 @@ export default function AuthPage() {
               Quick Demo Login
             </Button>
             <Text ta="center" size="xs" mt={6} c="dimmed">
-              testuser@bindingminds.co.nz · Test1234!
+              testuser@deargiver.co.nz · Test1234!
             </Text>
             {/* ── END DEV ONLY ── */}
           </Box>

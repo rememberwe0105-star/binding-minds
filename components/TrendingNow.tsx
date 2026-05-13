@@ -57,7 +57,7 @@ export function TrendingNow() {
             </ActionIcon>
             <Text
               component={Link}
-              href="/campaigns"
+              href="/projects"
               size="sm"
               fw={600}
               c="var(--bm-terracotta)"
@@ -72,7 +72,7 @@ export function TrendingNow() {
           {trendingCampaigns.map((campaign) => {
             const progress = getProgress(campaign);
             return (
-            <Link key={campaign.id} href={`/campaigns/${campaign.slug}`} style={{ textDecoration: 'none' }}>
+            <Link key={campaign.id} href={`/projects/${campaign.slug}`} style={{ textDecoration: 'none' }}>
             <Card
               shadow="sm"
               radius="lg"

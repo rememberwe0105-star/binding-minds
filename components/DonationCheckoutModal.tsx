@@ -96,7 +96,7 @@ function PaymentForm({
       const { error } = await stripe.confirmPayment({
         elements,
         confirmParams: {
-          return_url: `${window.location.origin}/campaigns/${campaign.slug}?donation=success`,
+          return_url: `${window.location.origin}/projects/${campaign.slug}?donation=success`,
           receipt_email: donationData.email || undefined,
         },
         redirect: 'if_required',

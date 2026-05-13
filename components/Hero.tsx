@@ -40,7 +40,7 @@ export function Hero() {
             <Group gap="md" mt={32} className={classes.ctaGroup}>
               <Button
                 component={Link}
-                href="/campaigns"
+                href="/projects"
                 size="lg"
                 radius="xl"
                 color="terracotta"
@@ -102,7 +102,7 @@ export function Hero() {
 
                 <Button
                   component={Link}
-                  href="/campaigns/restore-native-forest"
+                  href="/projects/restore-native-forest"
                   color="terracotta"
                   fullWidth
                   radius="md"

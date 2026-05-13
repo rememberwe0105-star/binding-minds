@@ -26,12 +26,12 @@ import classes from './page.module.css';
 
 const faqs = [
   {
-    q: 'How does Binding Minds work?',
-    a: 'Binding Minds connects you with verified charities across New Zealand. Browse campaigns, donate securely via Stripe, and we automatically generate your tax receipts for the 33.33% donation tax credit.',
+    q: 'How does DearGiver work?',
+    a: 'DearGiver connects you with verified charities across New Zealand. Browse campaigns, donate securely via Stripe, and we automatically generate your tax receipts for the 33.33% donation tax credit.',
   },
   {
     q: 'Is my donation tax deductible?',
-    a: 'Yes! Donations to approved organisations in New Zealand qualify for a 33.33% tax credit. Binding Minds automatically consolidates your receipts to make claiming easy.',
+    a: 'Yes! Donations to approved organisations in New Zealand qualify for a 33.33% tax credit. DearGiver automatically consolidates your receipts to make claiming easy.',
   },
   {
     q: 'How do I know the charities are legitimate?',
@@ -121,7 +121,7 @@ export default function SupportPage() {
                     </ThemeIcon>
                     <Text size="sm" fw={600} c="var(--bm-text-dark)">Email</Text>
                   </Group>
-                  <Text size="sm" c="var(--bm-text-muted)" ml={44}>hello@bindingminds.co.nz</Text>
+                  <Text size="sm" c="var(--bm-text-muted)" ml={44}>hello@deargiver.co.nz</Text>
                 </Box>
 
                 <Box mb={20}>

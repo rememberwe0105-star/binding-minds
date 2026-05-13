@@ -69,7 +69,7 @@ export default function AboutPage() {
               Connecting Hearts,<br />Changing the World
             </Title>
             <Text size="lg" c="var(--bm-text-muted)" maw={600} lh={1.8} mt={16}>
-              Binding Minds is a New Zealand-based platform that makes giving effortless.
+              DearGiver is a New Zealand-based platform that makes giving effortless.
               We connect donors with verified charities, simplify payments, and help you
               claim your tax refund — all in one place.
             </Text>
@@ -197,7 +197,7 @@ export default function AboutPage() {
             </Text>
             <Button
               component={Link}
-              href="/campaigns"
+              href="/projects"
               size="lg"
               radius="xl"
               color="white"

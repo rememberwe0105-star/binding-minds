@@ -38,12 +38,12 @@ export default function PrivacyPage() {
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>4. Your Rights</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8} mb={24}>
-              Under the New Zealand Privacy Act 2020, you have the right to access, correct, and request deletion of your personal information. Contact us at privacy@bindingminds.co.nz to exercise these rights.
+              Under the New Zealand Privacy Act 2020, you have the right to access, correct, and request deletion of your personal information. Contact us at privacy@deargiver.co.nz to exercise these rights.
             </Text>
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>5. Contact</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8}>
-              For privacy-related enquiries, please contact our Privacy Officer at privacy@bindingminds.co.nz or visit our Support page.
+              For privacy-related enquiries, please contact our Privacy Officer at privacy@deargiver.co.nz or visit our Support page.
             </Text>
           </Box>
         </Container>

@@ -2,46 +2,46 @@
 
 import { createTheme, MantineColorsTuple } from '@mantine/core';
 
-// Earthy & Organic 테마 - Sage Green 기반 팔레트
+// DearGiver 테마 — Deep Teal / Trust Green 기반 팔레트
 const sage: MantineColorsTuple = [
-  '#f2f4ef',
-  '#e3e7dc',
-  '#c5cdb7',
-  '#a6b390',
-  '#8f9779',
-  '#7a8563',
-  '#6c7854',
-  '#5b6643',
-  '#4e5a38',
-  '#424d2d',
+  '#e8f5f1',
+  '#d1ebe3',
+  '#a3d7c7',
+  '#7bbfaa',
+  '#2E7D6B',   // [4] Trust Green — Primary
+  '#267060',
+  '#1F5A4C',
+  '#1F4A5A',   // [7] Deep Teal
+  '#163D4A',
+  '#0E2F39',
 ];
 
-// Terracotta 악센트 팔레트
+// Warm Gold 악센트 팔레트
 const terracotta: MantineColorsTuple = [
-  '#fef0ed',
-  '#f8ddd6',
-  '#f0b6a8',
-  '#e88d77',
-  '#e2725b',
-  '#dc5a40',
-  '#d94f33',
-  '#c14025',
-  '#ac381f',
-  '#962e17',
+  '#fdf6ec',
+  '#f8ecd5',
+  '#f0d8a8',
+  '#e8c47c',
+  '#D8A95F',   // [4] Warm Gold — Accent
+  '#C9973F',
+  '#B8883A',
+  '#A07530',
+  '#8A6428',
+  '#74541F',
 ];
 
-// Warm Beige 팔레트
+// Mist / Sand 팔레트
 const warmBeige: MantineColorsTuple = [
-  '#fefdfb',
-  '#faf9f6',
-  '#f5f0e8',
-  '#ede5d6',
-  '#e3d7c2',
-  '#d8c8ad',
-  '#cdb99a',
-  '#b9a27e',
-  '#a68e67',
-  '#937b54',
+  '#FBFCFC',
+  '#F5F7F7',   // [1] Mist
+  '#F3EEE6',   // [2] Sand
+  '#E8E0D4',
+  '#DCD2C2',
+  '#CFC3AE',
+  '#C1B39A',
+  '#AD9D82',
+  '#9A8A6E',
+  '#87775C',
 ];
 
 export const theme = createTheme({
@@ -59,8 +59,9 @@ export const theme = createTheme({
   },
   other: {
     // 커스텀 컬러 변수들
-    bgWarm: '#FAF9F6',
-    textDark: '#3D3229',
-    textMuted: '#6B5E50',
+    bgMist: '#F5F7F7',
+    bgSand: '#F3EEE6',
+    textDark: '#1A2E35',
+    textMuted: '#5A6B6F',
   },
 });

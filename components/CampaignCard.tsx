@@ -16,7 +16,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
   const progress = getProgress(campaign);
 
   return (
-    <Link href={`/campaigns/${campaign.slug}`} className={classes.cardLink}>
+    <Link href={`/projects/${campaign.slug}`} className={classes.cardLink}>
       <Card
         shadow="sm"
         padding={0}

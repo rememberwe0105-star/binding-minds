@@ -1,0 +1,70 @@
+.page {
+  min-height: 100vh;
+  padding: 40px 0 80px;
+  background: var(--bm-bg-warm);
+}
+
+.pageHeader {
+  margin-bottom: 40px;
+}
+
+.pageTitle {
+  font-size: 2.4rem;
+  color: var(--bm-text-dark);
+  line-height: 1.15;
+}
+
+/* 데스크톱: 사이드바 + 그리드 레이아웃 */
+.layout {
+  display: flex;
+  gap: 40px;
+}
+
+.filterColumn {
+  flex: 0 0 260px;
+  position: sticky;
+  top: 88px;
+  align-self: flex-start;
+}
+
+.gridColumn {
+  flex: 1;
+  min-width: 0;
+}
+
+.mobileFilters {
+  display: none;
+}
+
+.emptyState {
+  text-align: center;
+  padding: 80px 20px;
+  background: white;
+  border-radius: 16px;
+  border: 1px solid rgba(143, 151, 121, 0.1);
+}
+
+.loadMore {
+  text-align: center;
+  margin-top: 40px;
+}
+
+@media (max-width: 62em) {
+  .layout {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .filterColumn {
+    display: none;
+  }
+
+  .mobileFilters {
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  .pageTitle {
+    font-size: 1.8rem;
+  }
+}

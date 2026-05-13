@@ -278,7 +278,7 @@ function DonationHistoryTab() {
                 {filtered.map((d) => (
                   <Table.Tr key={d.id}>
                     <Table.Td>
-                      <Link href={`/campaigns/${d.campaignSlug}`} className={classes.campaignLink}>
+                      <Link href={`/projects/${d.campaignSlug}`} className={classes.campaignLink}>
                         {d.campaignName}
                       </Link>
                     </Table.Td>
@@ -537,7 +537,7 @@ function ReceiptVaultTab() {
             </Text>
             <Button
               component={Link}
-              href="/campaigns"
+              href="/projects"
               color="terracotta"
               mt={20}
               radius="xl"

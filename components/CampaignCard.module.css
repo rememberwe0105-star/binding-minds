@@ -45,8 +45,8 @@
 
 .urgentBadge {
   position: absolute;
-  top: 12px;
-  right: 12px;
+  top: 36px;
+  left: 12px;
   z-index: 2;
 }
 

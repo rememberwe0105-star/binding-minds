@@ -1,16 +1,29 @@
-/* Binding Minds — 글로벌 스타일 */
+/* DearGiver — 글로벌 스타일 */
 :root {
-  --bm-bg-warm: #FAF9F6;
-  --bm-bg-cream: #F5F0E8;
-  --bm-text-dark: #3D3229;
-  --bm-text-muted: #6B5E50;
-  --bm-sage: #8F9779;
-  --bm-sage-dark: #6c7854;
-  --bm-sage-light: #c5cdb7;
-  --bm-terracotta: #E2725B;
-  --bm-terracotta-dark: #c14025;
-  --bm-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
-  --bm-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dg-mist: #F5F7F7;
+  --dg-sand: #F3EEE6;
+  --dg-text-dark: #1A2E35;
+  --dg-text-muted: #5A6B6F;
+  --dg-teal: #2E7D6B;
+  --dg-teal-dark: #1F4A5A;
+  --dg-teal-light: #7FBCAD;
+  --dg-gold: #D8A95F;
+  --dg-gold-dark: #B8883A;
+  --dg-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --dg-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+  /* Legacy aliases — CSS 모듈 호환 */
+  --bm-bg-warm: var(--dg-mist);
+  --bm-bg-cream: var(--dg-sand);
+  --bm-text-dark: var(--dg-text-dark);
+  --bm-text-muted: var(--dg-text-muted);
+  --bm-sage: var(--dg-teal);
+  --bm-sage-dark: var(--dg-teal-dark);
+  --bm-sage-light: var(--dg-teal-light);
+  --bm-terracotta: var(--dg-gold);
+  --bm-terracotta-dark: var(--dg-gold-dark);
+  --bm-ease-out: var(--dg-ease-out);
+  --bm-ease-spring: var(--dg-ease-spring);
 }
 
 * {
@@ -20,8 +33,8 @@
 }
 
 body {
-  background-color: var(--bm-bg-warm);
-  color: var(--bm-text-dark);
+  background-color: var(--dg-mist);
+  color: var(--dg-text-dark);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -35,7 +48,7 @@ html {
 .reveal {
   opacity: 0;
   transform: translateY(28px);
-  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  transition: opacity 0.8s var(--dg-ease-out), transform 0.8s var(--dg-ease-out);
   will-change: opacity, transform;
 }
 
@@ -56,7 +69,7 @@ html {
 .revealLeft {
   opacity: 0;
   transform: translateX(-40px);
-  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  transition: opacity 0.8s var(--dg-ease-out), transform 0.8s var(--dg-ease-out);
   will-change: opacity, transform;
 }
 .revealLeft.visible {
@@ -68,7 +81,7 @@ html {
 .revealRight {
   opacity: 0;
   transform: translateX(40px);
-  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+  transition: opacity 0.8s var(--dg-ease-out), transform 0.8s var(--dg-ease-out);
   will-change: opacity, transform;
 }
 .revealRight.visible {
@@ -80,7 +93,7 @@ html {
 .revealScale {
   opacity: 0;
   transform: scale(0.92);
-  transition: opacity 0.7s var(--bm-ease-out), transform 0.7s var(--bm-ease-spring);
+  transition: opacity 0.7s var(--dg-ease-out), transform 0.7s var(--dg-ease-spring);
   will-change: opacity, transform;
 }
 .revealScale.visible {
@@ -101,7 +114,7 @@ html {
 }
 
 .fadeInUp {
-  animation: fadeInUp 0.6s var(--bm-ease-out) forwards;
+  animation: fadeInUp 0.6s var(--dg-ease-out) forwards;
 }
 
 /* ── 링크/버튼 부드러운 전환 ── */

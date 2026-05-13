@@ -19,12 +19,12 @@ export default function TermsPage() {
           <Box style={{ background: 'white', borderRadius: 16, padding: 32, border: '1px solid rgba(143,151,121,0.08)' }}>
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>1. Acceptance of Terms</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8} mb={24}>
-              By accessing or using Binding Minds, you agree to be bound by these Terms of Service. If you do not agree, please do not use our platform.
+              By accessing or using DearGiver, you agree to be bound by these Terms of Service. If you do not agree, please do not use our platform.
             </Text>
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>2. Platform Services</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8} mb={24}>
-              Binding Minds provides a platform connecting donors with verified charitable organisations in New Zealand. We facilitate payment processing through Stripe and generate tax documentation. We do not hold or manage donation funds directly.
+              DearGiver provides a platform connecting donors with verified charitable organisations in New Zealand. We facilitate payment processing through Stripe and generate tax documentation. We do not hold or manage donation funds directly.
             </Text>
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>3. User Accounts</Title>
@@ -39,7 +39,7 @@ export default function TermsPage() {
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>5. Limitation of Liability</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8}>
-              Binding Minds is not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability shall not exceed the amount of fees paid to us in the twelve months preceding the claim.
+              DearGiver is not liable for any indirect, incidental, or consequential damages arising from your use of the platform. Our total liability shall not exceed the amount of fees paid to us in the twelve months preceding the claim.
             </Text>
           </Box>
         </Container>

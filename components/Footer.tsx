@@ -1,14 +1,16 @@
 'use client';
 
 import { Container, Group, Text, Stack, Anchor, Divider, Box } from '@mantine/core';
-import { IconLeaf, IconBrandInstagram, IconBrandFacebook, IconBrandLinkedin } from '@tabler/icons-react';
+import { IconBrandInstagram, IconBrandFacebook, IconBrandLinkedin } from '@tabler/icons-react';
+import NextImage from 'next/image';
 import classes from './Footer.module.css';
 
 const footerLinks = {
   platform: [
     { label: 'About Us', href: '/about' },
     { label: 'How It Works', href: '/about#how-it-works' },
-    { label: 'Campaigns', href: '/campaigns' },
+    { label: 'Projects', href: '/projects' },
+    { label: 'Charities', href: '/charities' },
     { label: 'Blog', href: '/blog' },
   ],
   support: [
@@ -31,13 +33,19 @@ export function Footer() {
           {/* 브랜드 영역 */}
           <div className={classes.brand}>
             <Group gap={8} mb={16}>
-              <IconLeaf size={24} color="var(--bm-terracotta)" />
+              <NextImage
+                src="/images/dg-logo-v2.png"
+                alt="DearGiver"
+                width={24}
+                height={24}
+                style={{ objectFit: 'contain' }}
+              />
               <Text fw={700} size="lg" c="white">
-                Binding Minds
+                DearGiver
               </Text>
             </Group>
             <Text size="sm" c="rgba(255,255,255,0.6)" lh={1.7} maw={280}>
-              Connecting hearts, empowering communities, and making giving effortless across New Zealand.
+              Every giver matters. Making generosity effortless across New Zealand.
             </Text>
             <Group gap={16} mt={20}>
               <Box className={classes.socialIcon}>
@@ -97,7 +105,7 @@ export function Footer() {
 
         <Group justify="space-between">
           <Text size="xs" c="rgba(255,255,255,0.4)">
-            © {new Date().getFullYear()} Binding Minds. All rights reserved.
+            © {new Date().getFullYear()} DearGiver. All rights reserved.
           </Text>
           <Text size="xs" c="rgba(255,255,255,0.4)">
             Made with ❤️ in Aotearoa, New Zealand

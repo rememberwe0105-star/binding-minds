@@ -64,7 +64,7 @@ export default function BlogPage() {
               Stories & Insights
             </Text>
             <Title order={1} className={classes.pageTitle}>
-              The Binding Minds Blog
+              The DearGiver Blog
             </Title>
             <Text size="md" c="var(--bm-text-muted)" maw={500} mx="auto" mt={8}>
               Impact stories, tax tips, and community news from across Aotearoa.

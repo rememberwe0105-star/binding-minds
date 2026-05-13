@@ -1,5 +1,5 @@
 // ==============================
-// Binding Minds — 기관(Organization) 데이터 모듈
+// DearGiver — 기관(Organization) 데이터 모듈
 // ==============================
 
 import type { Category, Region } from './campaigns';
