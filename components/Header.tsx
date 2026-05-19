@@ -27,7 +27,6 @@ const navLinks = [
   { label: 'About Us', href: '/about' },
   { label: 'Projects', href: '/projects' },
   { label: 'Charities', href: '/charities' },
-  { label: 'Blog', href: '/blog' },
 ];
 
 export function Header() {

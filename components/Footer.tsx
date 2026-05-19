@@ -8,25 +8,16 @@ import classes from './Footer.module.css';
 const footerLinks = {
   platform: [
     { label: 'About Us', href: '/about' },
-    { label: 'How It Works', href: '/about#how-it-works' },
     { label: 'Projects', href: '/projects' },
     { label: 'Charities', href: '/charities' },
-    { label: 'Blog', href: '/blog' },
   ],
-  organisations: [
+  getInvolved: [
     { label: 'List Your Charity', href: '/charity/apply' },
-    { label: 'How We Fund', href: '/about#how-we-work' },
-    { label: 'Help & FAQs', href: '/support#faq' },
-  ],
-  support: [
     { label: 'Help Centre', href: '/support' },
-    { label: 'Contact Us', href: '/support#contact' },
-    { label: 'FAQs', href: '/support#faq' },
   ],
   legal: [
     { label: 'Privacy Policy', href: '/legal/privacy' },
     { label: 'Terms of Service', href: '/legal/terms' },
-    { label: 'Cookie Policy', href: '/legal/cookies' },
   ],
 };
 
@@ -81,23 +72,10 @@ export function Footer() {
 
           <div className={classes.linkGroup}>
             <Text fw={600} size="sm" c="white" mb={16} tt="uppercase" style={{ letterSpacing: '1px' }}>
-              For Charities
+              Get Involved
             </Text>
             <Stack gap={10}>
-              {footerLinks.organisations.map((link) => (
-                <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
-                  {link.label}
-                </Anchor>
-              ))}
-            </Stack>
-          </div>
-
-          <div className={classes.linkGroup}>
-            <Text fw={600} size="sm" c="white" mb={16} tt="uppercase" style={{ letterSpacing: '1px' }}>
-              Support
-            </Text>
-            <Stack gap={10}>
-              {footerLinks.support.map((link) => (
+              {footerLinks.getInvolved.map((link) => (
                 <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
                   {link.label}
                 </Anchor>
