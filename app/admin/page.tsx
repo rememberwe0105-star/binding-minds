@@ -123,7 +123,11 @@ export default function AdminOverviewPage() {
               </Group>
             </Card>
 
-            <Card padding="lg" radius="lg" withBorder className={classes.actionCard}>
+            <Card
+              padding="lg" radius="lg" withBorder className={classes.actionCard}
+              component={Link} href="/admin/charities"
+              style={{ textDecoration: 'none' }}
+            >
               <Group justify="space-between">
                 <Group gap={12}>
                   <ThemeIcon size={40} radius="md" color="blue" variant="light">

@@ -9,8 +9,9 @@ import {
 import {
   IconBuilding, IconCheck, IconX, IconPhone,
   IconEye, IconShieldCheck, IconClock, IconAlertCircle,
-  IconMail, IconWorld, IconCalendar,
+  IconMail, IconWorld, IconCalendar, IconArrowLeft,
 } from '@tabler/icons-react';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import classes from './page.module.css';
@@ -137,6 +138,20 @@ export default function AdminCharitiesPage() {
       <Header />
       <main className={classes.page}>
         <Container size="xl" py={40}>
+          {/* Back to Overview */}
+          <Button
+            component={Link}
+            href="/admin"
+            variant="subtle"
+            color="gray"
+            size="compact-sm"
+            leftSection={<IconArrowLeft size={14} />}
+            mb={12}
+            style={{ alignSelf: 'flex-start' }}
+          >
+            Back to Overview
+          </Button>
+
           {/* 페이지 헤더 */}
           <Group justify="space-between" mb={8}>
             <Box>
