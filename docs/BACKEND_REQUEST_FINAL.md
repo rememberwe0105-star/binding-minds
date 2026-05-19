@@ -32,6 +32,11 @@ DearGiver 프론트엔드 팀입니다. 현재 UI/UX는 전 기능 완성된 상
 | 9 | 단체별 Stripe 계정 발급 | 🟡 중요 | **미해결** |
 | 10 | 기부 내역에 단체 등록번호 추가 | 🟢 보완 | **미해결** |
 | 11 | 최소 기부금액 서버 검증 | 🟢 보완 | **미해결** |
+| 12 | 사용자 역할(Role) 구분 시스템 | 🔴 긴급 | **미해결** |
+| 13 | 단체별 기부 내역 조회 API | 🟡 중요 | **미해결** |
+| 14 | 단체 프로필 수정 API | 🟡 중요 | **미해결** |
+| 15 | 프로젝트/캠페인 CRUD API | 🟡 중요 | **미해결** |
+| 16 | 플랫폼 관리자 통계 API | 🟢 보완 | **미해결** |
 
 ---
 
@@ -476,4 +481,126 @@ CREATE TABLE charity_applications (
 
 ---
 
-*문서 버전: v4.0 | 작성일: 2026-05-19 | 프론트엔드 팀 드림*
+## 🆕 추가 요청 (단체 대시보드 + 관리자 기능)
+
+> 프론트엔드에서 단체(Charity) 대시보드 (`/charity/dashboard`)와 관리자 오버뷰 (`/admin`)를 새로 구현했습니다.
+> 현재 Mock 데이터로 동작하며, 아래 API가 구현되면 실제 데이터로 교체됩니다.
+
+### 요청 12: 사용자 역할(Role) 구분 시스템
+
+| 항목 | 내용 |
+|------|------|
+| **현재 상태** | 모든 사용자가 동일한 권한 (donor만 존재) |
+| **필요한 것** | `role` 필드 추가: `donor` / `charity_admin` / `platform_admin` |
+| **방식 제안** | Firebase Custom Claims 또는 서비스 DB의 `users.role` 필드 |
+| **프론트 사용** | 로그인 시 role을 확인하여 메뉴 및 페이지 접근 제어 |
+
+### 요청 13: 단체별 기부 내역 조회 API
+
+```
+GET /api/v1/charities/{charityId}/donations?page=1&pageSize=20
+Authorization: Bearer <firebase-id-token>
+
+// Response
+{
+  "page": 1,
+  "pageSize": 20,
+  "total": 156,
+  "items": [
+    {
+      "donation_amount_minor": 10000,
+      "currency_code": "NZD",
+      "donation_status": "succeeded",
+      "donor_display_name": "Sarah K.",
+      "project_name": "Emergency Housing Fund",
+      "paid_at": "2026-05-19T06:30:00Z",
+      "created_at": "2026-05-19T06:28:00Z"
+    }
+  ]
+}
+```
+
+> 기부자 대시보드의 `/api/v1/me/donations`와 유사하지만, **단체 측 시점**이므로 `donor_display_name`과 `project_name`이 포함되어야 합니다.
+
+### 요청 14: 단체 프로필 수정 API
+
+```
+PATCH /api/v1/charities/{charityId}
+Authorization: Bearer <firebase-id-token>
+Content-Type: application/json
+
+{
+  "display_name": "Auckland City Mission",
+  "mission": "...",
+  "description": "...",
+  "website": "https://...",
+  "contact_email": "...",
+  "contact_phone": "..."
+}
+
+// Response
+{ "ok": true, "charity": { ... } }
+```
+
+### 요청 15: 프로젝트/캠페인 CRUD API
+
+```
+# 목록 조회
+GET /api/v1/charities/{charityId}/projects
+
+# 생성
+POST /api/v1/charities/{charityId}/projects
+{
+  "name": "Emergency Housing Fund",
+  "description": "...",
+  "goal_amount_minor": 5000000,
+  "category": "Community",
+  "duration_days": 60,
+  "cover_image_url": "https://..."
+}
+
+# 수정
+PATCH /api/v1/charities/{charityId}/projects/{projectId}
+
+# 종료 (soft delete)
+DELETE /api/v1/charities/{charityId}/projects/{projectId}
+```
+
+> 현재 프로젝트 데이터가 `data/campaigns.ts`에 하드코딩되어 있습니다. 이 API가 구현되면 동적 데이터로 교체합니다.
+
+### 요청 16: 플랫폼 관리자 통계 API
+
+```
+GET /api/v1/admin/stats
+Authorization: Bearer <firebase-id-token>
+
+// Response
+{
+  "total_donations_minor": 14835000,
+  "active_charities": 12,
+  "total_donors": 2847,
+  "platform_revenue_minor": 148350,
+  "pending_applications": 3,
+  "recent_activity": [
+    {
+      "type": "donation",
+      "message": "$200 donation — Restore Native Forest",
+      "created_at": "2026-05-19T10:30:00Z"
+    }
+  ]
+}
+```
+
+### 추가 요청 요약표
+
+| # | 요청 내용 | 긴급도 | 관련 페이지 |
+|---|-----------|--------|------------|
+| 12 | 사용자 역할(Role) 구분 시스템 | 🔴 긴급 | 전체 (메뉴 제어) |
+| 13 | 단체별 기부 내역 조회 API | 🟡 중요 | `/charity/dashboard` |
+| 14 | 단체 프로필 수정 API | 🟡 중요 | `/charity/dashboard` |
+| 15 | 프로젝트/캠페인 CRUD API | 🟡 중요 | `/charity/dashboard` |
+| 16 | 플랫폼 관리자 통계 API | 🟢 보완 | `/admin` |
+
+---
+
+*문서 버전: v5.0 | 작성일: 2026-05-19 | 프론트엔드 팀 드림*

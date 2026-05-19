@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -173,6 +173,13 @@ export function Header() {
                   href="/dashboard"
                 >
                   My Dashboard
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconBuilding size={16} />}
+                  component={Link}
+                  href="/charity/dashboard"
+                >
+                  Organisation Dashboard
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconGift size={16} />}

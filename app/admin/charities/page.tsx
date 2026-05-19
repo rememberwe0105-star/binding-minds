@@ -44,8 +44,8 @@ const MOCK_APPLICATIONS: CharityApplication[] = [
     ccNumber: 'CC20073', category: 'Community & Social Services',
     contactName: 'Sarah Thompson', contactEmail: 'sarah@acmission.org.nz',
     contactPhone: '+64 9 303 9200', city: 'Auckland', region: 'Auckland',
-    mission: '노숙인과 취약계층에게 식사, 의료, 주거 서비스를 제공합니다.',
-    description: '1856년 설립된 Auckland City Mission은 Auckland에서 가장 오래된 자선단체 중 하나입니다. 연간 20만 명 이상에게 서비스를 제공하며, 홈리스 지원, 알코올 중독 치료, 노인 복지 프로그램을 운영합니다.',
+    mission: 'Providing food, medical, and housing services to the homeless and vulnerable communities.',
+    description: 'Founded in 1856, Auckland City Mission is one of Auckland\'s oldest charities. Serving over 200,000 people annually through homelessness support, addiction treatment, and elderly welfare programmes.',
     website: 'https://www.acmission.org.nz', yearEstablished: '1856',
     status: 'pending', appliedAt: '2026-05-15T08:30:00Z',
   },
@@ -54,8 +54,8 @@ const MOCK_APPLICATIONS: CharityApplication[] = [
     ccNumber: 'CC37291', category: 'Community & Social Services',
     contactName: 'Mark Johnson', contactEmail: 'mark@surflifesaving.org.nz',
     contactPhone: '+64 4 384 8325', city: 'Wellington', region: 'Wellington',
-    mission: '해변 안전을 책임지고 해양 사고를 예방합니다.',
-    description: '뉴질랜드 전역 74개 클럽, 17,000명 이상의 자원봉사자가 활동하는 해양 안전 단체입니다.',
+    mission: 'Ensuring beach safety and preventing marine accidents across New Zealand.',
+    description: '74 clubs nationwide with over 17,000 active volunteers dedicated to water safety.',
     website: 'https://www.surflifesaving.org.nz', yearEstablished: '1910',
     status: 'pending', appliedAt: '2026-05-16T14:20:00Z',
   },
@@ -64,8 +64,8 @@ const MOCK_APPLICATIONS: CharityApplication[] = [
     ccNumber: 'CC24106', category: 'Animal Welfare',
     contactName: 'Emma Wilson', contactEmail: 'emma@spca.nz',
     contactPhone: '+64 9 827 6094', city: 'Auckland', region: 'Auckland',
-    mission: '동물 학대를 방지하고 모든 동물의 복지를 증진합니다.',
-    description: '1882년 설립. 연간 50,000마리 이상의 동물을 구조, 보호, 입양 연계합니다.',
+    mission: 'Preventing animal cruelty and promoting the welfare of all animals.',
+    description: 'Founded in 1882. Rescuing, sheltering, and rehoming over 50,000 animals annually.',
     website: 'https://www.spca.nz', yearEstablished: '1882',
     status: 'approved', appliedAt: '2026-05-10T09:15:00Z',
   },
@@ -74,35 +74,35 @@ const MOCK_APPLICATIONS: CharityApplication[] = [
     ccNumber: 'CC51834', category: 'Health & Medical',
     contactName: 'James Park', contactEmail: 'james@ymh.org.nz',
     contactPhone: '+64 9 555 0199', city: 'Christchurch', region: 'Canterbury',
-    mission: '청소년 정신건강 지원 및 위기 개입 서비스를 제공합니다.',
-    description: '10~24세 청소년을 위한 정신건강 상담, 위기 개입, 학교 방문 프로그램을 운영합니다.',
+    mission: 'Providing youth mental health support and crisis intervention services.',
+    description: 'Running mental health counselling, crisis intervention, and school outreach programmes for youth aged 10-24.',
     website: 'https://www.ymh.org.nz', yearEstablished: '2015',
     status: 'consultation', appliedAt: '2026-05-12T11:45:00Z',
-    note: 'CC 번호 확인 필요. 담당자에게 서류 추가 요청 예정.',
+    note: 'CC number verification required. Additional documentation requested from contact person.',
   },
   {
     id: '5', legalName: 'Fake Charity Ltd', displayName: 'Help Everyone',
     ccNumber: 'CC99999', category: 'Other',
     contactName: 'Unknown Person', contactEmail: 'info@faketest.com',
     contactPhone: '', city: 'Auckland', region: 'Auckland',
-    mission: '모든 사람을 돕습니다.',
-    description: '우리는 모든 사람을 돕는 좋은 단체입니다.',
+    mission: 'We help everyone.',
+    description: 'We are a good organisation that helps all people.',
     website: '', yearEstablished: '2026',
     status: 'rejected', appliedAt: '2026-05-14T16:00:00Z',
-    note: 'NZ Charities Services에서 CC99999 등록 확인 불가. 웹사이트 없음. 신청 거절.',
+    note: 'CC99999 registration not found on NZ Charities Services. No website. Application rejected.',
   },
 ];
 
 const STATUS_CONFIG: Record<AppStatus, { label: string; color: string; icon: React.ReactNode }> = {
-  pending: { label: '검토 대기', color: 'orange', icon: <IconClock size={14} /> },
-  approved: { label: '승인됨', color: 'green', icon: <IconCheck size={14} /> },
-  rejected: { label: '거절됨', color: 'red', icon: <IconX size={14} /> },
-  consultation: { label: '상담 진행', color: 'blue', icon: <IconPhone size={14} /> },
+  pending: { label: 'Pending Review', color: 'orange', icon: <IconClock size={14} /> },
+  approved: { label: 'Approved', color: 'green', icon: <IconCheck size={14} /> },
+  rejected: { label: 'Rejected', color: 'red', icon: <IconX size={14} /> },
+  consultation: { label: 'In Consultation', color: 'blue', icon: <IconPhone size={14} /> },
 };
 
 function formatDate(dateStr: string) {
-  return new Intl.DateTimeFormat('ko-KR', {
-    year: 'numeric', month: 'long', day: 'numeric',
+  return new Intl.DateTimeFormat('en-NZ', {
+    day: 'numeric', month: 'short', year: 'numeric',
     timeZone: 'Pacific/Auckland',
   }).format(new Date(dateStr));
 }
@@ -146,21 +146,21 @@ export default function AdminCharitiesPage() {
                   Admin Panel
                 </Text>
               </Group>
-              <Title order={1} className={classes.pageTitle}>단체 등록 관리</Title>
+              <Title order={1} className={classes.pageTitle}>Charity Registration Management</Title>
             </Box>
             <Alert icon={<IconAlertCircle size={14} />} color="orange" variant="light" radius="md" p={10}>
-              <Text size="xs" fw={600}>데모 모드</Text>
-              <Text size="xs">백엔드 API 연동 후 실제 데이터가 표시됩니다</Text>
+              <Text size="xs" fw={600}>Demo Mode</Text>
+              <Text size="xs">Live data will appear once the backend API is connected.</Text>
             </Alert>
           </Group>
 
           {/* 통계 카드 */}
           <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={16} mb={32}>
             {[
-              { key: 'pending', label: '검토 대기', color: 'orange', icon: IconClock },
-              { key: 'approved', label: '승인됨', color: 'green', icon: IconCheck },
-              { key: 'consultation', label: '상담 진행', color: 'blue', icon: IconPhone },
-              { key: 'rejected', label: '거절됨', color: 'red', icon: IconX },
+              { key: 'pending', label: 'Pending Review', color: 'orange', icon: IconClock },
+              { key: 'approved', label: 'Approved', color: 'green', icon: IconCheck },
+              { key: 'consultation', label: 'In Consultation', color: 'blue', icon: IconPhone },
+              { key: 'rejected', label: 'Rejected', color: 'red', icon: IconX },
             ].map(({ key, label, color, icon: Icon }) => (
               <Card
                 key={key} padding="lg" radius="lg" withBorder
@@ -183,23 +183,23 @@ export default function AdminCharitiesPage() {
           <Card padding="lg" radius="lg" withBorder>
             <Tabs value={activeTab} onChange={setActiveTab} mb={16}>
               <Tabs.List>
-                <Tabs.Tab value="pending">검토 대기 ({counts.pending})</Tabs.Tab>
-                <Tabs.Tab value="consultation">상담 ({counts.consultation})</Tabs.Tab>
-                <Tabs.Tab value="approved">승인됨 ({counts.approved})</Tabs.Tab>
-                <Tabs.Tab value="rejected">거절됨 ({counts.rejected})</Tabs.Tab>
-                <Tabs.Tab value="all">전체</Tabs.Tab>
+                <Tabs.Tab value="pending">Pending ({counts.pending})</Tabs.Tab>
+                <Tabs.Tab value="consultation">Consultation ({counts.consultation})</Tabs.Tab>
+                <Tabs.Tab value="approved">Approved ({counts.approved})</Tabs.Tab>
+                <Tabs.Tab value="rejected">Rejected ({counts.rejected})</Tabs.Tab>
+                <Tabs.Tab value="all">All</Tabs.Tab>
               </Tabs.List>
             </Tabs>
 
             <Table highlightOnHover>
               <Table.Thead>
                 <Table.Tr>
-                  <Table.Th>단체명</Table.Th>
-                  <Table.Th>CC 번호</Table.Th>
-                  <Table.Th>분야</Table.Th>
-                  <Table.Th>신청일</Table.Th>
-                  <Table.Th>상태</Table.Th>
-                  <Table.Th>액션</Table.Th>
+                  <Table.Th>Organisation</Table.Th>
+                  <Table.Th>CC Number</Table.Th>
+                  <Table.Th>Category</Table.Th>
+                  <Table.Th>Applied</Table.Th>
+                  <Table.Th>Status</Table.Th>
+                  <Table.Th>Action</Table.Th>
                 </Table.Tr>
               </Table.Thead>
               <Table.Tbody>
@@ -226,7 +226,7 @@ export default function AdminCharitiesPage() {
                         </Badge>
                       </Table.Td>
                       <Table.Td>
-                        <Tooltip label="상세 보기 / 처리">
+                        <Tooltip label="View Details">
                           <ActionIcon
                             variant="light"
                             color="sage"
@@ -243,7 +243,7 @@ export default function AdminCharitiesPage() {
                 {filtered.length === 0 && (
                   <Table.Tr>
                     <Table.Td colSpan={6} style={{ textAlign: 'center', padding: '32px 0' }}>
-                      <Text c="var(--bm-text-muted)">해당 상태의 신청이 없습니다.</Text>
+                      <Text c="var(--bm-text-muted)">No applications with this status.</Text>
                     </Table.Td>
                   </Table.Tr>
                 )}
@@ -277,12 +277,12 @@ export default function AdminCharitiesPage() {
             {/* 기본 정보 */}
             <SimpleGrid cols={2} spacing={12}>
               {[
-                { icon: IconBuilding, label: '법인명', value: selected.legalName },
-                { icon: IconShieldCheck, label: 'CC 번호', value: selected.ccNumber },
-                { icon: IconMail, label: '담당자 이메일', value: selected.contactEmail },
-                { icon: IconPhone, label: '연락처', value: selected.contactPhone || '—' },
-                { icon: IconWorld, label: '웹사이트', value: selected.website || '—' },
-                { icon: IconCalendar, label: '신청일', value: formatDate(selected.appliedAt) },
+                { icon: IconBuilding, label: 'Legal Name', value: selected.legalName },
+                { icon: IconShieldCheck, label: 'CC Number', value: selected.ccNumber },
+                { icon: IconMail, label: 'Contact Email', value: selected.contactEmail },
+                { icon: IconPhone, label: 'Phone', value: selected.contactPhone || '—' },
+                { icon: IconWorld, label: 'Website', value: selected.website || '—' },
+                { icon: IconCalendar, label: 'Applied', value: formatDate(selected.appliedAt) },
               ].map(({ icon: Icon, label, value }) => (
                 <Box key={label} p={10} style={{ background: 'var(--bm-sage-bg)', borderRadius: 8 }}>
                   <Group gap={6} mb={2}>
@@ -295,18 +295,18 @@ export default function AdminCharitiesPage() {
             </SimpleGrid>
 
             <Box>
-              <Text size="xs" fw={700} tt="uppercase" c="var(--bm-text-muted)" mb={6}>미션</Text>
+              <Text size="xs" fw={700} tt="uppercase" c="var(--bm-text-muted)" mb={6}>Mission</Text>
               <Text size="sm" c="var(--bm-text-dark)" lh={1.7}>{selected.mission}</Text>
             </Box>
 
             <Box>
-              <Text size="xs" fw={700} tt="uppercase" c="var(--bm-text-muted)" mb={6}>단체 소개</Text>
+              <Text size="xs" fw={700} tt="uppercase" c="var(--bm-text-muted)" mb={6}>About</Text>
               <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>{selected.description}</Text>
             </Box>
 
             {selected.note && (
               <Alert icon={<IconAlertCircle size={14} />} color="blue" variant="light" radius="md">
-                <Text size="xs" fw={600} mb={2}>메모</Text>
+                <Text size="xs" fw={600} mb={2}>Note</Text>
                 <Text size="sm">{selected.note}</Text>
               </Alert>
             )}
@@ -315,8 +315,8 @@ export default function AdminCharitiesPage() {
 
             {/* 액션 메모 */}
             <Textarea
-              label="처리 메모 (선택)"
-              placeholder="거절 사유, 상담 내용, 특이사항 등을 입력하세요..."
+              label="Processing Note (optional)"
+              placeholder="Reason for rejection, consultation details, or special notes..."
               value={actionNote}
               onChange={(e) => setActionNote(e.currentTarget.value)}
               autosize
@@ -333,7 +333,7 @@ export default function AdminCharitiesPage() {
                 onClick={() => applyAction(selected.id, 'approved', actionNote)}
                 disabled={selected.status === 'approved'}
               >
-                승인
+                Approve
               </Button>
               <Button
                 color="blue"
@@ -343,7 +343,7 @@ export default function AdminCharitiesPage() {
                 onClick={() => applyAction(selected.id, 'consultation', actionNote)}
                 disabled={selected.status === 'consultation'}
               >
-                상담 진행
+                Consult
               </Button>
               <Button
                 color="red"
@@ -353,12 +353,12 @@ export default function AdminCharitiesPage() {
                 onClick={() => applyAction(selected.id, 'rejected', actionNote)}
                 disabled={selected.status === 'rejected'}
               >
-                거절
+                Reject
               </Button>
             </Group>
 
             <Text size="xs" c="var(--bm-text-muted)" ta="center">
-              ⚠️ 현재 데모 모드 — 실제 이메일 발송 및 DB 저장은 백엔드 API 연동 후 작동합니다
+              ⚠️ Demo mode — email notifications and database writes will be active after backend API integration.
             </Text>
           </Stack>
         )}

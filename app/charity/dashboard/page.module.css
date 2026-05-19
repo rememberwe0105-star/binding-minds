@@ -1,0 +1,149 @@
+/* ===================================================
+   Charity Organisation Dashboard — page.module.css
+   Design system: mirrors /dashboard styles,
+   terracotta accent for charity-side identity
+   =================================================== */
+
+.page {
+  min-height: 100vh;
+  background: var(--bm-bg-warm);
+  padding: 40px 0 80px;
+}
+
+/* ── Header section ── */
+.greeting {
+  font-size: 1.6rem;
+  color: var(--bm-text-dark);
+}
+
+.orgBadge {
+  background: rgba(143, 151, 121, 0.08);
+  color: var(--bm-sage-dark);
+  border: 1px solid rgba(143, 151, 121, 0.15);
+}
+
+/* ── Tab navigation ── */
+.tabList {
+  border-bottom: 2px solid rgba(143, 151, 121, 0.1);
+  margin-bottom: 32px;
+}
+
+/* ── Hero banner (terracotta gradient for charity identity) ── */
+.hero {
+  background: linear-gradient(135deg, #6b4c3b 0%, var(--bm-sage-dark) 100%);
+  border-radius: 16px;
+  padding: 40px;
+  margin-bottom: 24px;
+  position: relative;
+  overflow: hidden;
+}
+
+.heroBlob {
+  position: absolute;
+  top: -60px;
+  right: -80px;
+  width: 250px;
+  height: 250px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 50%;
+}
+
+.heroAmount {
+  font-size: 3rem;
+  font-weight: 900;
+  color: white;
+  line-height: 1.1;
+}
+
+/* ── Stat cards ── */
+.statCard {
+  border-color: rgba(143, 151, 121, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(143, 151, 121, 0.1);
+}
+
+.statValue {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--bm-text-dark);
+  line-height: 1.1;
+}
+
+/* ── Recent donations list ── */
+.recentItem {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(143, 151, 121, 0.06);
+}
+
+.recentItem:last-child {
+  border-bottom: none;
+}
+
+/* ── Filter bar (Donations tab) ── */
+.filterBar {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 20px;
+}
+
+/* ── Table wrapper ── */
+.tableWrapper {
+  overflow-x: auto;
+}
+
+/* ── Project cards ── */
+.projectCard {
+  border-color: rgba(143, 151, 121, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.projectCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(143, 151, 121, 0.1);
+}
+
+/* ── Empty state ── */
+.emptyState {
+  text-align: center;
+  padding: 60px 20px;
+}
+
+/* ── Stripe status indicator ── */
+.stripeStatusCard {
+  border-left: 4px solid var(--mantine-color-green-5);
+}
+
+.stripeStatusCard[data-pending] {
+  border-left-color: var(--mantine-color-orange-5);
+}
+
+/* ── Responsive ── */
+@media (max-width: 48em) {
+  .greeting {
+    font-size: 1.3rem;
+  }
+
+  .hero {
+    padding: 24px;
+  }
+
+  .heroAmount {
+    font-size: 2.2rem;
+  }
+
+  .statValue {
+    font-size: 1.5rem;
+  }
+
+  .filterBar {
+    flex-direction: column;
+  }
+}
