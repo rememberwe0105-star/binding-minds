@@ -15,6 +15,34 @@ import {
   type ServiceUser,
 } from '@/lib/api';
 
+// ---------------------------------------------------------------------------
+// Demo Role System — 환경변수로 제어되는 순수 프론트엔드 역할 시뮬레이션
+// ---------------------------------------------------------------------------
+
+/** 데모 역할 타입 */
+export type DemoRole = 'donor' | 'charity' | 'admin' | null;
+
+/** 데모 모드가 활성화되어 있는지 (환경변수로 제어) */
+export const DEMO_MODE_ENABLED =
+  process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
+  process.env.NODE_ENV === 'development';
+
+/** 역할별 데모 프로필 (Firebase Auth 미사용 — 순수 프론트엔드 목업) */
+const DEMO_PROFILES: Record<Exclude<DemoRole, null>, { name: string; email: string }> = {
+  donor: {
+    name: 'Aroha Demo (Donor)',
+    email: 'aroha@demo.deargiver.co.nz',
+  },
+  charity: {
+    name: 'Sarah Thompson (Charity Admin)',
+    email: 'sarah@acmission.org.nz',
+  },
+  admin: {
+    name: 'Platform Admin',
+    email: 'admin@deargiver.co.nz',
+  },
+};
+
 // --- 인터페이스 ---
 interface AuthContextType {
   user: User | null;
@@ -28,6 +56,16 @@ interface AuthContextType {
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
+  /** 현재 활성화된 데모 역할 (null = 데모 아님) */
+  demoRole: DemoRole;
+  /** 데모 역할 전환 (null로 설정하면 데모 세션 종료) */
+  setDemoRole: (role: DemoRole) => void;
+  /** 현재 표시할 사용자 이름 (데모 모드이면 데모 프로필, 아니면 실제 유저) */
+  displayName: string;
+  /** 현재 표시할 이메일 */
+  displayEmail: string;
+  /** 데모 모드가 활성화 가능한 환경인지 */
+  isDemoModeEnabled: boolean;
 }
 
 // --- Context 생성 ---
@@ -39,6 +77,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [serviceUser, setServiceUser] = useState<ServiceUser | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean | undefined>(undefined);
+  const [demoRole, setDemoRoleState] = useState<DemoRole>(null);
+
+  // 데모 역할 전환
+  const setDemoRole = (role: DemoRole) => {
+    if (!DEMO_MODE_ENABLED && role !== null) {
+      console.warn('[AuthContext] Demo mode is disabled in this environment.');
+      return;
+    }
+    setDemoRoleState(role);
+  };
 
   // 인증 상태 실시간 감지 + 서비스 DB 자동 등록
   useEffect(() => {
@@ -111,6 +159,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // 로그아웃
   const logOut = async () => {
+    // 데모 모드이면 데모만 종료
+    if (demoRole) {
+      setDemoRoleState(null);
+      return;
+    }
     if (!auth) throw new Error('Firebase not configured');
     const { signOut } = await import('firebase/auth');
     await signOut(auth);
@@ -124,6 +177,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithPopup(auth, provider);
   };
 
+  // 표시할 이름/이메일 결정 (데모 역할 우선)
+  const demoProfile = demoRole ? DEMO_PROFILES[demoRole] : null;
+  const displayName = demoProfile?.name
+    ?? user?.displayName
+    ?? serviceUser?.name
+    ?? 'User';
+  const displayEmail = demoProfile?.email
+    ?? user?.email
+    ?? serviceUser?.email
+    ?? '';
+
   const value: AuthContextType = {
     user,
     loading,
@@ -134,6 +198,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     logIn,
     logOut,
     signInWithGoogle,
+    demoRole,
+    setDemoRole,
+    displayName,
+    displayEmail,
+    isDemoModeEnabled: DEMO_MODE_ENABLED,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

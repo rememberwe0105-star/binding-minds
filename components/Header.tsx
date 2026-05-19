@@ -16,7 +16,7 @@ import {
   Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,7 +32,7 @@ const navLinks = [
 export function Header() {
   const [opened, { toggle, close }] = useDisclosure(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, loading, logOut } = useAuth();
+  const { user, loading, logOut, demoRole, displayName: authDisplayName, displayEmail: authDisplayEmail } = useAuth();
 
   // ── Rewards 후크 (로그인 상태에서만) ──
   const { currentTier, nextTier, unlockedCount, totalCount, loading: rewardsLoading } = useRewards();
@@ -97,13 +97,22 @@ export function Header() {
           {loading ? (
             // 로딩 중 placeholder
             <div style={{ width: 120, height: 36 }} />
-          ) : user ? (
-            // 로그인 상태: Avatar + 드롭다운
+          ) : (user || demoRole) ? (
+            // 로그인 상태 또는 데모 역할 시뮬레이션
             <Menu shadow="md" width={220} position="bottom-end" withArrow>
               <Menu.Target>
                 <UnstyledButton className={classes.userBtn}>
                   <Group gap={8}>
-                    {/* A안: Avatar Ring — 등급 색상 테두리 */}
+                    {/* Avatar — 데모 모드면 역할 색상, 실제 로그인이면 티어 링 */}
+                    {demoRole ? (
+                      <Avatar
+                        size={32}
+                        radius="xl"
+                        color={demoRole === 'admin' ? 'blue' : demoRole === 'charity' ? 'terracotta' : 'sage'}
+                      >
+                        {getInitials(authDisplayName)}
+                      </Avatar>
+                    ) : (
                     <Tooltip
                       label={
                         rewardsLoading ? 'Loading...' :
@@ -118,26 +127,27 @@ export function Header() {
                         style={{ '--tier-color': `var(--mantine-color-${currentTier.color}-5)` } as React.CSSProperties}
                       >
                         <Avatar
-                          src={user.photoURL}
-                          alt={user.displayName || 'User'}
+                          src={user?.photoURL}
+                          alt={authDisplayName}
                           size={32}
                           radius="xl"
                           color="sage"
                         >
-                          {getInitials(user.displayName)}
+                          {getInitials(authDisplayName)}
                         </Avatar>
                       </div>
                     </Tooltip>
+                    )}
                     <Text size="sm" fw={500} c="var(--dg-text-dark)" className={classes.userName}>
-                      {user.displayName || 'User'}
+                      {authDisplayName}
                     </Text>
                     <IconChevronDown size={14} color="var(--dg-text-muted)" />
                   </Group>
                 </UnstyledButton>
               </Menu.Target>
               <Menu.Dropdown>
-                {/* B안: 드롭다운 상단 — Tier 카드 */}
-                {!rewardsLoading && (
+                {/* Tier card — 실제 로그인 시에만 */}
+                {!demoRole && !rewardsLoading && (
                   <>
                     <div className={classes.tierCard}>
                       <Group gap={8} mb={6}>
@@ -166,28 +176,45 @@ export function Header() {
                     <Menu.Divider />
                   </>
                 )}
-                <Menu.Label>{user.email}</Menu.Label>
-                <Menu.Item
-                  leftSection={<IconLayoutDashboard size={16} />}
-                  component={Link}
-                  href="/dashboard"
-                >
-                  My Dashboard
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconBuilding size={16} />}
-                  component={Link}
-                  href="/charity/dashboard"
-                >
-                  Organisation Dashboard
-                </Menu.Item>
-                <Menu.Item
-                  leftSection={<IconGift size={16} />}
-                  component={Link}
-                  href="/dashboard?tab=rewards"
-                >
-                  My Rewards
-                </Menu.Item>
+                <Menu.Label>{authDisplayEmail}{demoRole ? ` (${demoRole} demo)` : ''}</Menu.Label>
+
+                {/* 역할별 메뉴 항목 */}
+                {(!demoRole || demoRole === 'donor') && (
+                  <Menu.Item
+                    leftSection={<IconLayoutDashboard size={16} />}
+                    component={Link}
+                    href="/dashboard"
+                  >
+                    My Dashboard
+                  </Menu.Item>
+                )}
+                {(!demoRole || demoRole === 'charity') && (
+                  <Menu.Item
+                    leftSection={<IconBuilding size={16} />}
+                    component={Link}
+                    href="/charity/dashboard"
+                  >
+                    Organisation Dashboard
+                  </Menu.Item>
+                )}
+                {(!demoRole || demoRole === 'admin') && (
+                  <Menu.Item
+                    leftSection={<IconShieldCheck size={16} />}
+                    component={Link}
+                    href="/admin"
+                  >
+                    Admin Panel
+                  </Menu.Item>
+                )}
+                {(!demoRole || demoRole === 'donor') && (
+                  <Menu.Item
+                    leftSection={<IconGift size={16} />}
+                    component={Link}
+                    href="/dashboard?tab=rewards"
+                  >
+                    My Rewards
+                  </Menu.Item>
+                )}
                 <Menu.Item
                   leftSection={<IconSettings size={16} />}
                   component={Link}

@@ -14,7 +14,7 @@ import {
   Anchor,
   Alert,
 } from '@mantine/core';
-import { IconLeaf, IconBrandGoogle, IconAlertCircle, IconTestPipe } from '@tabler/icons-react';
+import { IconLeaf, IconBrandGoogle, IconAlertCircle, IconHeart, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -53,7 +53,7 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { logIn, signUp, signInWithGoogle, isFirebaseConfigured } = useAuth();
+  const { logIn, signUp, signInWithGoogle, isFirebaseConfigured, setDemoRole, isDemoModeEnabled } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -100,21 +100,22 @@ export default function AuthPage() {
     setError('');
   };
 
-  // ── 🧪 DEV ONLY: 테스트 계정 원클릭 로그인 (배포 전 삭제) ──
-  const handleDemoLogin = async () => {
-    setError('');
-    setLoading(true);
-    try {
-      await logIn('testuser@deargiver.co.nz', 'Test1234!');
-      router.push('/');
-    } catch (err: unknown) {
-      const firebaseError = err as { code?: string };
-      setError(getErrorMessage(firebaseError.code || ''));
-    } finally {
-      setLoading(false);
+  // ── Demo Role Simulation (no Firebase, no credentials) ──
+  const handleDemoRole = (role: 'donor' | 'charity' | 'admin') => {
+    setDemoRole(role);
+    switch (role) {
+      case 'donor':
+        router.push('/dashboard');
+        break;
+      case 'charity':
+        router.push('/charity/dashboard');
+        break;
+      case 'admin':
+        router.push('/admin');
+        break;
     }
   };
-  // ── END DEV ONLY ──
+  // ── END Demo ──
 
   return (
     <>
@@ -264,36 +265,86 @@ export default function AuthPage() {
               </Anchor>
             </Text>
 
-            {/* ── 🧪 DEV ONLY: Quick Demo Login (배포 전 삭제) ── */}
-            <Divider
-              label="developer shortcut"
-              labelPosition="center"
-              my={20}
-              color="rgba(143, 151, 121, 0.15)"
-              style={{ borderStyle: 'dashed' }}
-            />
-            <Button
-              fullWidth
-              variant="light"
-              color="gray"
-              size="md"
-              radius="xl"
-              leftSection={<IconTestPipe size={18} />}
-              onClick={handleDemoLogin}
-              loading={loading}
-              styles={{
-                root: {
-                  border: '1px dashed var(--bm-sage)',
-                  background: 'rgba(143, 151, 121, 0.06)',
-                },
-              }}
-            >
-              Quick Demo Login
-            </Button>
-            <Text ta="center" size="xs" mt={6} c="dimmed">
-              testuser@deargiver.co.nz · Test1234!
-            </Text>
-            {/* ── END DEV ONLY ── */}
+            {/* ── 🧪 Demo Role Simulation (controlled by NEXT_PUBLIC_DEMO_MODE) ── */}
+            {isDemoModeEnabled && (
+              <>
+                <Divider
+                  label="demo environment"
+                  labelPosition="center"
+                  my={20}
+                  color="rgba(143, 151, 121, 0.15)"
+                  style={{ borderStyle: 'dashed' }}
+                />
+
+                <Text ta="center" size="xs" c="dimmed" mb={12}>
+                  No credentials needed — these simulate different user roles for UI testing only.
+                </Text>
+
+                {/* Donor Demo */}
+                <Button
+                  fullWidth
+                  variant="light"
+                  color="sage"
+                  size="md"
+                  radius="xl"
+                  leftSection={<IconHeart size={18} />}
+                  onClick={() => handleDemoRole('donor')}
+                  mb={8}
+                  styles={{
+                    root: {
+                      border: '1px dashed var(--bm-sage)',
+                      background: 'rgba(143, 151, 121, 0.06)',
+                    },
+                  }}
+                >
+                  Demo — Individual Donor
+                </Button>
+
+                {/* Charity Admin Demo */}
+                <Button
+                  fullWidth
+                  variant="light"
+                  color="terracotta"
+                  size="md"
+                  radius="xl"
+                  leftSection={<IconBuilding size={18} />}
+                  onClick={() => handleDemoRole('charity')}
+                  mb={8}
+                  styles={{
+                    root: {
+                      border: '1px dashed var(--bm-terracotta, #b07552)',
+                      background: 'rgba(176, 117, 82, 0.06)',
+                    },
+                  }}
+                >
+                  Demo — Charity Organisation
+                </Button>
+
+                {/* Platform Admin Demo */}
+                <Button
+                  fullWidth
+                  variant="light"
+                  color="blue"
+                  size="md"
+                  radius="xl"
+                  leftSection={<IconShieldCheck size={18} />}
+                  onClick={() => handleDemoRole('admin')}
+                  styles={{
+                    root: {
+                      border: '1px dashed var(--mantine-color-blue-4)',
+                      background: 'rgba(51, 154, 240, 0.06)',
+                    },
+                  }}
+                >
+                  Demo — Platform Admin
+                </Button>
+
+                <Text ta="center" size="xs" mt={8} c="dimmed">
+                  ⚠️ Demo sessions have no API access — UI preview only
+                </Text>
+              </>
+            )}
+            {/* ── END Demo ── */}
           </Box>
         </Container>
       </main>
@@ -301,3 +352,4 @@ export default function AuthPage() {
     </>
   );
 }
+
