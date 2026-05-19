@@ -1,10 +1,10 @@
 'use client';
 
-import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
+import { Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
+import { IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
 import { CATEGORIES, REGIONS, SORT_OPTIONS, type Category, type Region, type SortOption } from '@/data/campaigns';
-import classes from './CampaignFilters.module.css';
+import classes from './FiltersShared.module.css';
 
 interface ProjectFiltersProps {
   search: string;
@@ -146,17 +146,8 @@ export function ProjectFilters({
 
   return (
     <>
-      {/* 상단: 검색 + 모바일 필터 버튼 + 결과 수 */}
+      {/* 상단: 모바일 필터 버튼 + 결과 수 */}
       <div className={classes.topBar}>
-        <TextInput
-          placeholder="Search projects..."
-          leftSection={<IconSearch size={18} />}
-          value={search}
-          onChange={(e) => onSearchChange(e.currentTarget.value)}
-          size="md"
-          radius="xl"
-          className={classes.searchInput}
-        />
         <Button
           variant="outline"
           color="dark"

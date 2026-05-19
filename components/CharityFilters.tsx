@@ -1,10 +1,10 @@
 'use client';
 
-import { TextInput, Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
+import { Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconSearch, IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
-import { CATEGORIES, REGIONS, type Region } from '@/data/campaigns';
-import classes from './CampaignFilters.module.css';
+import { IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
+import { CATEGORIES, REGIONS, type Category, type Region } from '@/data/campaigns';
+import classes from './FiltersShared.module.css';
 
 interface CharityFiltersProps {
   search: string;
@@ -130,15 +130,6 @@ export function CharityFilters({
   return (
     <>
       <div className={classes.topBar}>
-        <TextInput
-          placeholder="Search charities..."
-          leftSection={<IconSearch size={18} />}
-          value={search}
-          onChange={(e) => onSearchChange(e.currentTarget.value)}
-          size="md"
-          radius="xl"
-          className={classes.searchInput}
-        />
         <Button
           variant="outline"
           color="dark"

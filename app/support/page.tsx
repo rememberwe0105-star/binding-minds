@@ -19,7 +19,12 @@ import {
   IconMail,
   IconPhone,
   IconMapPin,
+  IconBuilding,
+  IconArrowRight,
+  IconShieldCheck,
+  IconHeart,
 } from '@tabler/icons-react';
+import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import classes from './page.module.css';
@@ -31,11 +36,11 @@ const faqs = [
   },
   {
     q: 'Is my donation tax deductible?',
-    a: 'Yes! Donations to approved organisations in New Zealand qualify for a 33.33% tax credit. DearGiver automatically consolidates your receipts to make claiming easy.',
+    a: 'Yes! Donations to approved charities in New Zealand qualify for a 33.33% tax credit. DearGiver automatically consolidates your receipts to make claiming easy.',
   },
   {
     q: 'How do I know the charities are legitimate?',
-    a: 'All organisations on our platform are verified and registered with New Zealand\'s Charities Services (charities.govt.nz). We perform ongoing checks to ensure compliance.',
+    a: 'All charities on our platform are verified and registered with New Zealand\'s Charities Services (charities.govt.nz). We perform ongoing checks to ensure compliance.',
   },
   {
     q: 'What payment methods do you accept?',
@@ -160,6 +165,76 @@ export default function SupportPage() {
                 </form>
               </Card>
             </SimpleGrid>
+          </Container>
+        </section>
+
+        {/* For Charities */}
+        <section className={classes.section} id="for-charities">
+          <Container size="lg">
+            <Group gap={10} mb={8}>
+              <IconBuilding size={20} color="var(--bm-terracotta)" />
+              <Text size="sm" fw={600} tt="uppercase" c="var(--bm-terracotta)" style={{ letterSpacing: '1.5px' }}>
+                For Charities
+              </Text>
+            </Group>
+            <Title order={2} className={classes.sectionTitle} mb={8}>
+              Want to List Your Charity on DearGiver?
+            </Title>
+            <Text size="md" c="var(--bm-text-muted)" lh={1.7} mb={32} maw={600}>
+              If your charity is registered with NZ Charities Services, you can apply to join DearGiver
+              and connect with thousands of donors across New Zealand.
+            </Text>
+
+            <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={20} mb={32}>
+              {[
+                {
+                  icon: IconShieldCheck,
+                  title: 'Free to List',
+                  desc: 'No monthly fees or subscriptions. We only charge a 1% platform fee per donation received.',
+                },
+                {
+                  icon: IconHeart,
+                  title: 'NZ-Wide Donors',
+                  desc: 'Reach donors across New Zealand who are actively looking for causes to support.',
+                },
+                {
+                  icon: IconBuilding,
+                  title: 'CC Number Required',
+                  desc: 'Only charities registered with NZ Charities Services (charities.govt.nz) are eligible.',
+                },
+              ].map(({ icon: Icon, title, desc }) => (
+                <Card key={title} padding="lg" radius="lg" withBorder className={classes.charityCard}>
+                  <ThemeIcon size={36} radius="md" color="sage" variant="light" mb={12}>
+                    <Icon size={18} />
+                  </ThemeIcon>
+                  <Text fw={700} size="sm" c="var(--bm-text-dark)" mb={6}>{title}</Text>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.6}>{desc}</Text>
+                </Card>
+              ))}
+            </SimpleGrid>
+
+            <Group gap={12}>
+              <Button
+                component={Link}
+                href="/charity/apply"
+                color="sage"
+                radius="xl"
+                size="md"
+                rightSection={<IconArrowRight size={16} />}
+              >
+                Register Your Charity
+              </Button>
+              <Button
+                component={Link}
+                href="mailto:hello@deargiver.co.nz?subject=Charity Registration Enquiry"
+                variant="outline"
+                color="sage"
+                radius="xl"
+                size="md"
+              >
+                Email Us First
+              </Button>
+            </Group>
           </Container>
         </section>
       </main>

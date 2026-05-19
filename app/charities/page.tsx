@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { OrganizationCard } from '@/components/OrganizationCard';
 import { CharityFilters } from '@/components/CharityFilters';
+import { RichSearchInput } from '@/components/RichSearchInput';
 import { organizations as allOrganizations, filterOrganizations } from '@/data/organizations';
 import { CATEGORIES, REGIONS, type Category, type Region } from '@/data/campaigns';
 import { useFavorites } from '@/contexts/FavoritesContext';
@@ -85,10 +86,22 @@ export default function CharitiesPage() {
             <Title order={1} className={classes.pageTitle}>
               Browse Charities
             </Title>
-            <Text size="lg" c="var(--bm-text-muted)" maw={600} mt={8}>
-              Explore trusted charitable organisations across Aotearoa.
-              Your donations are tax-deductible at 33.33%.
+            <Text size="lg" c="var(--bm-text-muted)" maw={640} mt={8} mx="auto">
+              Explore registered charities across Aotearoa.
+              Data sourced from NZ Charities Services.
             </Text>
+            <div className={classes.searchWrap}>
+              <RichSearchInput
+                value={search}
+                onChange={handleSearchChange}
+                onCategoryPick={(cat) => {
+                  if (!selectedCategories.includes(cat)) {
+                    handleCategoriesChange([...selectedCategories, cat]);
+                  }
+                }}
+                placeholder="Search charities & causes..."
+              />
+            </div>
           </Box>
 
           {/* 레이아웃 */}

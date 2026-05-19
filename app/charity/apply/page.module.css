@@ -1,0 +1,58 @@
+.page {
+  min-height: 100vh;
+  background: var(--bm-warm-bg, #fafaf8);
+}
+
+.heroSection {
+  background: linear-gradient(135deg, #f8f4ef 0%, #eef5f0 100%);
+  padding: 64px 0 48px;
+  border-bottom: 1px solid var(--bm-border, #e8ede9);
+}
+
+.heroTitle {
+  font-size: clamp(2rem, 5vw, 3rem);
+  font-weight: 900;
+  color: var(--bm-text-dark, #1a2e1f);
+  line-height: 1.2;
+  margin-top: 8px;
+}
+
+.formSection {
+  padding: 48px 0 80px;
+}
+
+.stepLabel {
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.formCard {
+  background: white;
+  border-color: var(--bm-border, #e8ede9) !important;
+  /* 그림자로 입체감 */
+  box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+}
+
+.stepTitle {
+  font-size: 1.2rem;
+  font-weight: 800;
+  color: var(--bm-text-dark, #1a2e1f);
+}
+
+.reviewBlock {
+  background: var(--bm-sage-bg, #f4f8f6);
+  border-radius: 10px;
+  padding: 16px 20px;
+  border: 1px solid var(--bm-border, #e8ede9);
+}
+
+@keyframes fadeSlideDown {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

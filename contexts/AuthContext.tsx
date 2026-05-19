@@ -9,12 +9,21 @@ import {
 } from 'react';
 import type { User } from 'firebase/auth';
 import { auth, isConfigured } from '@/lib/firebase';
+import {
+  getRegistration,
+  postRegistration,
+  type ServiceUser,
+} from '@/lib/api';
 
 // --- 인터페이스 ---
 interface AuthContextType {
   user: User | null;
   loading: boolean;
   isFirebaseConfigured: boolean;
+  /** 서비스 DB에 등록된 사용자 정보 (null = 아직 미등록 또는 로그아웃 상태) */
+  serviceUser: ServiceUser | null;
+  /** 서비스 DB 등록 여부 (로딩 중에는 undefined) */
+  isRegistered: boolean | undefined;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
@@ -28,19 +37,58 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [serviceUser, setServiceUser] = useState<ServiceUser | null>(null);
+  const [isRegistered, setIsRegistered] = useState<boolean | undefined>(undefined);
 
-  // 인증 상태 실시간 감지
+  // 인증 상태 실시간 감지 + 서비스 DB 자동 등록
   useEffect(() => {
     if (!isConfigured || !auth) {
       setLoading(false);
       return;
     }
 
-    // 동적 import로 Firebase Auth 함수 로드
     import('firebase/auth').then(({ onAuthStateChanged }) => {
-      const unsubscribe = onAuthStateChanged(auth!, (firebaseUser) => {
+      const unsubscribe = onAuthStateChanged(auth!, async (firebaseUser) => {
         setUser(firebaseUser);
-        setLoading(false);
+
+        if (!firebaseUser) {
+          // 로그아웃 시 초기화
+          setServiceUser(null);
+          setIsRegistered(undefined);
+          setLoading(false);
+          return;
+        }
+
+        // 로그인 감지 → 서비스 DB 등록 여부 확인
+        try {
+          const regResult = await getRegistration();
+
+          if (regResult.registered) {
+            setServiceUser(regResult.user);
+            setIsRegistered(true);
+          } else {
+            // 미등록 → Firebase 프로필로 자동 등록
+            const email = firebaseUser.email ?? regResult.suggestedEmail ?? '';
+            const name = firebaseUser.displayName ?? regResult.suggestedName ?? email.split('@')[0];
+
+            try {
+              const registerResult = await postRegistration({ email, name });
+              setServiceUser(registerResult.user);
+              setIsRegistered(true);
+            } catch (registerErr) {
+              console.error('[AuthContext] 서비스 DB 등록 실패:', registerErr);
+              // 등록 실패해도 Firebase 로그인은 유지 (기부 외 기능은 사용 가능)
+              setIsRegistered(false);
+              setServiceUser(null);
+            }
+          }
+        } catch (err) {
+          console.error('[AuthContext] 등록 여부 조회 실패:', err);
+          setIsRegistered(false);
+          setServiceUser(null);
+        } finally {
+          setLoading(false);
+        }
       });
       return () => unsubscribe();
     });
@@ -80,6 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     user,
     loading,
     isFirebaseConfigured: isConfigured,
+    serviceUser,
+    isRegistered,
     signUp,
     logIn,
     logOut,

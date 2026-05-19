@@ -23,6 +23,7 @@ import {
   IconClipboardList,
   IconExternalLink,
   IconArrowLeft,
+  IconLock,
 } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
@@ -32,12 +33,13 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
+import { ClaimProfileBanner } from '@/components/ClaimProfileBanner';
 import { getOrganizationBySlug, ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
 import { campaigns, formatCurrency } from '@/data/campaigns';
 import type { Campaign } from '@/data/campaigns';
 import classes from './page.module.css';
 
-// Organization → "fake" Campaign 변환 (기부 모달 호환용)
+// Organization → "fake" Campaign 변환 (기부 모달 호환용 — partnered 기관 전용)
 function orgToCampaign(org: ReturnType<typeof getOrganizationBySlug>): Campaign {
   return {
     id: org!.id,
@@ -73,6 +75,8 @@ export default function OrganizationDetailPage({
     notFound();
   }
 
+  const isPartnered = org.status === 'partnered';
+
   // 이 기관의 캠페인 찾기
   const orgCampaigns = campaigns.filter((c) => {
     const mappedSlug = ORGANIZER_TO_ORG_SLUG[c.organizer];
@@ -102,30 +106,55 @@ export default function OrganizationDetailPage({
               <IconArrowLeft size={16} />
               Back to Charities
             </Link>
-            <Badge
-              size="lg"
-              variant="filled"
-              color="dark"
-              mb={12}
-              leftSection={<IconShieldCheck size={14} />}
-            >
-              Verified Organisation · {org.charityNumber}
-            </Badge>
+            <Group gap={8} mb={12}>
+              <Badge
+                size="lg"
+                variant="filled"
+                color="dark"
+                leftSection={<IconShieldCheck size={14} />}
+              >
+                Registered Charity · {org.charityNumber}
+              </Badge>
+              {!isPartnered && (
+                <Badge
+                  size="lg"
+                  variant="light"
+                  color="orange"
+                  leftSection={<IconLock size={14} />}
+                >
+                  Unclaimed Profile
+                </Badge>
+              )}
+            </Group>
             <Title order={1} className={classes.heroTitle}>
               {org.name}
             </Title>
             <Text className={classes.heroMission}>{org.mission}</Text>
             <Group mt={24} gap={12}>
-              <Button
-                size="lg"
-                radius="xl"
-                color="terracotta"
-                leftSection={<IconHeart size={18} />}
-                onClick={() => setDonationOpened(true)}
-                className={classes.donateBtn}
-              >
-                Donate to {org.name}
-              </Button>
+              {isPartnered ? (
+                <Button
+                  size="lg"
+                  radius="xl"
+                  color="terracotta"
+                  leftSection={<IconHeart size={18} />}
+                  onClick={() => setDonationOpened(true)}
+                  className={classes.donateBtn}
+                >
+                  Donate to {org.name}
+                </Button>
+              ) : (
+                <Button
+                  component={Link}
+                  href="/charity/apply"
+                  size="lg"
+                  radius="xl"
+                  color="sage"
+                  leftSection={<IconShieldCheck size={18} />}
+                  className={classes.donateBtn}
+                >
+                  Claim this Profile
+                </Button>
+              )}
               {org.website && (
                 <Button
                   variant="outline"
@@ -147,45 +176,85 @@ export default function OrganizationDetailPage({
         </div>
 
         <Container size="lg" className={classes.contentArea}>
-          {/* 통계 카드 */}
-          <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={16} mb={48}>
-            <div className={classes.statCard}>
-              <ThemeIcon size={40} radius="xl" color="terracotta" variant="light">
-                <IconHeart size={20} />
-              </ThemeIcon>
-              <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
-                {formatCurrency(org.totalRaised)}
-              </Text>
-              <Text size="xs" c="dimmed">Total Raised</Text>
-            </div>
-            <div className={classes.statCard}>
-              <ThemeIcon size={40} radius="xl" color="sage" variant="light">
-                <IconUsers size={20} />
-              </ThemeIcon>
-              <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
-                {org.donorCount.toLocaleString()}
-              </Text>
-              <Text size="xs" c="dimmed">Donors</Text>
-            </div>
-            <div className={classes.statCard}>
-              <ThemeIcon size={40} radius="xl" color="blue" variant="light">
-                <IconClipboardList size={20} />
-              </ThemeIcon>
-              <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
-                {org.activeCampaigns}
-              </Text>
-              <Text size="xs" c="dimmed">Active Projects</Text>
-            </div>
-            <div className={classes.statCard}>
-              <ThemeIcon size={40} radius="xl" color="grape" variant="light">
-                <IconCalendar size={20} />
-              </ThemeIcon>
-              <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
-                {org.yearFounded}
-              </Text>
-              <Text size="xs" c="dimmed">Established</Text>
-            </div>
-          </SimpleGrid>
+          {/* Claim / Interest 배너 — unclaimed 기관에만 표시 */}
+          {!isPartnered && (
+            <ClaimProfileBanner organization={org} />
+          )}
+
+          {/* 통계 카드 — partnered 기관에만 표시 */}
+          {isPartnered && (
+            <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={16} mb={48}>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="terracotta" variant="light">
+                  <IconHeart size={20} />
+                </ThemeIcon>
+                <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
+                  {formatCurrency(org.totalRaised)}
+                </Text>
+                <Text size="xs" c="dimmed">Total Raised</Text>
+              </div>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="sage" variant="light">
+                  <IconUsers size={20} />
+                </ThemeIcon>
+                <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
+                  {org.donorCount.toLocaleString()}
+                </Text>
+                <Text size="xs" c="dimmed">Donors</Text>
+              </div>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="blue" variant="light">
+                  <IconClipboardList size={20} />
+                </ThemeIcon>
+                <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
+                  {org.activeCampaigns}
+                </Text>
+                <Text size="xs" c="dimmed">Active Projects</Text>
+              </div>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="grape" variant="light">
+                  <IconCalendar size={20} />
+                </ThemeIcon>
+                <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
+                  {org.yearFounded}
+                </Text>
+                <Text size="xs" c="dimmed">Established</Text>
+              </div>
+            </SimpleGrid>
+          )}
+
+          {/* unclaimed 기관 기본 정보 카드 */}
+          {!isPartnered && (
+            <SimpleGrid cols={{ base: 2, sm: 3 }} spacing={16} mb={48}>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="sage" variant="light">
+                  <IconShieldCheck size={20} />
+                </ThemeIcon>
+                <Text size="md" fw={700} mt={8} c="var(--bm-text-dark)">
+                  {org.charityNumber}
+                </Text>
+                <Text size="xs" c="dimmed">CC Registration</Text>
+              </div>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="grape" variant="light">
+                  <IconCalendar size={20} />
+                </ThemeIcon>
+                <Text size="md" fw={700} mt={8} c="var(--bm-text-dark)">
+                  {org.yearFounded}
+                </Text>
+                <Text size="xs" c="dimmed">Established</Text>
+              </div>
+              <div className={classes.statCard}>
+                <ThemeIcon size={40} radius="xl" color="blue" variant="light">
+                  <IconWorld size={20} />
+                </ThemeIcon>
+                <Text size="md" fw={700} mt={8} c="var(--bm-text-dark)">
+                  {org.region}
+                </Text>
+                <Text size="xs" c="dimmed">Region</Text>
+              </div>
+            </SimpleGrid>
+          )}
 
           {/* 상세 소개 */}
           <Box className={classes.descriptionBlock}>
@@ -226,8 +295,8 @@ export default function OrganizationDetailPage({
             </div>
           </Box>
 
-          {/* 관련 캠페인 */}
-          {orgCampaigns.length > 0 && (
+          {/* 관련 캠페인 — partnered 기관만 */}
+          {isPartnered && orgCampaigns.length > 0 && (
             <>
               <Divider
                 my={48}
@@ -251,7 +320,7 @@ export default function OrganizationDetailPage({
           <Box mt={48} className={classes.infoCard}>
             <Group gap={8} mb={8}>
               <IconWorld size={18} color="var(--bm-sage)" />
-              <Text size="sm" fw={600} c="var(--bm-text-dark)">Organisation Details</Text>
+              <Text size="sm" fw={600} c="var(--bm-text-dark)">Charity Details</Text>
             </Group>
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={12}>
               <Group gap={8}>
@@ -279,35 +348,71 @@ export default function OrganizationDetailPage({
                   {org.website.replace('https://', '')}
                 </Text>
               </Group>
+              <Group gap={8}>
+                <Text size="xs" c="dimmed" w={100}>Status</Text>
+                <Badge
+                  size="sm"
+                  color={isPartnered ? 'sage' : 'orange'}
+                  variant="light"
+                >
+                  {isPartnered ? 'Active Partner' : 'Unclaimed Profile'}
+                </Badge>
+              </Group>
             </SimpleGrid>
           </Box>
 
           {/* 하단 CTA */}
           <Box ta="center" mt={48} mb={32}>
-            <Button
-              size="xl"
-              radius="xl"
-              color="terracotta"
-              leftSection={<IconHeart size={20} />}
-              onClick={() => setDonationOpened(true)}
-              className={classes.donateBtn}
-            >
-              Support {org.name} Today
-            </Button>
-            <Text size="xs" c="dimmed" mt={8}>
-              33.33% tax credit on all donations to verified NZ charities
-            </Text>
+            {isPartnered ? (
+              <>
+                <Button
+                  size="xl"
+                  radius="xl"
+                  color="terracotta"
+                  leftSection={<IconHeart size={20} />}
+                  onClick={() => setDonationOpened(true)}
+                  className={classes.donateBtn}
+                >
+                  Support {org.name} Today
+                </Button>
+                <Text size="xs" c="dimmed" mt={8}>
+                  33.33% tax credit on all donations to verified NZ charities
+                </Text>
+              </>
+            ) : (
+              <>
+                <Text size="md" c="var(--bm-text-muted)" mb={12}>
+                  Are you from {org.name}?
+                </Text>
+                <Button
+                  component={Link}
+                  href="/charity/apply"
+                  size="lg"
+                  radius="xl"
+                  color="sage"
+                  leftSection={<IconShieldCheck size={18} />}
+                >
+                  Claim Your Profile & Start Receiving Donations
+                </Button>
+                <Text size="xs" c="dimmed" mt={8}>
+                  Data sourced from NZ Charities Services public register
+                </Text>
+              </>
+            )}
           </Box>
         </Container>
       </main>
       <Footer />
 
-      {/* 기부 모달 */}
-      <DonationCheckoutModal
-        opened={donationOpened}
-        onClose={() => setDonationOpened(false)}
-        campaign={fakeCampaign}
-      />
+      {/* 기부 모달 — partnered 기관만 접근 가능 */}
+      {isPartnered && (
+        <DonationCheckoutModal
+          opened={donationOpened}
+          onClose={() => setDonationOpened(false)}
+          campaign={fakeCampaign}
+        />
+      )}
     </>
   );
 }
+

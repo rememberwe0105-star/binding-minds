@@ -31,7 +31,7 @@ export function TrendingNow() {
         <Group justify="space-between" mb={20}>
           <Group gap={10}>
             <Text size="xl" fw={800} c="var(--bm-text-dark)">
-              🔥 Trending Now
+              🌿 Explore Causes
             </Text>
           </Group>
           <Group gap={8}>

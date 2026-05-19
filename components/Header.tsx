@@ -12,12 +12,15 @@ import {
   Avatar,
   Menu,
   UnstyledButton,
+  Progress,
+  Tooltip,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
+import { useRewards } from '@/hooks/useRewards';
 import classes from './Header.module.css';
 
 const navLinks = [
@@ -31,6 +34,9 @@ export function Header() {
   const [opened, { toggle, close }] = useDisclosure(false);
   const [scrolled, setScrolled] = useState(false);
   const { user, loading, logOut } = useAuth();
+
+  // ── Rewards 후크 (로그인 상태에서만) ──
+  const { currentTier, nextTier, unlockedCount, totalCount, loading: rewardsLoading } = useRewards();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -94,19 +100,35 @@ export function Header() {
             <div style={{ width: 120, height: 36 }} />
           ) : user ? (
             // 로그인 상태: Avatar + 드롭다운
-            <Menu shadow="md" width={200} position="bottom-end" withArrow>
+            <Menu shadow="md" width={220} position="bottom-end" withArrow>
               <Menu.Target>
                 <UnstyledButton className={classes.userBtn}>
                   <Group gap={8}>
-                    <Avatar
-                      src={user.photoURL}
-                      alt={user.displayName || 'User'}
-                      size={32}
-                      radius="xl"
-                      color="sage"
+                    {/* A안: Avatar Ring — 등급 색상 테두리 */}
+                    <Tooltip
+                      label={
+                        rewardsLoading ? 'Loading...' :
+                        `${currentTier.emoji} ${currentTier.label} · ${unlockedCount}/${totalCount} badges`
+                      }
+                      position="bottom"
+                      withArrow
+                      offset={6}
                     >
-                      {getInitials(user.displayName)}
-                    </Avatar>
+                      <div
+                        className={classes.avatarRing}
+                        style={{ '--tier-color': `var(--mantine-color-${currentTier.color}-5)` } as React.CSSProperties}
+                      >
+                        <Avatar
+                          src={user.photoURL}
+                          alt={user.displayName || 'User'}
+                          size={32}
+                          radius="xl"
+                          color="sage"
+                        >
+                          {getInitials(user.displayName)}
+                        </Avatar>
+                      </div>
+                    </Tooltip>
                     <Text size="sm" fw={500} c="var(--dg-text-dark)" className={classes.userName}>
                       {user.displayName || 'User'}
                     </Text>
@@ -115,6 +137,36 @@ export function Header() {
                 </UnstyledButton>
               </Menu.Target>
               <Menu.Dropdown>
+                {/* B안: 드롭다운 상단 — Tier 카드 */}
+                {!rewardsLoading && (
+                  <>
+                    <div className={classes.tierCard}>
+                      <Group gap={8} mb={6}>
+                        <span style={{ fontSize: '1.1rem' }}>{currentTier.emoji}</span>
+                        <div style={{ flex: 1 }}>
+                          <Text size="xs" fw={700} c="var(--bm-text-dark)" lh={1.2}>
+                            {currentTier.label}
+                          </Text>
+                          <Text size="xs" c="var(--bm-text-muted)" lh={1.2}>
+                            {unlockedCount}/{totalCount} badges
+                          </Text>
+                        </div>
+                      </Group>
+                      <Progress
+                        value={nextTier ? ((unlockedCount - currentTier.minBadges) / (nextTier.minBadges - currentTier.minBadges)) * 100 : 100}
+                        color={currentTier.color}
+                        size={4}
+                        radius="xl"
+                      />
+                      {nextTier && (
+                        <Text size="xs" c="var(--bm-text-muted)" mt={4}>
+                          {nextTier.minBadges - unlockedCount} badge{nextTier.minBadges - unlockedCount !== 1 ? 's' : ''} to {nextTier.label}
+                        </Text>
+                      )}
+                    </div>
+                    <Menu.Divider />
+                  </>
+                )}
                 <Menu.Label>{user.email}</Menu.Label>
                 <Menu.Item
                   leftSection={<IconLayoutDashboard size={16} />}
@@ -122,6 +174,13 @@ export function Header() {
                   href="/dashboard"
                 >
                   My Dashboard
+                </Menu.Item>
+                <Menu.Item
+                  leftSection={<IconGift size={16} />}
+                  component={Link}
+                  href="/dashboard?tab=rewards"
+                >
+                  My Rewards
                 </Menu.Item>
                 <Menu.Item
                   leftSection={<IconSettings size={16} />}

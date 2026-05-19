@@ -18,7 +18,7 @@ const counters: CounterItem[] = [
   { icon: IconHeart, value: 2847, prefix: '', suffix: '', label: 'Donations Made', color: 'var(--bm-terracotta)' },
   { icon: IconUsers, value: 1250, prefix: '', suffix: '+', label: 'Active Donors', color: 'var(--bm-sage-dark)' },
   { icon: IconBuildingBank, value: 174850, prefix: '$', suffix: '', label: 'Total Raised (NZD)', color: 'var(--bm-terracotta)' },
-  { icon: IconTree, value: 48, prefix: '', suffix: '', label: 'Verified Organisations', color: 'var(--bm-sage-dark)' },
+  { icon: IconTree, value: 48, prefix: '', suffix: '', label: 'Verified Charities', color: 'var(--bm-sage-dark)' },
 ];
 
 function AnimatedCounter({ target, prefix, suffix, isVisible }: { target: number; prefix: string; suffix: string; isVisible: boolean }) {

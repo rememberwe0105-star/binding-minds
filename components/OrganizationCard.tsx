@@ -1,10 +1,12 @@
 'use client';
 
 import { Card, Text, Badge, Group, Box, ThemeIcon } from '@mantine/core';
-import { IconShieldCheck, IconBuilding, IconHeart, IconUsers } from '@tabler/icons-react';
+import { IconShieldCheck, IconBuilding, IconHeart, IconUsers, IconLock } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import type { Organization } from '@/data/organizations';
+import { CATEGORY_META } from '@/data/categoryMeta';
+import type { Category } from '@/data/campaigns';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import classes from './OrganizationCard.module.css';
 
@@ -13,6 +15,7 @@ interface OrganizationCardProps {
 }
 
 export function OrganizationCard({ organization }: OrganizationCardProps) {
+  const CategoryIcon = CATEGORY_META[organization.category as Category]?.icon ?? IconBuilding;
   return (
     <Link href={`/charities/${organization.slug}`} className={classes.cardLink}>
       <Card
@@ -37,18 +40,19 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
           </div>
           <Badge
             className={classes.typeBadge}
-            color="dark"
+            color={organization.status === 'partnered' ? 'dark' : 'orange'}
             variant="filled"
             size="sm"
-            leftSection={<IconBuilding size={10} />}
+            leftSection={organization.status === 'partnered' ? <IconBuilding size={10} /> : <IconLock size={10} />}
           >
-            Organisation
+            {organization.status === 'partnered' ? 'Charity' : 'Unclaimed'}
           </Badge>
           <Badge
             className={classes.categoryBadge}
             color="sage"
             variant="filled"
             size="sm"
+            leftSection={<CategoryIcon size={11} stroke={2} />}
           >
             {organization.category}
           </Badge>
@@ -74,42 +78,50 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
             {organization.mission}
           </Text>
 
-          {/* 통계 */}
-          <Box mt={16}>
-            <Group justify="space-between" mb={8}>
-              <Group gap={6}>
-                <ThemeIcon size={20} radius="xl" color="sage" variant="light">
-                  <IconHeart size={10} />
-                </ThemeIcon>
-                <Text size="xs" c="dimmed">
-                  <Text component="span" fw={600} c="var(--bm-sage-dark)" size="xs">
-                    {organization.donorCount.toLocaleString()}
-                  </Text>{' '}
-                  donors
-                </Text>
+          {/* 통계 — partnered 기관만 표시 */}
+          {organization.status === 'partnered' ? (
+            <Box mt={16}>
+              <Group justify="space-between" mb={8}>
+                <Group gap={6}>
+                  <ThemeIcon size={20} radius="xl" color="sage" variant="light">
+                    <IconHeart size={10} />
+                  </ThemeIcon>
+                  <Text size="xs" c="dimmed">
+                    <Text component="span" fw={600} c="var(--bm-sage-dark)" size="xs">
+                      {organization.donorCount.toLocaleString()}
+                    </Text>{' '}
+                    donors
+                  </Text>
+                </Group>
+                <Group gap={6}>
+                  <ThemeIcon size={20} radius="xl" color="terracotta" variant="light">
+                    <IconUsers size={10} />
+                  </ThemeIcon>
+                  <Text size="xs" c="dimmed">
+                    <Text component="span" fw={600} c="var(--bm-terracotta)" size="xs">
+                      {organization.activeCampaigns}
+                    </Text>{' '}
+                    {organization.activeCampaigns === 1 ? 'project' : 'projects'}
+                  </Text>
+                </Group>
               </Group>
-              <Group gap={6}>
-                <ThemeIcon size={20} radius="xl" color="terracotta" variant="light">
-                  <IconUsers size={10} />
-                </ThemeIcon>
-                <Text size="xs" c="dimmed">
-                  <Text component="span" fw={600} c="var(--bm-terracotta)" size="xs">
-                    {organization.activeCampaigns}
-                  </Text>{' '}
-                  {organization.activeCampaigns === 1 ? 'project' : 'projects'}
-                </Text>
-              </Group>
-            </Group>
 
-            <div className={classes.raisedBar}>
-              <Text size="sm" fw={600} c="var(--bm-sage-dark)">
-                ${organization.totalRaised.toLocaleString('en-NZ')}
+              <div className={classes.raisedBar}>
+                <Text size="sm" fw={600} c="var(--bm-sage-dark)">
+                  ${organization.totalRaised.toLocaleString('en-NZ')}
+                </Text>
+                <Text size="xs" c="dimmed">
+                  total raised
+                </Text>
+              </div>
+            </Box>
+          ) : (
+            <Box mt={16}>
+              <Text size="xs" c="dimmed" lh={1.6}>
+                Est. {organization.yearFounded} · {organization.charityNumber}
               </Text>
-              <Text size="xs" c="dimmed">
-                total raised
-              </Text>
-            </div>
-          </Box>
+            </Box>
+          )}
         </Box>
       </Card>
     </Link>

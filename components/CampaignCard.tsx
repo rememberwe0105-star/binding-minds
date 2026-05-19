@@ -5,6 +5,7 @@ import { IconShieldCheck } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { Campaign, getProgress, formatCurrency } from '@/data/campaigns';
+import { CATEGORY_META } from '@/data/categoryMeta';
 import { FavoriteButton } from '@/components/FavoriteButton';
 import classes from './CampaignCard.module.css';
 
@@ -14,6 +15,7 @@ interface CampaignCardProps {
 
 export function CampaignCard({ campaign }: CampaignCardProps) {
   const progress = getProgress(campaign);
+  const CategoryIcon = CATEGORY_META[campaign.category].icon;
 
   return (
     <Link href={`/projects/${campaign.slug}`} className={classes.cardLink}>
@@ -40,6 +42,7 @@ export function CampaignCard({ campaign }: CampaignCardProps) {
             color="sage"
             variant="filled"
             size="sm"
+            leftSection={<CategoryIcon size={11} stroke={2} />}
           >
             {campaign.category}
           </Badge>

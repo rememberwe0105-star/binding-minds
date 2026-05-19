@@ -13,6 +13,11 @@ const footerLinks = {
     { label: 'Charities', href: '/charities' },
     { label: 'Blog', href: '/blog' },
   ],
+  organisations: [
+    { label: 'List Your Charity', href: '/charity/apply' },
+    { label: 'How We Fund', href: '/about#how-we-work' },
+    { label: 'Help & FAQs', href: '/support#faq' },
+  ],
   support: [
     { label: 'Help Centre', href: '/support' },
     { label: 'Contact Us', href: '/support#contact' },
@@ -67,6 +72,19 @@ export function Footer() {
             </Text>
             <Stack gap={10}>
               {footerLinks.platform.map((link) => (
+                <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
+                  {link.label}
+                </Anchor>
+              ))}
+            </Stack>
+          </div>
+
+          <div className={classes.linkGroup}>
+            <Text fw={600} size="sm" c="white" mb={16} tt="uppercase" style={{ letterSpacing: '1px' }}>
+              For Charities
+            </Text>
+            <Stack gap={10}>
+              {footerLinks.organisations.map((link) => (
                 <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
                   {link.label}
                 </Anchor>

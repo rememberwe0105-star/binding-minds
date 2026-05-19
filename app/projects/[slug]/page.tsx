@@ -48,6 +48,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
   const campaign = getCampaignBySlug(slug);
   const [donationAmount, setDonationAmount] = useState('50');
   const [customAmount, setCustomAmount] = useState('');
+  const [frequency, setFrequency] = useState<'one-time' | 'monthly'>('one-time');
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
   // 캠페인이 없으면 404
@@ -117,7 +118,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                       size="sm"
                       leftSection={<IconShieldCheck size={14} />}
                     >
-                      Verified Organisation
+                      Verified Charity
                     </Badge>
                   )}
                 </Group>
@@ -212,6 +213,27 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   </Box>
                 </Group>
 
+                {/* 결제 주기 선택 */}
+                <SegmentedControl
+                  value={frequency}
+                  onChange={(v) => setFrequency(v as 'one-time' | 'monthly')}
+                  data={[
+                    { value: 'one-time', label: 'One-time' },
+                    { 
+                      value: 'monthly', 
+                      label: (
+                        <Group gap={4} justify="center">
+                          Monthly <IconHeart size={14} color="var(--bm-terracotta)" />
+                        </Group>
+                      )
+                    },
+                  ]}
+                  fullWidth
+                  size="sm"
+                  color="terracotta"
+                  mb={16}
+                />
+
                 {/* 금액 선택 */}
                 <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={8}>
                   Choose Amount
@@ -220,7 +242,8 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   value={donationAmount}
                   onChange={setDonationAmount}
                   data={[
-                    { value: '25', label: '$25' },
+                    { value: '10', label: '$10' },
+                    { value: '20', label: '$20' },
                     { value: '50', label: '$50' },
                     { value: '100', label: '$100' },
                     { value: 'custom', label: 'Custom' },
@@ -240,7 +263,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                     size="md"
                     mb={12}
                     type="number"
-                    min={5}
+                    min={10}
                   />
                 )}
 
@@ -262,7 +285,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   className={classes.donateBtn}
                   onClick={openModal}
                 >
-                  Donate {actualAmount ? `$${actualAmount}` : ''} Now
+                  Donate {actualAmount ? `$${actualAmount}` : ''} {frequency === 'monthly' ? 'Monthly' : 'Now'}
                 </Button>
 
                 <Text ta="center" size="xs" c="dimmed" mt={8}>
@@ -288,7 +311,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
         </Container>
       </main>
       <Footer />
-      <DonationCheckoutModal opened={modalOpened} onClose={closeModal} campaign={campaign} />
+      <DonationCheckoutModal opened={modalOpened} onClose={closeModal} campaign={campaign} frequency={frequency} />
     </>
   );
 }

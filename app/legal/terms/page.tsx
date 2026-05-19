@@ -24,7 +24,7 @@ export default function TermsPage() {
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>2. Platform Services</Title>
             <Text size="sm" c="var(--bm-text-muted)" lh={1.8} mb={24}>
-              DearGiver provides a platform connecting donors with verified charitable organisations in New Zealand. We facilitate payment processing through Stripe and generate tax documentation. We do not hold or manage donation funds directly.
+              DearGiver provides a platform connecting donors with verified charities in New Zealand. We facilitate payment processing through Stripe and generate tax documentation. We do not hold or manage donation funds directly.
             </Text>
 
             <Title order={3} mb={12} style={{ color: 'var(--bm-text-dark)' }}>3. User Accounts</Title>

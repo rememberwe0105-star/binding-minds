@@ -15,6 +15,16 @@
   border-color: rgba(143, 151, 121, 0.1);
 }
 
+.charityCard {
+  border-color: rgba(143, 151, 121, 0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.charityCard:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 8px 24px rgba(74, 124, 113, 0.12);
+}
+
 @media (max-width: 48em) {
   .heroTitle { font-size: 1.6rem; }
 }

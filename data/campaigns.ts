@@ -38,6 +38,8 @@ export interface Campaign {
   featured: boolean;
   trending: boolean;
   createdAt: string;
+  /** Stripe Connected Account ID (acct_...). 없으면 기본 테스트 ID 사용 */
+  stripeAccountId?: string;
 }
 
 // --- 카테고리 목록 ---

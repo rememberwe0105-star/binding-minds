@@ -1,0 +1,124 @@
+.section {
+  padding: 64px 0;
+  background: var(--bm-bg-cream, #f9f8f4);
+}
+
+/* ── 6:4 비대칭 그리드 ── */
+.grid {
+  display: grid;
+  grid-template-columns: 3fr 2fr;
+  gap: 24px;
+  align-items: stretch;
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s var(--bm-ease-out), transform 0.8s var(--bm-ease-out);
+}
+
+.grid.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── 좌측: Trust 카드 ── */
+.trustCard {
+  background: white;
+  border-radius: 20px;
+  padding: 40px 36px;
+  border: 1px solid rgba(143, 151, 121, 0.1);
+}
+
+.trustList {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.trustItem {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+}
+
+.trustIcon {
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+
+.learnMoreBtn {
+  font-weight: 600 !important;
+  padding-left: 0 !important;
+}
+
+.learnMoreBtn:hover {
+  text-decoration: underline;
+}
+
+/* ── 우측: Charity CTA 카드 ── */
+.charityCard {
+  position: relative;
+  background: linear-gradient(135deg, #2d6a5c 0%, #1a3d34 60%, #0f2820 100%);
+  border-radius: 20px;
+  padding: 36px 32px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.charityBlob {
+  position: absolute;
+  top: -50px;
+  right: -50px;
+  width: 200px;
+  height: 200px;
+  background: radial-gradient(circle, rgba(74,124,113,0.4) 0%, transparent 70%);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.charityTitle {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: white;
+  line-height: 1.3;
+}
+
+.benefitsList {
+  margin-top: 4px;
+}
+
+.claimBtn {
+  color: var(--bm-text-dark, #1a2e1f) !important;
+  font-weight: 700 !important;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.claimBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255,255,255,0.25);
+}
+
+/* ── 반응형 ── */
+@media (max-width: 62em) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charityCard {
+    padding: 32px 28px;
+  }
+}
+
+@media (max-width: 36em) {
+  .section {
+    padding: 40px 0;
+  }
+
+  .trustCard {
+    padding: 28px 20px;
+  }
+
+  .charityCard {
+    padding: 28px 20px;
+  }
+}

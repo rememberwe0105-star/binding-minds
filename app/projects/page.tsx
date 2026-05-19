@@ -7,6 +7,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { ProjectFilters } from '@/components/ProjectFilters';
+import { RichSearchInput } from '@/components/RichSearchInput';
 import {
   campaigns as allCampaigns,
   filterAndSortCampaigns,
@@ -97,10 +98,22 @@ export default function ProjectsPage() {
             <Title order={1} className={classes.pageTitle}>
               Browse Projects
             </Title>
-            <Text size="lg" c="var(--bm-text-muted)" maw={600} mt={8}>
+            <Text size="lg" c="var(--bm-text-muted)" maw={640} mt={8} mx="auto">
               Discover verified fundraising projects across Aotearoa.
               Every donation earns you a 33.33% tax credit.
             </Text>
+            <div className={classes.searchWrap}>
+              <RichSearchInput
+                value={search}
+                onChange={handleSearchChange}
+                onCategoryPick={(cat) => {
+                  if (!selectedCategories.includes(cat)) {
+                    handleCategoriesChange([...selectedCategories, cat]);
+                  }
+                }}
+                placeholder="Search projects & charities..."
+              />
+            </div>
           </Box>
 
           {/* 레이아웃: 사이드바 + 그리드 */}

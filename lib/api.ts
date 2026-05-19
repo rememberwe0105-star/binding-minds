@@ -207,6 +207,7 @@ export async function createCheckoutSession(data: {
   amount: number;
   charityAccountId: string;
   charityName?: string;
+  frequency?: 'one-time' | 'monthly';
 }): Promise<CheckoutSession> {
   return apiFetch<CheckoutSession>('/api/v1/checkout/donations', {
     method: 'POST',

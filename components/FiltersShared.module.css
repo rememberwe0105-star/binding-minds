@@ -1,7 +1,5 @@
 .topBar {
-  display: flex;
-  gap: 12px;
-  margin-bottom: 16px;
+  display: none;
 }
 
 .searchInput {
@@ -42,8 +40,15 @@
 
 /* 모바일: 사이드바 숨기고 필터 버튼 표시 */
 @media (max-width: 62em) {
+  .topBar {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
   .mobileFilterBtn {
     display: flex;
+    flex: 1;
   }
 
   .sidebar {

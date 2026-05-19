@@ -2,11 +2,10 @@ import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { TrendingNow } from '@/components/TrendingNow';
 import { HowItWorks } from '@/components/HowItWorks';
-import { ImpactStories } from '@/components/ImpactStories';
 import { ImpactCounter } from '@/components/ImpactCounter';
-import { Features } from '@/components/Features';
-import { FeaturedCharities } from '@/components/FeaturedCharities';
+import { ImpactStories } from '@/components/ImpactStories';
 import { TaxTeaser } from '@/components/TaxTeaser';
+import { TrustSection } from '@/components/TrustSection';
 import { Footer } from '@/components/Footer';
 import { LiveToast } from '@/components/LiveToast';
 
@@ -18,11 +17,10 @@ export default function Home() {
         <Hero />
         <TrendingNow />
         <HowItWorks />
-        <ImpactStories />
         <ImpactCounter />
-        <Features />
-        <FeaturedCharities />
+        <ImpactStories />
         <TaxTeaser />
+        <TrustSection />
       </main>
       <Footer />
       <LiveToast />
