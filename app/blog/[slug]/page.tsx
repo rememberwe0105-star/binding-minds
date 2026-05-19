@@ -15,7 +15,6 @@ import {
 import {
   IconArrowLeft,
   IconClock,
-  IconUser,
   IconCalendar,
   IconArrowRight,
 } from '@tabler/icons-react';

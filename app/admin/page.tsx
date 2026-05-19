@@ -1,15 +1,14 @@
 'use client';
 
-import { useState } from 'react';
 import {
-  Container, Title, Text, Box, Group, Button, Badge,
-  Card, SimpleGrid, ThemeIcon, Alert, Stack, Divider,
+  Container, Title, Text, Box, Group, Button,
+  Card, SimpleGrid, ThemeIcon, Alert,
 } from '@mantine/core';
 import {
   IconShieldCheck, IconAlertCircle, IconCoin,
   IconBuilding, IconUsers, IconReceipt,
   IconClock, IconCheck, IconArrowRight,
-  IconHeart, IconBell, IconX, IconPhone,
+  IconHeart, IconBell, IconX, IconTrendingUp,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -99,7 +98,7 @@ export default function AdminOverviewPage() {
           </SimpleGrid>
 
           {/* Quick Actions */}
-          <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={16} mb={32}>
+          <SimpleGrid cols={{ base: 1, sm: 2, lg: 4 }} spacing={16} mb={32}>
             <Card
               padding="lg" radius="lg" withBorder className={classes.actionCard}
               component={Link} href="/admin/charities"
@@ -112,10 +111,10 @@ export default function AdminOverviewPage() {
                   </ThemeIcon>
                   <Box>
                     <Text size="sm" fw={700} c="var(--bm-text-dark)">
-                      {PLATFORM_STATS.pendingApplications} Pending Applications
+                      {PLATFORM_STATS.pendingApplications} Pending Apps
                     </Text>
                     <Text size="xs" c="var(--bm-text-muted)">
-                      Review and process charity registration requests
+                      Review registrations
                     </Text>
                   </Box>
                 </Group>
@@ -135,10 +134,56 @@ export default function AdminOverviewPage() {
                   </ThemeIcon>
                   <Box>
                     <Text size="sm" fw={700} c="var(--bm-text-dark)">
-                      {PLATFORM_STATS.stripePending} Stripe Setup Pending
+                      {PLATFORM_STATS.stripePending} Stripe Setup
                     </Text>
                     <Text size="xs" c="var(--bm-text-muted)">
-                      Approved charities awaiting Stripe Connect onboarding
+                      Awaiting Stripe onboarding
+                    </Text>
+                  </Box>
+                </Group>
+                <IconArrowRight size={18} color="var(--bm-text-muted)" />
+              </Group>
+            </Card>
+
+            <Card
+              padding="lg" radius="lg" withBorder className={classes.actionCard}
+              component={Link} href="/admin/donors"
+              style={{ textDecoration: 'none' }}
+            >
+              <Group justify="space-between">
+                <Group gap={12}>
+                  <ThemeIcon size={40} radius="md" color="green" variant="light">
+                    <IconUsers size={20} />
+                  </ThemeIcon>
+                  <Box>
+                    <Text size="sm" fw={700} c="var(--bm-text-dark)">
+                      Manage Donors
+                    </Text>
+                    <Text size="xs" c="var(--bm-text-muted)">
+                      Update account statuses
+                    </Text>
+                  </Box>
+                </Group>
+                <IconArrowRight size={18} color="var(--bm-text-muted)" />
+              </Group>
+            </Card>
+
+            <Card
+              padding="lg" radius="lg" withBorder className={classes.actionCard}
+              component={Link} href="/admin/analytics"
+              style={{ textDecoration: 'none' }}
+            >
+              <Group justify="space-between">
+                <Group gap={12}>
+                  <ThemeIcon size={40} radius="md" color="terracotta" variant="light">
+                    <IconTrendingUp size={20} />
+                  </ThemeIcon>
+                  <Box>
+                    <Text size="sm" fw={700} c="var(--bm-text-dark)">
+                      Platform Analytics
+                    </Text>
+                    <Text size="xs" c="var(--bm-text-muted)">
+                      View growth trends
                     </Text>
                   </Box>
                 </Group>

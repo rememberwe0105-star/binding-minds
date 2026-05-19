@@ -3,7 +3,6 @@
 import { useState, useCallback } from 'react';
 import {
   Modal,
-  Title,
   Text,
   Button,
   Group,
@@ -21,13 +20,11 @@ import {
 } from '@mantine/core';
 import {
   IconHeart,
-  IconCheck,
   IconShieldCheck,
   IconLock,
   IconArrowRight,
   IconReceipt,
   IconAlertCircle,
-  IconConfetti,
   IconAlertTriangle,
 } from '@tabler/icons-react';
 import type { Campaign } from '@/data/campaigns';
@@ -402,7 +399,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
           )}
 
           <Text size="xs" c="dimmed" mb={16} ta="center">
-            You will be redirected to Stripe's secure payment page.
+            You will be redirected to Stripe&apos;s secure payment page.
           </Text>
 
           <Group justify="space-between">

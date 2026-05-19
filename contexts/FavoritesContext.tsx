@@ -69,6 +69,7 @@ export function FavoritesProvider({ children }: { children: ReactNode }) {
 
   // 클라이언트 hydration 시 localStorage에서 로드
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFavorites(loadFromStorage());
     setHydrated(true);
   }, []);

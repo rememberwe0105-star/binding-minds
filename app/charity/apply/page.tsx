@@ -173,7 +173,7 @@ export default function CharityApplyPage() {
                 Application Submitted!
               </Title>
               <Text size="md" c="var(--bm-text-muted)" mb={40}>
-                We're reviewing your claim for <strong>{form.legalName || 'your charity'}</strong>.<br/>
+                We&apos;re reviewing your claim for <strong>{form.legalName || 'your charity'}</strong>.<br/>
                 We will contact you via email within 1-2 business days.
               </Text>
 
@@ -181,7 +181,7 @@ export default function CharityApplyPage() {
                 <Title order={4} mb={24} c="var(--bm-text-dark)">What happens next?</Title>
                 <Timeline active={0} bulletSize={32} lineWidth={2} color="sage">
                   <Timeline.Item bullet={<IconCheck size={16} />} title="Application Received">
-                    <Text c="dimmed" size="xs" mt={4}>You've successfully submitted your claim.</Text>
+                    <Text c="dimmed" size="xs" mt={4}>You&apos;ve successfully submitted your claim.</Text>
                   </Timeline.Item>
 
                   <Timeline.Item bullet={<IconClock size={16} />} title="Under Review" lineVariant="dashed">
@@ -189,7 +189,7 @@ export default function CharityApplyPage() {
                   </Timeline.Item>
 
                   <Timeline.Item bullet={<IconMail size={16} />} title="Look out for an email" lineVariant="dashed">
-                    <Text c="dimmed" size="xs" mt={4}>We'll send an invitation to {form.contactEmail || 'your email'}.</Text>
+                    <Text c="dimmed" size="xs" mt={4}>We&apos;ll send an invitation to {form.contactEmail || 'your email'}.</Text>
                   </Timeline.Item>
 
                   <Timeline.Item bullet={<IconCreditCard size={16} />} title="Connect & Go Live">

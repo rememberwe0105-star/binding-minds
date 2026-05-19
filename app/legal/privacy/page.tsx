@@ -1,4 +1,4 @@
-import { Container, Title, Text, Box, Group, Divider } from '@mantine/core';
+import { Container, Title, Text, Box, Group } from '@mantine/core';
 import { IconLeaf } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';

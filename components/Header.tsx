@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   Group,
@@ -14,9 +14,15 @@ import {
   UnstyledButton,
   Progress,
   Tooltip,
+  Popover,
+  ActionIcon,
+  Indicator,
+  Box,
+  Divider,
+  ScrollArea,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding, IconShieldCheck, IconBell, IconCheck, IconHeart, IconTrophy, IconChartLine } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -28,6 +34,125 @@ const navLinks = [
   { label: 'Projects', href: '/projects' },
   { label: 'Charities', href: '/charities' },
 ];
+
+// ── Mock Notifications ──
+interface Notification {
+  id: string;
+  type: 'donation' | 'badge' | 'milestone' | 'project';
+  title: string;
+  message: string;
+  time: string;
+  read: boolean;
+  icon: 'heart' | 'trophy' | 'chart' | 'check';
+}
+
+const INITIAL_NOTIFICATIONS: Notification[] = [
+  { id: 'n1', type: 'donation', title: 'Donation Confirmed', message: 'Your $50 donation to Restore Native Forest was processed', time: '10 min ago', read: false, icon: 'heart' },
+  { id: 'n2', type: 'badge', title: 'New Badge Unlocked!', message: '🌱 Tree Planter — you\'ve donated to 3 environmental projects', time: '2 hours ago', read: false, icon: 'trophy' },
+  { id: 'n3', type: 'milestone', title: 'Project Milestone', message: 'Restore Native Forest reached 80% of its goal!', time: '5 hours ago', read: false, icon: 'chart' },
+  { id: 'n4', type: 'donation', title: 'Receipt Ready', message: 'Your tax receipt for March donations is ready to download', time: '1 day ago', read: true, icon: 'check' },
+  { id: 'n5', type: 'project', title: 'Project Update', message: 'Auckland City Mission shared a new impact report', time: '2 days ago', read: true, icon: 'chart' },
+];
+
+const NOTIF_ICON_MAP = {
+  heart: IconHeart,
+  trophy: IconTrophy,
+  chart: IconChartLine,
+  check: IconCheck,
+};
+
+const NOTIF_COLOR_MAP = {
+  heart: 'terracotta',
+  trophy: 'grape',
+  chart: 'blue',
+  check: 'sage',
+};
+
+// ── Notification Bell Component ──
+function NotificationBell() {
+  const [notifications, setNotifications] = useState(INITIAL_NOTIFICATIONS);
+  const [opened, setOpened] = useState(false);
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const markAsRead = useCallback((id: string) => {
+    setNotifications(prev => prev.map(n => n.id === id ? { ...n, read: true } : n));
+  }, []);
+
+  const markAllRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  return (
+    <Popover width="min(360px, calc(100vw - 32px))" position="bottom-end" withArrow shadow="lg" opened={opened} onChange={setOpened} radius="lg">
+      <Popover.Target>
+        <Indicator color="red" size={8} offset={4} disabled={unreadCount === 0} processing>
+          <ActionIcon
+            variant="subtle"
+            color="gray"
+            size={36}
+            radius="xl"
+            onClick={() => setOpened(o => !o)}
+            className={classes.notifBtn}
+          >
+            <IconBell size={20} />
+          </ActionIcon>
+        </Indicator>
+      </Popover.Target>
+      <Popover.Dropdown p={0} style={{ overflow: 'hidden' }}>
+        <Group justify="space-between" p="sm" pb={8}>
+          <Text fw={700} size="sm" c="var(--bm-text-dark)">Notifications</Text>
+          {unreadCount > 0 && (
+            <Button variant="subtle" size="compact-xs" color="sage" onClick={markAllRead}>
+              Mark all read
+            </Button>
+          )}
+        </Group>
+        <Divider />
+        <ScrollArea.Autosize mah={340} type="scroll">
+          {notifications.length === 0 ? (
+            <Box ta="center" py={32}>
+              <Text size="sm" c="var(--bm-text-muted)">No notifications yet</Text>
+            </Box>
+          ) : (
+            notifications.map((n) => {
+              const Icon = NOTIF_ICON_MAP[n.icon];
+              const color = NOTIF_COLOR_MAP[n.icon];
+              return (
+                <Box
+                  key={n.id}
+                  className={`${classes.notifItem} ${!n.read ? classes.notifUnread : ''}`}
+                  onClick={() => markAsRead(n.id)}
+                  style={{ cursor: 'pointer' }}
+                >
+                  <Group gap={12} align="flex-start" wrap="nowrap">
+                    <ActionIcon variant="light" color={color} radius="xl" size={32} style={{ flexShrink: 0, marginTop: 2 }}>
+                      <Icon size={16} />
+                    </ActionIcon>
+                    <Box style={{ flex: 1, minWidth: 0 }}>
+                      <Group gap={6} mb={2}>
+                        <Text size="xs" fw={600} c="var(--bm-text-dark)" lineClamp={1}>{n.title}</Text>
+                        {!n.read && <Box style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--mantine-color-blue-5)', flexShrink: 0 }} />}
+                      </Group>
+                      <Text size="xs" c="var(--bm-text-muted)" lineClamp={2} lh={1.4}>{n.message}</Text>
+                      <Text size="xs" c="var(--bm-text-muted)" mt={4} style={{ opacity: 0.6 }}>{n.time}</Text>
+                    </Box>
+                  </Group>
+                </Box>
+              );
+            })
+          )}
+        </ScrollArea.Autosize>
+        <Divider />
+        <Box ta="center" py={8}>
+          <Button variant="subtle" color="sage" size="compact-xs" component={Link} href="/settings" onClick={() => setOpened(false)}>
+            Notification Settings
+          </Button>
+        </Box>
+      </Popover.Dropdown>
+    </Popover>
+  );
+}
 
 export function Header() {
   const [opened, { toggle, close }] = useDisclosure(false);
@@ -99,6 +224,8 @@ export function Header() {
             <div style={{ width: 120, height: 36 }} />
           ) : (user || demoRole) ? (
             // 로그인 상태 또는 데모 역할 시뮬레이션
+            <Group gap={8}>
+            <NotificationBell />
             <Menu shadow="md" width={220} position="bottom-end" withArrow>
               <Menu.Target>
                 <UnstyledButton className={classes.userBtn}>
@@ -232,6 +359,7 @@ export function Header() {
                 </Menu.Item>
               </Menu.Dropdown>
             </Menu>
+            </Group>
           ) : (
             // 비로그인 상태
             <>

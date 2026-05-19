@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useMemo, useState, useEffect } from 'react';
 import { useApiDonations } from './useApiDonations';
 import { useAuth } from '@/contexts/AuthContext';
 import { BADGES, getGiverTier, getNextGiverTier, type BadgeDefinition, type GiverTierInfo } from '@/data/rewards';
@@ -217,10 +217,11 @@ export function useRewards(): RewardsData {
   const badgesToNextTier = nextTier ? nextTier.minBadges - unlockedCount : 0;
 
   // 랜덤 격려 메시지 (마운트 시 1회 결정)
-  const encouragement = useMemo(
-    () => ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)],
-    [],
-  );
+  const [encouragement, setEncouragement] = useState(ENCOURAGEMENTS[0]);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setEncouragement(ENCOURAGEMENTS[Math.floor(Math.random() * ENCOURAGEMENTS.length)]);
+  }, []);
 
   return {
     badges,

@@ -151,7 +151,6 @@ export async function downloadTaxSummaryPdf(opts: TaxSummaryOptions): Promise<vo
 
   const nzdTotal = nzdItems.reduce((s, d) => s + d.donation_amount_minor, 0);
   const nzdTaxCredit = Math.round(nzdTotal * 0.3333) / 100; // 달러로
-  const nzdTotalDisplay = nzdTotal / 100;
 
   const taxYearLabel = `${taxYear} Tax Year`;
   const taxYearRange = `1 Apr ${taxYear - 1} – 31 Mar ${taxYear}`;

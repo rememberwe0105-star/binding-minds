@@ -9,7 +9,7 @@ import { OrganizationCard } from '@/components/OrganizationCard';
 import { CharityFilters } from '@/components/CharityFilters';
 import { RichSearchInput } from '@/components/RichSearchInput';
 import { organizations as allOrganizations, filterOrganizations } from '@/data/organizations';
-import { CATEGORIES, REGIONS, type Category, type Region } from '@/data/campaigns';
+import { type Region } from '@/data/campaigns';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import classes from './page.module.css';
 

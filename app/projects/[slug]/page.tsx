@@ -30,7 +30,6 @@ import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import {
-  campaigns,
   getCampaignBySlug,
   getRelatedCampaigns,
   getProgress,

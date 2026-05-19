@@ -25,6 +25,7 @@ interface ProjectFiltersProps {
 
 export function ProjectFilters({
   search,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSearchChange,
   selectedCategories,
   onCategoriesChange,
@@ -51,7 +52,7 @@ export function ProjectFilters({
     }
   };
 
-  const FilterContent = () => (
+  const filterContent = (
     <>
       {/* 찜 필터 */}
       <Box mb={24}>
@@ -180,7 +181,7 @@ export function ProjectFilters({
 
       {/* 데스크톱 사이드바 */}
       <aside className={classes.sidebar}>
-        <FilterContent />
+        {filterContent}
       </aside>
 
       {/* 모바일 드로어 */}
@@ -192,7 +193,7 @@ export function ProjectFilters({
         size="75%"
         hiddenFrom="md"
       >
-        <FilterContent />
+        {filterContent}
         <Button
           color="sage"
           fullWidth

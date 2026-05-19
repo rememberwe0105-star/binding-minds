@@ -48,6 +48,7 @@ export function useBadgeUnlockNotifier(badges: BadgeStatus[], loading: boolean) 
     );
 
     if (newlyUnlocked.length > 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setQueue(newlyUnlocked);
     }
   }, [badges, loading]);

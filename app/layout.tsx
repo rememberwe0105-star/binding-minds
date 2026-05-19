@@ -2,7 +2,10 @@ import type { Metadata } from 'next';
 import '@mantine/core/styles.css';
 import './globals.css';
 import { ColorSchemeScript, MantineProvider, mantineHtmlProps } from '@mantine/core';
+import { Inter } from 'next/font/google';
 import { theme } from '../theme';
+
+const inter = Inter({ subsets: ['latin'] });
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
@@ -50,13 +53,10 @@ export default function RootLayout({
     <html lang="en" {...mantineHtmlProps}>
       <head>
         <ColorSchemeScript />
-        <link
-          href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
-          rel="stylesheet"
-        />
+
         <link rel="icon" href="/favicon.ico" sizes="any" />
       </head>
-      <body>
+      <body className={inter.className}>
         <MantineProvider theme={theme}>
           <AuthProvider>
             <FavoritesProvider>

@@ -74,7 +74,7 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 // --- Provider ---
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(!!isConfigured && !!auth);
   const [serviceUser, setServiceUser] = useState<ServiceUser | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean | undefined>(undefined);
   const [demoRole, setDemoRoleState] = useState<DemoRole>(null);
@@ -91,7 +91,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // 인증 상태 실시간 감지 + 서비스 DB 자동 등록
   useEffect(() => {
     if (!isConfigured || !auth) {
-      setLoading(false);
       return;
     }
 

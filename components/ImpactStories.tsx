@@ -1,7 +1,7 @@
 'use client';
 
 import { Container, SimpleGrid, Card, Text, Title, Badge, Group, Box } from '@mantine/core';
-import { IconHeart, IconClock, IconLeaf } from '@tabler/icons-react';
+import { IconClock, IconLeaf } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useScrollReveal } from '@/hooks/useScrollReveal';

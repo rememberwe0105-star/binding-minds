@@ -16,7 +16,6 @@ import {
   Table,
   Badge,
   Tabs,
-  TextInput,
   Select,
   Slider,
   Divider,
@@ -44,7 +43,16 @@ import {
   IconMoodEmpty,
   IconGift,
   IconLoader2,
+  IconSparkles,
+  IconTree,
+  IconToolsKitchen2,
+  IconSchool,
+  IconPaw,
 } from '@tabler/icons-react';
+import {
+  AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
+  ResponsiveContainer, PieChart, Pie, Cell, Legend,
+} from 'recharts';
 import { RewardsTab } from '@/components/RewardsTab';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -237,6 +245,127 @@ function OverviewTab() {
         )}
       </Card>
     </>
+  );
+}
+
+// ===================== My Impact 탭 =====================
+const IMPACT_MONTHLY = [
+  { month: 'Oct', amount: 50 },
+  { month: 'Nov', amount: 120 },
+  { month: 'Dec', amount: 200 },
+  { month: 'Jan', amount: 80 },
+  { month: 'Feb', amount: 150 },
+  { month: 'Mar', amount: 300 },
+];
+
+const IMPACT_CATEGORIES = [
+  { name: 'Environment', value: 40 },
+  { name: 'Education', value: 25 },
+  { name: 'Community', value: 20 },
+  { name: 'Health', value: 10 },
+  { name: 'Animal Welfare', value: 5 },
+];
+const IMPACT_COLORS = ['#8eb897', '#4b6bfb', '#e67e5e', '#fab005', '#be4bdb'];
+
+function ImpactTab() {
+  const { items } = useApiDonations(100);
+  const succeededItems = items.filter((d) => d.donation_status === 'succeeded');
+  const totalNZD = succeededItems.reduce((s, d) => s + d.donation_amount_minor, 0) / 100;
+
+  // Impact analogies based on total donated
+  const treesPlanted = Math.floor(totalNZD / 25);
+  const mealsProvided = Math.floor(totalNZD / 8);
+  const booksForKids = Math.floor(totalNZD / 15);
+  const shelterNights = Math.floor(totalNZD / 35);
+
+  return (
+    <Stack gap={24}>
+      {/* Impact Analogies */}
+      <Box>
+        <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Your Real-World Impact</Text>
+        <Text size="sm" c="var(--bm-text-muted)" mb={16}>Here&apos;s what your <strong>{formatNZD(totalNZD)}</strong> in donations could achieve:</Text>
+
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={12}>
+          {[
+            { icon: IconTree, label: 'Native trees planted', value: treesPlanted, color: 'sage' },
+            { icon: IconToolsKitchen2, label: 'Meals for families', value: mealsProvided, color: 'terracotta' },
+            { icon: IconSchool, label: 'Books for children', value: booksForKids, color: 'blue' },
+            { icon: IconPaw, label: 'Shelter nights for animals', value: shelterNights, color: 'grape' },
+          ].map(({ icon: Icon, label, value, color }) => (
+            <Card key={label} padding="lg" radius="lg" withBorder className={classes.statCard}
+              style={{ background: 'linear-gradient(135deg, rgba(142,184,151,0.04) 0%, rgba(255,255,255,1) 100%)' }}
+            >
+              <ThemeIcon size={36} radius="md" color={color} variant="light" mb={8}>
+                <Icon size={18} />
+              </ThemeIcon>
+              <Text fw={800} size="xl" c="var(--bm-text-dark)">{value}</Text>
+              <Text size="xs" c="var(--bm-text-muted)" lh={1.4}>{label}</Text>
+            </Card>
+          ))}
+        </SimpleGrid>
+      </Box>
+
+      {/* Charts Row */}
+      <SimpleGrid cols={{ base: 1, md: 2 }} spacing={16}>
+        {/* Monthly Trend */}
+        <Card padding="xl" radius="lg" withBorder>
+          <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Monthly Giving Trend</Text>
+          <Text size="xs" c="var(--bm-text-muted)" mb={20}>Your donation pattern over the last 6 months</Text>
+          <Box h={220}>
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={IMPACT_MONTHLY} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+                <defs>
+                  <linearGradient id="impactGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="var(--bm-sage-dark)" stopOpacity={0.3}/>
+                    <stop offset="95%" stopColor="var(--bm-sage-dark)" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#eee" />
+                <XAxis dataKey="month" axisLine={false} tickLine={false} tick={{fill: '#868e96', fontSize: 11}} dy={8} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#868e96', fontSize: 11}} tickFormatter={(v) => `$${v}`} />
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <RechartsTooltip formatter={(value: any) => [`$${value}`, 'Donated']} contentStyle={{ borderRadius: '8px', border: 'none', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }} />
+                <Area type="monotone" dataKey="amount" stroke="var(--bm-sage-dark)" strokeWidth={2.5} fillOpacity={1} fill="url(#impactGrad)" />
+              </AreaChart>
+            </ResponsiveContainer>
+          </Box>
+        </Card>
+
+        {/* Category Breakdown */}
+        <Card padding="xl" radius="lg" withBorder>
+          <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Giving by Category</Text>
+          <Text size="xs" c="var(--bm-text-muted)" mb={12}>Where your donations are making an impact</Text>
+          <Box h={220}>
+            <ResponsiveContainer width="100%" height="100%">
+              <PieChart>
+                <Pie data={IMPACT_CATEGORIES} innerRadius={55} outerRadius={80} paddingAngle={2} dataKey="value" cx="50%" cy="45%">
+                  {IMPACT_CATEGORIES.map((_, index) => (
+                    <Cell key={`cell-${index}`} fill={IMPACT_COLORS[index % IMPACT_COLORS.length]} />
+                  ))}
+                </Pie>
+                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                <RechartsTooltip formatter={(value: any) => `${value}%`} />
+                <Legend verticalAlign="bottom" height={32} iconType="circle" wrapperStyle={{fontSize: '11px'}} />
+              </PieChart>
+            </ResponsiveContainer>
+          </Box>
+        </Card>
+      </SimpleGrid>
+
+      {/* Encouragement */}
+      <Card padding="lg" radius="lg" withBorder
+        style={{ background: 'linear-gradient(135deg, rgba(142,184,151,0.08) 0%, rgba(230,126,94,0.06) 100%)', textAlign: 'center' }}
+      >
+        <Group gap={8} justify="center" mb={8}>
+          <IconSparkles size={18} color="var(--bm-terracotta-dark)" />
+          <Text fw={700} size="md" c="var(--bm-text-dark)">You&apos;re making a difference!</Text>
+        </Group>
+        <Text size="sm" c="var(--bm-text-muted)" maw={500} mx="auto" lh={1.6}>
+          Every dollar you donate helps build a stronger, more compassionate New Zealand.
+          Keep it up — your generosity inspires others to give too.
+        </Text>
+      </Card>
+    </Stack>
   );
 }
 
@@ -850,6 +979,9 @@ function DashboardContent() {
               <Tabs.Tab value="overview" leftSection={<IconChartBar size={16} />}>
                 Overview
               </Tabs.Tab>
+              <Tabs.Tab value="impact" leftSection={<IconSparkles size={16} />}>
+                My Impact
+              </Tabs.Tab>
               <Tabs.Tab value="history" leftSection={<IconCalendar size={16} />}>
                 Donation History
               </Tabs.Tab>
@@ -866,6 +998,10 @@ function DashboardContent() {
 
             <Tabs.Panel value="overview">
               <OverviewTab />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="impact">
+              <ImpactTab />
             </Tabs.Panel>
 
             <Tabs.Panel value="history">

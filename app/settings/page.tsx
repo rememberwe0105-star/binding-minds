@@ -21,7 +21,6 @@ import {
 } from '@mantine/core';
 import {
   IconUser,
-  IconMail,
   IconBell,
   IconLock,
   IconCheck,
@@ -30,7 +29,6 @@ import {
   IconShieldCheck,
   IconLogout,
   IconTrash,
-  IconSettings,
 } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';

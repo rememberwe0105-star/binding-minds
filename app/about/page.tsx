@@ -18,7 +18,6 @@ import {
   IconReceipt,
   IconSearch,
   IconCreditCard,
-  IconFileText,
   IconUsers,
   IconWorld,
   IconLeaf,

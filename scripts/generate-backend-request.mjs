@@ -15,7 +15,6 @@ const OUTPUT_PATH = join(__dirname, '../docs/BACKEND_REQUEST.pdf');
 const TEAL   = [74, 124, 113];
 const GOLD   = [196, 154, 82];
 const RED    = [180, 60, 60];
-const ORANGE = [200, 110, 30];
 const GREEN  = [60, 140, 100];
 const TEXT   = [30, 40, 35];
 const MUTED  = [110, 125, 118];

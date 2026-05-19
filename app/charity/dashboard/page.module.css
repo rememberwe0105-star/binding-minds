@@ -26,6 +26,13 @@
 .tabList {
   border-bottom: 2px solid rgba(143, 151, 121, 0.1);
   margin-bottom: 32px;
+  overflow-x: auto;
+  flex-wrap: nowrap !important;
+  scrollbar-width: none;
+}
+
+.tabList::-webkit-scrollbar {
+  display: none;
 }
 
 /* ── Hero banner (terracotta gradient for charity identity) ── */
@@ -145,5 +152,12 @@
 
   .filterBar {
     flex-direction: column;
+  }
+}
+
+/* ── Mobile: side panel takes full width ── */
+@media (max-width: 62em) {
+  .projectCard {
+    min-width: 0;
   }
 }

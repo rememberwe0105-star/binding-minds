@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Text, Button, Group, Box } from '@mantine/core';
+import { Container, Title, Text, Button, Group } from '@mantine/core';
 import { IconLeaf, IconArrowRight, IconHome } from '@tabler/icons-react';
 import Link from 'next/link';
 import classes from './not-found.module.css';

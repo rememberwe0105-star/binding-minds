@@ -3,7 +3,7 @@
 import { Chip, Group, Select, Text, Box, Button, Drawer, Badge } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import { IconFilter, IconX, IconHeartFilled } from '@tabler/icons-react';
-import { CATEGORIES, REGIONS, type Category, type Region } from '@/data/campaigns';
+import { CATEGORIES, REGIONS, type Region } from '@/data/campaigns';
 import classes from './FiltersShared.module.css';
 
 interface CharityFiltersProps {
@@ -23,6 +23,7 @@ interface CharityFiltersProps {
 
 export function CharityFilters({
   search,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onSearchChange,
   selectedCategories,
   onCategoriesChange,
@@ -47,7 +48,7 @@ export function CharityFilters({
     }
   };
 
-  const FilterContent = () => (
+  const filterContent = (
     <>
       {/* 찜 필터 */}
       <Box mb={24}>
@@ -161,7 +162,7 @@ export function CharityFilters({
       </div>
 
       <aside className={classes.sidebar}>
-        <FilterContent />
+        {filterContent}
       </aside>
 
       <Drawer
@@ -172,7 +173,7 @@ export function CharityFilters({
         size="75%"
         hiddenFrom="md"
       >
-        <FilterContent />
+        {filterContent}
         <Button color="sage" fullWidth mt="md" radius="xl" onClick={closeDrawer}>
           Show {resultCount} Results
         </Button>

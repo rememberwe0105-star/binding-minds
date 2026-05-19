@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Container, Title, Text, Box, Group, SimpleGrid } from '@mantine/core';
+import { Container, Title, Text, Box, SimpleGrid } from '@mantine/core';
 import { IconUsers, IconHeart, IconTree, IconBuildingBank } from '@tabler/icons-react';
 import classes from './ImpactCounter.module.css';
 
@@ -27,7 +27,6 @@ function AnimatedCounter({ target, prefix, suffix, isVisible }: { target: number
   useEffect(() => {
     if (!isVisible) return;
 
-    let start = 0;
     const duration = 2000;
     const startTime = performance.now();
 
