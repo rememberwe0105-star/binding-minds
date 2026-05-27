@@ -1,0 +1,122 @@
+/* ===================================================
+   Admin Settings — page.module.css
+   =================================================== */
+
+.page {
+  min-height: 100vh;
+  background: var(--bm-warm-bg, #fafaf8);
+}
+
+.pageTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--bm-text-dark, #1a2e1f);
+}
+
+/* ── Back button ── */
+.backButton {
+  color: var(--bm-sage-dark, #4a7c71);
+  font-weight: 600;
+  transition: opacity 0.15s ease;
+}
+
+.backButton:hover {
+  opacity: 0.8;
+}
+
+/* ── Settings cards ── */
+.settingsCard {
+  border-color: rgba(143, 151, 121, 0.1);
+  transition: box-shadow 0.15s ease;
+}
+
+.settingsCard:hover {
+  box-shadow: 0 4px 16px rgba(74, 124, 113, 0.08);
+}
+
+.cardTitle {
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--bm-text-dark, #1a2e1f);
+}
+
+/* ── Tags / Pills ── */
+.tagList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.tagBadge {
+  cursor: default;
+  transition: opacity 0.15s ease;
+}
+
+.tagBadge:hover {
+  opacity: 0.85;
+}
+
+/* ── Add item row ── */
+.addRow {
+  display: flex;
+  gap: 8px;
+  align-items: flex-end;
+}
+
+.addRow input {
+  flex: 1;
+}
+
+/* ── Switch descriptions ── */
+.switchGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.switchItem {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--bm-warm-bg, #fafaf8);
+  border: 1px solid rgba(143, 151, 121, 0.08);
+}
+
+.switchLabel {
+  flex: 1;
+}
+
+/* ── Save footer ── */
+.saveFooter {
+  position: sticky;
+  bottom: 0;
+  z-index: 10;
+  padding: 16px 0;
+  margin-top: 24px;
+  background: linear-gradient(transparent, var(--bm-warm-bg, #fafaf8) 16px);
+}
+
+.saveCard {
+  border-color: rgba(143, 151, 121, 0.15);
+  box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.06);
+}
+
+/* ── Responsive ── */
+@media (max-width: 48em) {
+  .pageTitle {
+    font-size: 1.4rem;
+  }
+
+  .switchItem {
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .addRow {
+    flex-direction: column;
+    align-items: stretch;
+  }
+}

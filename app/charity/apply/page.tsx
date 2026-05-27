@@ -15,6 +15,7 @@ import {
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { applyCharity } from '@/lib/api';
 import classes from './page.module.css';
 
 const CATEGORIES = [
@@ -43,6 +44,10 @@ interface FormData {
   category: string;
   mission: string;
   description: string;
+
+  bankAccountNumber: string;
+  irdNumber: string;
+  gstRegistered: 'yes' | 'no' | 'exempt';
   
   agreed: boolean;
 }
@@ -60,6 +65,10 @@ const INITIAL: FormData = {
   category: '',
   mission: '',
   description: '',
+
+  bankAccountNumber: '',
+  irdNumber: '',
+  gstRegistered: 'exempt',
   
   agreed: false,
 };
@@ -70,10 +79,12 @@ export default function CharityApplyPage() {
   const [submitted, setSubmitted] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   
-  // 상태 변수 (API 시뮬레이션용)
+  // 상태 변수
   const [isSearching, setIsSearching] = useState(false);
   const [searchSuccess, setSearchSuccess] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const set = (field: keyof FormData) => (value: string | boolean) =>
     setForm((prev) => ({ ...prev, [field]: value }));
@@ -138,14 +149,34 @@ export default function CharityApplyPage() {
   const canNext = () => {
     if (active === 0) return searchSuccess;
     if (active === 1) return !!(form.contactName && form.contactTitle && form.contactEmail);
-    if (active === 2) return !!(form.category && form.mission);
+    if (active === 2) return !!(form.category && form.mission && form.bankAccountNumber && form.irdNumber);
     if (active === 3) return form.agreed;
     return true;
   };
 
-  const handleSubmit = () => {
-    // TODO: POST /api/v1/charities/claim 
-    setSubmitted(true);
+  const handleSubmit = async () => {
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      await applyCharity({
+        legal_name: form.legalName,
+        display_name: form.legalName,
+        cc_number: form.ccNumber,
+        category: form.category.toLowerCase(),
+        bank_account_number: form.bankAccountNumber,
+        ird_number: form.irdNumber,
+        gst_registered: form.gstRegistered,
+        contact_name: form.contactName,
+        contact_email: form.contactEmail,
+      });
+      setSubmitted(true);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : '신청 중 오류가 발생했습니다. 다시 시도해주세요.';
+      setSubmitError(msg);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   // 이메일 도메인 매칭 확인 유틸리티
@@ -438,6 +469,48 @@ export default function CharityApplyPage() {
                     size="md"
                     minRows={4}
                   />
+
+                  <Divider my="lg" label="Financial Details" labelPosition="center" />
+
+                  <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" mb={16}>
+                    <Text size="sm">
+                      These details are required for <strong>IRD verification</strong> and <strong>Stripe payouts</strong>. Your bank account will be securely connected via Stripe after approval.
+                    </Text>
+                  </Alert>
+
+                  <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg">
+                    <TextInput
+                      label="NZ Bank Account Number"
+                      placeholder="12-3456-1234567-00"
+                      required
+                      value={form.bankAccountNumber}
+                      onChange={(e) => set('bankAccountNumber')(e.target.value)}
+                      size="md"
+                      description="Used for Stripe payout setup after approval"
+                    />
+                    <TextInput
+                      label="IRD Number"
+                      placeholder="123-456-789"
+                      required
+                      value={form.irdNumber}
+                      onChange={(e) => set('irdNumber')(e.target.value)}
+                      size="md"
+                      description="Required for tax receipt issuance"
+                    />
+                  </SimpleGrid>
+
+                  <Select
+                    label="GST Registration Status"
+                    data={[
+                      { value: 'yes', label: '✅ GST Registered' },
+                      { value: 'no', label: '❌ Not GST Registered' },
+                      { value: 'exempt', label: '🔄 GST Exempt (Charity)' },
+                    ]}
+                    value={form.gstRegistered}
+                    onChange={(val) => set('gstRegistered')(val || 'exempt')}
+                    size="md"
+                    mt="md"
+                  />
                 </div>
               )}
 
@@ -515,14 +588,22 @@ export default function CharityApplyPage() {
                   Next Step
                 </Button>
               ) : (
-                <Button
-                  color="terracotta"
-                  onClick={handleSubmit}
-                  disabled={!canNext()}
-                  rightSection={<IconCheck size={16} />}
-                >
-                  Submit Claim Request
-                </Button>
+                <>
+                  {submitError && (
+                    <Alert icon={<IconInfoCircle size={14} />} color="red" variant="light" radius="md" mb={12} style={{ flex: 1 }}>
+                      <Text size="sm">{submitError}</Text>
+                    </Alert>
+                  )}
+                  <Button
+                    color="terracotta"
+                    onClick={handleSubmit}
+                    disabled={!canNext() || isSubmitting}
+                    loading={isSubmitting}
+                    rightSection={<IconCheck size={16} />}
+                  >
+                    {isSubmitting ? 'Submitting...' : 'Submit Claim Request'}
+                  </Button>
+                </>
               )}
             </Group>
           </Card>

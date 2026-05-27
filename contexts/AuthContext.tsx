@@ -22,6 +22,9 @@ import {
 /** 데모 역할 타입 */
 export type DemoRole = 'donor' | 'charity' | 'admin' | null;
 
+/** 사용자 역할 (API 기반) */
+export type UserRole = 'donor' | 'charity_admin' | 'platform_admin' | null;
+
 /** 데모 모드가 활성화되어 있는지 (환경변수로 제어) */
 export const DEMO_MODE_ENABLED =
   process.env.NEXT_PUBLIC_DEMO_MODE === 'true' ||
@@ -43,6 +46,13 @@ const DEMO_PROFILES: Record<Exclude<DemoRole, null>, { name: string; email: stri
   },
 };
 
+/** 데모 역할 → API 역할 매핑 */
+const DEMO_ROLE_MAP: Record<Exclude<DemoRole, null>, UserRole> = {
+  donor: 'donor',
+  charity: 'charity_admin',
+  admin: 'platform_admin',
+};
+
 // --- 인터페이스 ---
 interface AuthContextType {
   user: User | null;
@@ -52,6 +62,8 @@ interface AuthContextType {
   serviceUser: ServiceUser | null;
   /** 서비스 DB 등록 여부 (로딩 중에는 undefined) */
   isRegistered: boolean | undefined;
+  /** 사용자 역할 (데모 역할 우선, 실제 역할 fallback) */
+  userRole: UserRole;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
@@ -176,6 +188,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     await signInWithPopup(auth, provider);
   };
 
+  // 사용자 역할 결정 (데모 역할 > 실제 역할)
+  const userRole: UserRole = demoRole
+    ? DEMO_ROLE_MAP[demoRole]
+    : (serviceUser?.role ?? null);
+
   // 표시할 이름/이메일 결정 (데모 역할 우선)
   const demoProfile = demoRole ? DEMO_PROFILES[demoRole] : null;
   const displayName = demoProfile?.name
@@ -193,6 +210,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isFirebaseConfigured: isConfigured,
     serviceUser,
     isRegistered,
+    userRole,
     signUp,
     logIn,
     logOut,

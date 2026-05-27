@@ -1,0 +1,28 @@
+/* Admin Finance — page.module.css */
+
+.page {
+  min-height: 100vh;
+  background: var(--bm-warm-bg, #fafaf8);
+}
+
+.pageTitle {
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-weight: 900;
+  color: var(--bm-text-dark, #1a2e1f);
+}
+
+.statCard {
+  border-color: rgba(143, 151, 121, 0.1);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.statCard:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 16px rgba(74, 124, 113, 0.12);
+}
+
+@media (max-width: 48em) {
+  .pageTitle {
+    font-size: 1.4rem;
+  }
+}

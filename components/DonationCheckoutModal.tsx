@@ -116,14 +116,16 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
     setApiError(null);
 
     try {
-      // 백엔드 API: amount는 AUD/NZD 정수 (달러 단위, 센트 아님)
+      // 백엔드 API: amount는 기부 원금(달러 단위, 소수점 가능). 수수료는 백엔드가 계산.
       const charityAccountId = campaign.stripeAccountId ?? 'acct_1TLekBRHr11OamkF';
 
       const session = await createCheckoutSession({
-        amount: Math.round(totalCharge),
+        amount,
+        currency: currency as 'NZD' | 'AUD' | 'USD',
         charityAccountId,
         charityName: campaign.name,
-        frequency,
+        coverStripeFee: coverFee,
+        addSupport: tipPlatform,
       });
 
       // Stripe Checkout 페이지로 리다이렉트

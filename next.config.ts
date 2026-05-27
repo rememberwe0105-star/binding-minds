@@ -3,6 +3,40 @@ import type { NextConfig } from "next";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://libertron.iptime.org:8787';
 
 const nextConfig: NextConfig = {
+  images: {
+    remotePatterns: [
+      {
+        // Firebase Storage
+        protocol: 'https',
+        hostname: '*.firebasestorage.app',
+      },
+      {
+        // Firebase Storage (legacy)
+        protocol: 'https',
+        hostname: 'firebasestorage.googleapis.com',
+      },
+      {
+        // AWS S3
+        protocol: 'https',
+        hostname: '*.s3.amazonaws.com',
+      },
+      {
+        // Cloudflare R2 / CDN
+        protocol: 'https',
+        hostname: '*.r2.cloudflarestorage.com',
+      },
+      {
+        // Generic storage — backend API server
+        protocol: 'https',
+        hostname: 'storage.example.com',
+      },
+      {
+        // Backend API (for proxied images)
+        protocol: 'http',
+        hostname: 'libertron.iptime.org',
+      },
+    ],
+  },
   async rewrites() {
     return [
       {

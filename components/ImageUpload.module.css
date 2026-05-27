@@ -1,0 +1,420 @@
+/* ═══════════════════════════════════════════════════════════════
+   ImageUpload — Premium Drag & Drop Upload Component
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Shared Dropzone ──────────────────────────────────────── */
+.dropzone {
+  position: relative;
+  border: 2px dashed var(--bm-sage);
+  border-radius: 16px;
+  background: linear-gradient(135deg, rgba(142, 184, 151, 0.03), rgba(230, 126, 94, 0.03));
+  cursor: pointer;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  overflow: hidden;
+}
+
+.dropzone:hover {
+  border-color: var(--bm-sage-dark);
+  background: linear-gradient(135deg, rgba(142, 184, 151, 0.08), rgba(230, 126, 94, 0.05));
+  transform: translateY(-1px);
+  box-shadow: 0 4px 20px rgba(142, 184, 151, 0.15);
+}
+
+.dropzoneDragging {
+  border-color: var(--bm-terracotta-dark);
+  background: linear-gradient(135deg, rgba(230, 126, 94, 0.1), rgba(142, 184, 151, 0.08));
+  transform: scale(1.01);
+  box-shadow: 0 8px 32px rgba(230, 126, 94, 0.2);
+}
+
+.dropzoneDragging .uploadPulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.1); opacity: 1; }
+}
+
+/* ── Hidden file input ─────────────────────────────────────── */
+.fileInput {
+  display: none;
+}
+
+/* ── Upload Content (empty state) ──────────────────────────── */
+.uploadContent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding: 32px 24px;
+  min-height: 160px;
+}
+
+.uploadIcon {
+  width: 56px;
+  height: 56px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, var(--bm-sage-light), rgba(142, 184, 151, 0.2));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+}
+
+.dropzone:hover .uploadIcon {
+  transform: scale(1.05) rotate(-3deg);
+}
+
+.uploadPulse {
+  color: var(--bm-sage-dark);
+}
+
+.uploadTitle {
+  font-family: var(--bm-font-heading);
+  font-weight: 700;
+  font-size: 15px;
+  color: var(--bm-text-dark);
+  text-align: center;
+  margin: 0;
+}
+
+.uploadHint {
+  font-size: 12px;
+  color: var(--bm-text-muted);
+  text-align: center;
+  line-height: 1.5;
+}
+
+.browseLink {
+  color: var(--bm-terracotta-dark);
+  font-weight: 600;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.formatBadges {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 4px;
+}
+
+.formatBadge {
+  font-size: 10px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: rgba(142, 184, 151, 0.1);
+  color: var(--bm-sage-dark);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* ── Preview (filled state) ──────────────────────────────── */
+.previewContainer {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+}
+
+.previewImage {
+  width: 100%;
+  height: 100%;
+  min-height: 160px;
+  object-fit: cover;
+  display: block;
+}
+
+.previewOverlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to top,
+    rgba(0, 0, 0, 0.6) 0%,
+    rgba(0, 0, 0, 0) 50%
+  );
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 16px;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.previewContainer:hover .previewOverlay {
+  opacity: 1;
+}
+
+.previewActions {
+  display: flex;
+  gap: 8px;
+}
+
+.previewBtn {
+  padding: 6px 14px;
+  border: none;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s ease;
+  backdrop-filter: blur(8px);
+}
+
+.changeBtn {
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--bm-text-dark);
+}
+
+.changeBtn:hover {
+  background: white;
+  transform: translateY(-1px);
+}
+
+.removeBtn {
+  background: rgba(255, 80, 80, 0.85);
+  color: white;
+}
+
+.removeBtn:hover {
+  background: rgba(255, 60, 60, 1);
+  transform: translateY(-1px);
+}
+
+.previewInfo {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.previewFilename {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.8);
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.previewSize {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+/* ── Variant: Avatar (circular) ────────────────────────── */
+.avatarDropzone {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 3px dashed var(--bm-sage);
+  flex-shrink: 0;
+}
+
+.avatarDropzone .uploadContent {
+  padding: 12px;
+  min-height: unset;
+  gap: 4px;
+}
+
+.avatarDropzone .uploadIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+}
+
+.avatarDropzone .uploadTitle {
+  font-size: 11px;
+}
+
+.avatarDropzone .uploadHint,
+.avatarDropzone .formatBadges {
+  display: none;
+}
+
+.avatarDropzone .previewImage {
+  border-radius: 50%;
+  min-height: unset;
+  height: 100%;
+}
+
+.avatarDropzone .previewContainer {
+  min-height: unset;
+  height: 100%;
+}
+
+.avatarDropzone .previewOverlay {
+  border-radius: 50%;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.avatarDropzone .previewActions {
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatarDropzone .previewInfo {
+  display: none;
+}
+
+/* ── Variant: Banner (wide) ────────────────────────── */
+.bannerDropzone {
+  border-radius: 16px;
+  min-height: 200px;
+}
+
+.bannerDropzone .previewImage {
+  min-height: 200px;
+  max-height: 280px;
+  border-radius: 14px;
+}
+
+/* ── Variant: Compact (project card) ─────────────── */
+.compactDropzone {
+  border-radius: 12px;
+  min-height: 140px;
+}
+
+.compactDropzone .uploadContent {
+  padding: 20px 16px;
+  min-height: 140px;
+}
+
+.compactDropzone .uploadIcon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+}
+
+.compactDropzone .previewImage {
+  min-height: 140px;
+  max-height: 200px;
+  border-radius: 10px;
+}
+
+/* ── Document variant ────────────────────────── */
+.documentDropzone {
+  border-radius: 12px;
+  border-style: dashed;
+  background: linear-gradient(135deg, rgba(75, 107, 251, 0.03), rgba(142, 184, 151, 0.03));
+}
+
+.documentDropzone:hover {
+  border-color: #4b6bfb;
+  background: linear-gradient(135deg, rgba(75, 107, 251, 0.08), rgba(142, 184, 151, 0.05));
+}
+
+.documentDropzone .uploadIcon {
+  background: linear-gradient(135deg, rgba(75, 107, 251, 0.1), rgba(75, 107, 251, 0.2));
+}
+
+.documentDropzone .uploadPulse {
+  color: #4b6bfb;
+}
+
+.documentDropzone .formatBadge {
+  background: rgba(75, 107, 251, 0.1);
+  color: #4b6bfb;
+}
+
+/* ── File list (documents) ──────────────────────── */
+.fileList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fileItem {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: var(--mantine-color-gray-0);
+  border-radius: 10px;
+  border: 1px solid var(--mantine-color-gray-2);
+  transition: all 0.2s ease;
+}
+
+.fileItem:hover {
+  background: var(--mantine-color-gray-1);
+  border-color: var(--mantine-color-gray-3);
+}
+
+.fileIcon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, rgba(75, 107, 251, 0.1), rgba(75, 107, 251, 0.05));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.fileDetails {
+  flex: 1;
+  min-width: 0;
+}
+
+.fileName {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--bm-text-dark);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileMeta {
+  font-size: 11px;
+  color: var(--bm-text-muted);
+}
+
+.fileRemove {
+  width: 28px;
+  height: 28px;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--bm-text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+  flex-shrink: 0;
+}
+
+.fileRemove:hover {
+  background: rgba(255, 80, 80, 0.1);
+  color: #e03131;
+}
+
+/* ── Error state ──────────────────────────────── */
+.errorMessage {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  margin-top: 8px;
+  background: rgba(255, 80, 80, 0.08);
+  border-radius: 8px;
+  font-size: 12px;
+  color: #e03131;
+  font-weight: 500;
+  animation: slideDown 0.3s ease;
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
