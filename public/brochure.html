@@ -1,0 +1,1031 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DearGiver — New Zealand's Trusted Donation Platform</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <style>
+    /* ================================================================
+       PRINT-READY BROCHURE — DearGiver NZ
+       Open in browser → Ctrl+P → Save as PDF (A4, No Margins)
+       ================================================================ */
+    :root {
+      --teal: #2E7D6B;
+      --teal-dark: #1F4A5A;
+      --teal-light: #7FBCAD;
+      --teal-bg: #E8F5F0;
+      --gold: #D8A95F;
+      --gold-dark: #B8883A;
+      --gold-bg: #FDF6EC;
+      --mist: #F5F7F7;
+      --sand: #F3EEE6;
+      --text-dark: #1A2E35;
+      --text-muted: #5A6B6F;
+      --white: #FFFFFF;
+      --red-soft: #E8443A;
+      --gradient-hero: linear-gradient(135deg, #1F4A5A 0%, #2E7D6B 50%, #7FBCAD 100%);
+      --gradient-gold: linear-gradient(135deg, #D8A95F 0%, #B8883A 100%);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Inter', -apple-system, sans-serif;
+      color: var(--text-dark);
+      background: var(--white);
+      -webkit-font-smoothing: antialiased;
+      line-height: 1.6;
+    }
+
+    /* ── Page structure ── */
+    .page {
+      width: 210mm;
+      min-height: 297mm;
+      margin: 0 auto;
+      padding: 0;
+      position: relative;
+      overflow: hidden;
+      page-break-after: always;
+    }
+    .page:last-child { page-break-after: avoid; }
+
+    @media print {
+      body { background: white; }
+      .page {
+        width: 100%;
+        min-height: 100vh;
+        margin: 0;
+        page-break-after: always;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .page:last-child { page-break-after: avoid; }
+      .no-print { display: none !important; }
+    }
+
+    @media screen {
+      .page { 
+        margin: 20px auto; 
+        box-shadow: 0 4px 40px rgba(0,0,0,0.12);
+        border-radius: 4px;
+      }
+    }
+
+    /* ── Utility ── */
+    .text-teal { color: var(--teal); }
+    .text-gold { color: var(--gold-dark); }
+    .text-muted { color: var(--text-muted); }
+    .text-white { color: var(--white); }
+    .fw-300 { font-weight: 300; }
+    .fw-400 { font-weight: 400; }
+    .fw-600 { font-weight: 600; }
+    .fw-700 { font-weight: 700; }
+    .fw-800 { font-weight: 800; }
+    .fw-900 { font-weight: 900; }
+
+    /* ================================================================
+       PAGE 1 — COVER
+       ================================================================ */
+    .cover {
+      background: var(--gradient-hero);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 50px;
+      position: relative;
+    }
+
+    .cover::before {
+      content: '';
+      position: absolute;
+      top: -100px; right: -100px;
+      width: 400px; height: 400px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.04);
+    }
+    .cover::after {
+      content: '';
+      position: absolute;
+      bottom: -150px; left: -80px;
+      width: 500px; height: 500px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .cover-logo {
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 6px;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.7);
+      margin-bottom: 40px;
+    }
+
+    .cover h1 {
+      font-size: 52px;
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 24px;
+      max-width: 600px;
+      letter-spacing: -1px;
+    }
+
+    .cover h1 .highlight {
+      background: var(--gradient-gold);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .cover-sub {
+      font-size: 18px;
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 520px;
+      color: rgba(255,255,255,0.85);
+      margin-bottom: 50px;
+    }
+
+    .cover-stats {
+      display: flex;
+      gap: 48px;
+      margin-top: 20px;
+    }
+    .cover-stat {
+      text-align: center;
+    }
+    .cover-stat-num {
+      font-size: 36px;
+      font-weight: 900;
+      color: var(--gold);
+    }
+    .cover-stat-label {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.6);
+      margin-top: 4px;
+    }
+
+    .cover-url {
+      position: absolute;
+      bottom: 30px;
+      font-size: 13px;
+      letter-spacing: 1px;
+      color: rgba(255,255,255,0.5);
+    }
+
+    /* ================================================================
+       PAGE 2 — WHAT IS DEARGIVER
+       ================================================================ */
+    .content-page {
+      padding: 50px;
+      background: var(--white);
+    }
+
+    .section-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: var(--teal);
+      margin-bottom: 12px;
+    }
+
+    .section-title {
+      font-size: 32px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 16px;
+      color: var(--text-dark);
+      letter-spacing: -0.5px;
+    }
+
+    .section-desc {
+      font-size: 14px;
+      line-height: 1.8;
+      color: var(--text-muted);
+      max-width: 580px;
+      margin-bottom: 36px;
+    }
+
+    .divider {
+      width: 48px;
+      height: 3px;
+      background: var(--gradient-gold);
+      border-radius: 2px;
+      margin-bottom: 40px;
+    }
+
+    /* Feature cards */
+    .features-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 12px;
+    }
+
+    .feature-card {
+      background: var(--mist);
+      border-radius: 16px;
+      padding: 28px 24px;
+      position: relative;
+      overflow: hidden;
+    }
+    .feature-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 4px;
+      height: 100%;
+      background: var(--teal);
+      border-radius: 4px 0 0 4px;
+    }
+    .feature-card.gold::before {
+      background: var(--gold);
+    }
+
+    .feature-icon {
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      margin-bottom: 14px;
+    }
+    .feature-icon.teal {
+      background: var(--teal-bg);
+      color: var(--teal);
+    }
+    .feature-icon.gold {
+      background: var(--gold-bg);
+      color: var(--gold-dark);
+    }
+
+    .feature-title {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-dark);
+    }
+    .feature-desc {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    /* ================================================================
+       PAGE 3/4 — FOR CHARITIES / FOR DONORS
+       ================================================================ */
+    .audience-header {
+      background: var(--gradient-hero);
+      color: var(--white);
+      padding: 44px 50px 36px;
+      position: relative;
+    }
+    .audience-header.donor {
+      background: linear-gradient(135deg, #B8883A 0%, #D8A95F 50%, #E8C87A 100%);
+    }
+
+    .audience-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      color: rgba(255,255,255,0.65);
+      margin-bottom: 12px;
+    }
+
+    .audience-title {
+      font-size: 30px;
+      font-weight: 900;
+      line-height: 1.2;
+      margin-bottom: 8px;
+    }
+
+    .audience-sub {
+      font-size: 14px;
+      font-weight: 300;
+      color: rgba(255,255,255,0.85);
+      max-width: 520px;
+    }
+
+    .audience-body {
+      padding: 36px 50px 50px;
+      background: var(--white);
+    }
+
+    /* Benefit rows */
+    .benefit-row {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 28px;
+      align-items: flex-start;
+    }
+
+    .benefit-num {
+      flex-shrink: 0;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: 800;
+      color: var(--white);
+      background: var(--teal);
+      margin-top: 2px;
+    }
+    .benefit-num.gold {
+      background: var(--gold);
+    }
+
+    .benefit-content h3 {
+      font-size: 15px;
+      font-weight: 700;
+      margin-bottom: 4px;
+      color: var(--text-dark);
+    }
+    .benefit-content p {
+      font-size: 12.5px;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+
+    /* Highlight box */
+    .highlight-box {
+      border-radius: 14px;
+      padding: 24px 28px;
+      margin-top: 10px;
+    }
+    .highlight-box.teal {
+      background: var(--teal-bg);
+      border: 1px solid rgba(46,125,107,0.15);
+    }
+    .highlight-box.gold {
+      background: var(--gold-bg);
+      border: 1px solid rgba(216,169,95,0.2);
+    }
+    .highlight-box h4 {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .highlight-box p {
+      font-size: 12px;
+      line-height: 1.7;
+      color: var(--text-muted);
+    }
+    .highlight-box .big-num {
+      font-size: 42px;
+      font-weight: 900;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    /* ================================================================
+       PAGE 5 — HOW IT WORKS
+       ================================================================ */
+    .steps-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .step-card {
+      background: var(--mist);
+      border-radius: 14px;
+      padding: 24px;
+      text-align: center;
+      position: relative;
+    }
+    .step-num {
+      position: absolute;
+      top: 14px;
+      right: 18px;
+      font-size: 48px;
+      font-weight: 900;
+      color: rgba(46,125,107,0.07);
+      line-height: 1;
+    }
+    .step-emoji {
+      font-size: 32px;
+      margin-bottom: 12px;
+    }
+    .step-title {
+      font-size: 14px;
+      font-weight: 700;
+      margin-bottom: 6px;
+      color: var(--text-dark);
+    }
+    .step-desc {
+      font-size: 11.5px;
+      line-height: 1.6;
+      color: var(--text-muted);
+    }
+
+    /* Comparison table */
+    .compare-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 24px;
+      font-size: 12px;
+    }
+    .compare-table th {
+      background: var(--teal-dark);
+      color: var(--white);
+      padding: 12px 16px;
+      text-align: left;
+      font-weight: 700;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .compare-table th:first-child {
+      border-radius: 10px 0 0 0;
+    }
+    .compare-table th:last-child {
+      border-radius: 0 10px 0 0;
+      text-align: center;
+    }
+    .compare-table td {
+      padding: 11px 16px;
+      border-bottom: 1px solid #eee;
+      color: var(--text-dark);
+    }
+    .compare-table td:last-child {
+      text-align: center;
+      font-weight: 700;
+      color: var(--teal);
+    }
+    .compare-table tr:last-child td {
+      border-bottom: none;
+    }
+    .compare-table tr:nth-child(even) {
+      background: var(--mist);
+    }
+
+    .check { color: var(--teal); font-weight: 800; }
+    .cross { color: #ccc; }
+
+    /* ================================================================
+       PAGE 6 — CLOSING / CTA
+       ================================================================ */
+    .closing {
+      background: var(--gradient-hero);
+      color: var(--white);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 60px 50px;
+    }
+
+    .closing h2 {
+      font-size: 38px;
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 20px;
+      max-width: 520px;
+      letter-spacing: -0.5px;
+    }
+
+    .closing p {
+      font-size: 15px;
+      font-weight: 300;
+      line-height: 1.8;
+      max-width: 480px;
+      color: rgba(255,255,255,0.8);
+      margin-bottom: 40px;
+    }
+
+    .cta-box {
+      display: flex;
+      gap: 20px;
+      margin-bottom: 50px;
+    }
+
+    .cta-button {
+      display: inline-block;
+      padding: 14px 36px;
+      border-radius: 50px;
+      font-size: 14px;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.5px;
+    }
+    .cta-button.primary {
+      background: var(--gold);
+      color: var(--text-dark);
+    }
+    .cta-button.secondary {
+      background: rgba(255,255,255,0.12);
+      color: var(--white);
+      border: 1px solid rgba(255,255,255,0.25);
+    }
+
+    .contact-grid {
+      display: flex;
+      gap: 40px;
+      margin-top: 20px;
+    }
+    .contact-item {
+      text-align: center;
+    }
+    .contact-item .label {
+      font-size: 9px;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
+    }
+    .contact-item .value {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.9);
+    }
+
+    .closing-footer {
+      position: absolute;
+      bottom: 24px;
+      font-size: 10px;
+      color: rgba(255,255,255,0.3);
+      letter-spacing: 0.5px;
+    }
+
+    /* ── Print button (screen only) ── */
+    .print-bar {
+      text-align: center;
+      padding: 20px;
+    }
+    .print-bar button {
+      background: var(--teal);
+      color: white;
+      border: none;
+      padding: 12px 32px;
+      border-radius: 50px;
+      font-family: 'Inter', sans-serif;
+      font-size: 14px;
+      font-weight: 600;
+      cursor: pointer;
+      letter-spacing: 0.5px;
+    }
+    .print-bar button:hover {
+      background: var(--teal-dark);
+    }
+  </style>
+</head>
+<body>
+
+<!-- PRINT BUTTON -->
+<div class="print-bar no-print">
+  <button onclick="window.print()">📄 Save as PDF (Ctrl + P)</button>
+</div>
+
+<!-- ================================================================
+     PAGE 1 — COVER
+     ================================================================ -->
+<div class="page cover">
+  <div class="cover-logo">DearGiver</div>
+  <h1>Giving Made <span class="highlight">Transparent,</span><br/>Simple, and <span class="highlight">Impactful</span></h1>
+  <p class="cover-sub">
+    New Zealand's trusted donation platform connecting generous donors 
+    with verified charities — powered by secure payments, real-time tracking, 
+    and automated tax receipts.
+  </p>
+
+  <div class="cover-stats">
+    <div class="cover-stat">
+      <div class="cover-stat-num">33.33%</div>
+      <div class="cover-stat-label">Tax Credit</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">100%</div>
+      <div class="cover-stat-label">Verified Charities</div>
+    </div>
+    <div class="cover-stat">
+      <div class="cover-stat-num">0</div>
+      <div class="cover-stat-label">Hidden Fees</div>
+    </div>
+  </div>
+
+  <div class="cover-url">binding-minds.vercel.app</div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 2 — WHAT IS DEARGIVER
+     ================================================================ -->
+<div class="page content-page">
+  <div class="section-label">About the Platform</div>
+  <h2 class="section-title">What is DearGiver?</h2>
+  <div class="divider"></div>
+  <p class="section-desc">
+    DearGiver is a modern donation platform built for Aotearoa New Zealand. 
+    We connect donors with verified charitable organisations, making every dollar 
+    transparent, trackable, and tax-deductible. Our platform never holds your funds — 
+    every donation flows directly to the charity through Stripe Connect.
+  </p>
+
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon teal">🔒</div>
+      <div class="feature-title">Stripe Connect Payments</div>
+      <div class="feature-desc">
+        DearGiver never holds donor funds. Payments flow directly from donor 
+        to charity via Stripe's regulated platform, with full PCI-DSS compliance.
+      </div>
+    </div>
+
+    <div class="feature-card gold">
+      <div class="feature-icon gold">🏛️</div>
+      <div class="feature-title">NZ Charities Commission Verified</div>
+      <div class="feature-desc">
+        Every organisation on DearGiver is verified against the NZ Charities 
+        Commission register. CC numbers are validated before approval.
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon teal">📊</div>
+      <div class="feature-title">Real-Time Impact Tracking</div>
+      <div class="feature-desc">
+        Donors see live fundraising progress, milestone notifications, 
+        and impact stories. Charities get real-time analytics dashboards.
+      </div>
+    </div>
+
+    <div class="feature-card gold">
+      <div class="feature-icon gold">🧾</div>
+      <div class="feature-title">Automatic Tax Receipts</div>
+      <div class="feature-desc">
+        Every donation generates an IRD-compliant tax receipt. 
+        Donors can track their 33.33% tax credit eligibility year-round.
+      </div>
+    </div>
+
+    <div class="feature-card">
+      <div class="feature-icon teal">🔔</div>
+      <div class="feature-title">Smart Notification System</div>
+      <div class="feature-desc">
+        Role-based unified notifications keep donors, charities, and admins 
+        informed with real-time updates on donations, milestones, and alerts.
+      </div>
+    </div>
+
+    <div class="feature-card gold">
+      <div class="feature-icon gold">📱</div>
+      <div class="feature-title">Fully Responsive Design</div>
+      <div class="feature-desc">
+        Beautiful, modern interface optimised for desktop, tablet, and mobile. 
+        Donate from anywhere, anytime, on any device.
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 3 — FOR CHARITIES
+     ================================================================ -->
+<div class="page">
+  <div class="audience-header">
+    <div class="audience-label">For Charitable Organisations</div>
+    <h2 class="audience-title">Why Partner with DearGiver?</h2>
+    <p class="audience-sub">
+      Expand your reach, reduce admin overhead, and focus on what matters — your mission.
+    </p>
+  </div>
+
+  <div class="audience-body">
+    <div class="benefit-row">
+      <div class="benefit-num">1</div>
+      <div class="benefit-content">
+        <h3>Zero Setup Cost, Instant Onboarding</h3>
+        <p>
+          Apply online with your CC registration number. Once approved, complete 
+          Stripe Connect onboarding and start receiving donations immediately. 
+          No contracts, no sign-up fees, no minimum commitments.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num">2</div>
+      <div class="benefit-content">
+        <h3>Your Own Charity Dashboard</h3>
+        <p>
+          A dedicated management panel with real-time analytics: total donations, 
+          donor count, repeat donor ratio, and monthly trends. Create and manage 
+          unlimited fundraising projects with cover images, goals, and timelines.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num">3</div>
+      <div class="benefit-content">
+        <h3>Direct Fund Settlement</h3>
+        <p>
+          Donations go straight to your Stripe account — DearGiver never holds 
+          your money. Settlements are processed directly by Stripe with full 
+          transparency. Track every dollar in your finance overview.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num">4</div>
+      <div class="benefit-content">
+        <h3>Rich Public Profile</h3>
+        <p>
+          Upload logos, banners, gallery images (up to 10), and compliance documents. 
+          Showcase annual reports, financial statements, and impact reports to 
+          build donor trust and transparency.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num">5</div>
+      <div class="benefit-content">
+        <h3>Built-In Donor Discovery</h3>
+        <p>
+          Your organisation appears on DearGiver's public campaign pages, 
+          search results, and featured sections — reaching donors you 
+          wouldn't find through your own marketing channels.
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight-box teal">
+      <h4 style="color: var(--teal);">💡 Platform Fee: Transparent & Fair</h4>
+      <p>
+        A small, transparent platform fee (2.5–3.5%) is applied per donation — 
+        far lower than traditional fundraising costs (typically 15–25%). 
+        You keep the vast majority of every dollar donated. 
+        <strong>No hidden charges. No monthly subscriptions.</strong>
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 4 — FOR DONORS
+     ================================================================ -->
+<div class="page">
+  <div class="audience-header donor">
+    <div class="audience-label">For Donors</div>
+    <h2 class="audience-title">Why Give Through DearGiver?</h2>
+    <p class="audience-sub">
+      Your generosity deserves transparency, security, and recognition.
+    </p>
+  </div>
+
+  <div class="audience-body">
+    <div class="benefit-row">
+      <div class="benefit-num gold">1</div>
+      <div class="benefit-content">
+        <h3>33.33% Tax Credit — Automatically Tracked</h3>
+        <p>
+          Every donation to a registered NZ charity qualifies for the IRD's 
+          33.33% tax credit. DearGiver generates compliant receipts and 
+          tracks your total donations year-round, so you never miss 
+          claiming your refund before March 31.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num gold">2</div>
+      <div class="benefit-content">
+        <h3>100% Verified Charities Only</h3>
+        <p>
+          Every organisation on DearGiver is verified against the NZ 
+          Charities Commission register. Our admin team reviews each 
+          application, checks CC numbers, and monitors ongoing compliance. 
+          You'll never wonder "is this charity legitimate?"
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num gold">3</div>
+      <div class="benefit-content">
+        <h3>Watch Your Impact in Real Time</h3>
+        <p>
+          Live progress bars show exactly how much has been raised toward 
+          each project's goal. Receive milestone notifications when a project 
+          you supported reaches 25%, 50%, 75%, or 100% of its target.
+          See how many donors are giving alongside you.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num gold">4</div>
+      <div class="benefit-content">
+        <h3>Secure, Simple 3-Step Checkout</h3>
+        <p>
+          Choose your amount → confirm details → complete payment. 
+          Powered by Stripe's bank-level encryption. One-time or recurring 
+          options available. Stripe fee coverage option lets you ensure 
+          100% of your chosen amount reaches the charity.
+        </p>
+      </div>
+    </div>
+
+    <div class="benefit-row">
+      <div class="benefit-num gold">5</div>
+      <div class="benefit-content">
+        <h3>Personal Donation Dashboard</h3>
+        <p>
+          Track your complete giving history, download receipts, and see your 
+          cumulative impact. Favourite campaigns to follow and support later.
+          Get monthly impact reports summarising your charitable contributions.
+        </p>
+      </div>
+    </div>
+
+    <div class="highlight-box gold">
+      <div style="display: flex; align-items: center; gap: 24px;">
+        <div>
+          <div class="big-num" style="color: var(--gold-dark);">$150</div>
+          <div style="font-size:11px; color:var(--text-muted); font-weight:600;">BACK IN YOUR POCKET</div>
+        </div>
+        <div>
+          <h4 style="color: var(--gold-dark);">Example: You donate $450 this year</h4>
+          <p>
+            You receive a <strong>$150 tax credit</strong> from IRD (33.33% × $450). 
+            That means your $450 of generosity effectively costs you only $300. 
+            DearGiver tracks every dollar automatically — no spreadsheets needed.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 5 — HOW IT WORKS + COMPARISON
+     ================================================================ -->
+<div class="page content-page">
+  <div class="section-label">How It Works</div>
+  <h2 class="section-title">Four Simple Steps</h2>
+  <div class="divider"></div>
+
+  <div class="steps-grid">
+    <div class="step-card">
+      <div class="step-num">01</div>
+      <div class="step-emoji">🔍</div>
+      <div class="step-title">Discover</div>
+      <div class="step-desc">
+        Browse verified NZ charities and active projects. 
+        Filter by category, region, or cause. Read impact stories 
+        and transparency reports.
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">02</div>
+      <div class="step-emoji">💳</div>
+      <div class="step-title">Donate</div>
+      <div class="step-desc">
+        Choose an amount and complete secure checkout 
+        via Stripe. Your funds go directly to the charity — 
+        DearGiver never holds your money.
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">03</div>
+      <div class="step-emoji">📈</div>
+      <div class="step-title">Track</div>
+      <div class="step-desc">
+        Watch real-time progress. Get milestone notifications 
+        and updates from the charities you support. 
+        All donation history in one dashboard.
+      </div>
+    </div>
+    <div class="step-card">
+      <div class="step-num">04</div>
+      <div class="step-emoji">🧾</div>
+      <div class="step-title">Claim</div>
+      <div class="step-desc">
+        Download your annual tax receipts. Claim your 33.33% 
+        NZ tax credit from IRD. DearGiver calculates your 
+        total automatically.
+      </div>
+    </div>
+  </div>
+
+  <div style="margin-top: 40px;">
+    <div class="section-label">Platform Comparison</div>
+    <h2 class="section-title" style="font-size:24px;">Why DearGiver Stands Out</h2>
+
+    <table class="compare-table">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th style="text-align:center;">DearGiver</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>NZ Charities Commission Verification</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Direct Fund Settlement (No Pooling)</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Automatic IRD Tax Receipt Generation</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Real-Time Impact & Milestone Tracking</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Charity Self-Service Dashboard</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Multi-Image Gallery + Document Upload</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Role-Based Notification System</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Admin Oversight & Anomaly Detection</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>No Monthly Subscription for Charities</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+        <tr>
+          <td>Mobile-Responsive Modern Design</td>
+          <td><span class="check">✓</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     PAGE 6 — CLOSING / CTA
+     ================================================================ -->
+<div class="page closing">
+  <div class="cover-logo" style="margin-bottom: 50px;">DearGiver</div>
+
+  <h2>Ready to Make <br/>a Difference?</h2>
+  <p>
+    Whether you're a charity looking to expand your reach, or a donor 
+    who wants every dollar to count — DearGiver is built for you.
+  </p>
+
+  <div class="cta-box">
+    <a href="https://binding-minds.vercel.app/charity/apply" class="cta-button primary">
+      Register Your Charity →
+    </a>
+    <a href="https://binding-minds.vercel.app/charities" class="cta-button secondary">
+      Start Giving Today
+    </a>
+  </div>
+
+  <div class="contact-grid">
+    <div class="contact-item">
+      <div class="label">Website</div>
+      <div class="value">binding-minds.vercel.app</div>
+    </div>
+    <div class="contact-item">
+      <div class="label">Email</div>
+      <div class="value">hello@deargiver.co.nz</div>
+    </div>
+    <div class="contact-item">
+      <div class="label">Region</div>
+      <div class="value">Aotearoa New Zealand</div>
+    </div>
+  </div>
+
+  <div class="closing-footer">
+    © 2026 DearGiver. All rights reserved. A Binding Minds initiative.
+  </div>
+</div>
+
+</body>
+</html>
