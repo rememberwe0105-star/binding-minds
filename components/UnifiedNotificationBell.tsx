@@ -137,7 +137,7 @@ function normalizeAdminNotif(n: AdminNotification): UserNotification {
 // ---------------------------------------------------------------------------
 
 export function UnifiedNotificationBell() {
-  const { demoRole, userRole } = useAuth();
+  const { demoRole, userRole, serviceUser } = useAuth();
 
   // Determine active role
   const activeRole: DemoRole = useMemo(() => {
@@ -167,7 +167,13 @@ export function UnifiedNotificationBell() {
         items = res.items.map(normalizeAdminNotif);
         unread = res.unread_count;
       } else if (activeRole === 'charity') {
-        const res = await getCharityNotifications(1); // TODO: use actual charityId
+        const charityId = serviceUser?.charity_id;
+        if (!charityId) {
+          // charity_id가 없으면 알림을 가져올 수 없음
+          setLoading(false);
+          return;
+        }
+        const res = await getCharityNotifications(charityId);
         items = res.items;
         unread = res.unread_count;
       } else {
@@ -184,7 +190,7 @@ export function UnifiedNotificationBell() {
     } finally {
       setLoading(false);
     }
-  }, [activeRole]);
+  }, [activeRole, serviceUser?.charity_id]);
 
   // Fetch on mount + poll every 60s
   useEffect(() => {

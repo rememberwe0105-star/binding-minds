@@ -23,7 +23,7 @@ import {
 } from '@/lib/api';
 import classes from './page.module.css';
 
-type DonorStatus = 'active' | 'inactive' | 'deleted';
+type DonorStatus = 'active' | 'flagged' | 'suspended';
 
 function formatNZD(cents: number): string {
   return `$${(cents / 100).toLocaleString('en-NZ', { minimumFractionDigits: 2 })}`;
@@ -78,7 +78,7 @@ export default function AdminDonorsPage() {
   const counts = {
     all: total,
     active: donors.filter((d) => d.status === 'active').length,
-    inactive: donors.filter((d) => d.status === 'inactive' || d.status === 'deleted').length,
+    flagged: donors.filter((d) => d.status === 'flagged' || d.status === 'suspended').length,
   };
 
   const handleStatusChange = async () => {
@@ -157,8 +157,8 @@ export default function AdminDonorsPage() {
               <ThemeIcon size={36} radius="md" color="red" variant="light" mb={8}>
                 <IconX size={18} />
               </ThemeIcon>
-              <Text size="xl" fw={900} c="red.7">{counts.inactive}</Text>
-              <Text size="sm" c="var(--bm-text-muted)">Inactive / Blocked</Text>
+              <Text size="xl" fw={900} c="red.7">{counts.flagged}</Text>
+              <Text size="sm" c="var(--bm-text-muted)">Flagged / Suspended</Text>
             </Card>
           </SimpleGrid>
 
@@ -173,7 +173,7 @@ export default function AdminDonorsPage() {
                     <Tabs.List>
                       <Tabs.Tab value="all">All</Tabs.Tab>
                       <Tabs.Tab value="active">Active</Tabs.Tab>
-                      <Tabs.Tab value="inactive">Inactive</Tabs.Tab>
+                      <Tabs.Tab value="flagged">Flagged</Tabs.Tab>
                     </Tabs.List>
                   </Tabs>
                   <TextInput
@@ -328,9 +328,18 @@ export default function AdminDonorsPage() {
                         <Text size="xs" c="red.7" mb={12}>Change the access status of this donor.</Text>
 
                         {selected.status === 'active' ? (
-                          <Button color="red" variant="outline" size="sm" radius="md" onClick={() => setConfirmStatusModal('inactive')}>
-                            Suspend Account
+                          <Button color="orange" variant="outline" size="sm" radius="md" onClick={() => setConfirmStatusModal('flagged')}>
+                            Flag Account
                           </Button>
+                        ) : selected.status === 'flagged' ? (
+                          <Group gap={8}>
+                            <Button color="red" variant="outline" size="sm" radius="md" onClick={() => setConfirmStatusModal('suspended')}>
+                              Suspend Account
+                            </Button>
+                            <Button color="green" variant="outline" size="sm" radius="md" onClick={() => setConfirmStatusModal('active')}>
+                              Reactivate
+                            </Button>
+                          </Group>
                         ) : (
                           <Button color="green" variant="outline" size="sm" radius="md" onClick={() => setConfirmStatusModal('active')}>
                             Reactivate Account

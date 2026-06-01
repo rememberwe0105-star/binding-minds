@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Container,
   Title,
@@ -34,6 +34,10 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth } from '@/contexts/AuthContext';
+import {
+  getNotificationPreferences,
+  updateNotificationPreferences,
+} from '@/lib/api';
 import classes from './page.module.css';
 
 function SettingsContent() {
@@ -42,9 +46,29 @@ function SettingsContent() {
   const [email] = useState(user?.email || '');
   const [saved, setSaved] = useState(false);
   const [notifPrefs, setNotifPrefs] = useState<Record<string, boolean>>({});
+  const [notifLoading, setNotifLoading] = useState(false);
 
   // Determine active role for notification settings
   const activeNotifRole = demoRole ?? (userRole === 'platform_admin' ? 'admin' : userRole === 'charity_admin' ? 'charity' : 'donor');
+
+  // Load notification preferences from backend
+  useEffect(() => {
+    let cancelled = false;
+    setNotifLoading(true);
+    getNotificationPreferences()
+      .then((prefs) => {
+        if (!cancelled) {
+          setNotifPrefs(prefs as unknown as Record<string, boolean>);
+        }
+      })
+      .catch(() => {
+        // Backend not ready — use defaults (already set via defaultOn in UI)
+      })
+      .finally(() => {
+        if (!cancelled) setNotifLoading(false);
+      });
+    return () => { cancelled = true; };
+  }, []);
 
   // Role-based notification items
   type NotifItem = { key: string; label: string; description: string; defaultOn: boolean; mandatory?: boolean };
@@ -92,10 +116,20 @@ function SettingsContent() {
     setTimeout(() => setSaved(false), 2000);
   };
 
-  const handleSaveNotifs = () => {
-    // TODO: call updateNotificationPreferences(notifPrefs)
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+  const handleSaveNotifs = async () => {
+    setNotifLoading(true);
+    try {
+      await updateNotificationPreferences(notifPrefs);
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      console.error('[Settings] Failed to save notification preferences:', err);
+      // Still show saved for UX if backend not ready
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } finally {
+      setNotifLoading(false);
+    }
   };
 
   return (

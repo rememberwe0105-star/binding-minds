@@ -41,6 +41,8 @@ export interface ServiceUser {
   name: string;
   status: string;
   role?: 'donor' | 'charity_admin' | 'platform_admin';
+  /** charity_admin 역할일 때 소속 단체 ID */
+  charity_id?: number;
 }
 
 /** GET /me/registration 응답 — 등록됨 */
@@ -320,7 +322,7 @@ export interface AdminDonorItem {
   id: number;
   email: string;
   name: string;
-  status: 'active' | 'inactive' | 'deleted';
+  status: 'active' | 'flagged' | 'suspended';
   role: string;
   created_at: string;
   last_login_at: string | null;
@@ -331,7 +333,7 @@ export interface AdminDonorItem {
 /** GET /admin/donors 응답 */
 export interface AdminDonorsResponse {
   page: number;
-  pageSize: number;
+  page_size: number;
   total: number;
   items: AdminDonorItem[];
 }
@@ -475,6 +477,13 @@ export interface AdminMessage {
   subject: string;
   body: string;
   template_id?: string;
+}
+
+/** POST /admin/messages 응답 (B-3 보강) */
+export interface AdminMessageResponse {
+  ok: true;
+  message_id: string;
+  delivered_at: string;
 }
 
 // ── 통합 알림 시스템 (역할별) ──
@@ -1031,10 +1040,10 @@ export async function uploadCharityDocument(
 export async function getAdminCharities(
   status = 'pending',
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminCharitiesResponse> {
   return apiFetch<AdminCharitiesResponse>(
-    `/api/v1/admin/charities?status=${status}&page=${page}&pageSize=${pageSize}`,
+    `/api/v1/admin/charities?status=${status}&page=${page}&page_size=${pageSize}`,
   );
 }
 
@@ -1043,10 +1052,10 @@ export async function getAdminCharities(
  */
 export async function getAdminCharitiesHistory(
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminCharitiesResponse> {
   return apiFetch<AdminCharitiesResponse>(
-    `/api/v1/admin/charities/history?page=${page}&pageSize=${pageSize}`,
+    `/api/v1/admin/charities/history?page=${page}&page_size=${pageSize}`,
   );
 }
 
@@ -1081,10 +1090,10 @@ export async function getAdminPlatformAnalytics(): Promise<PlatformAnalytics> {
  */
 export async function getAdminDonors(
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminDonorsResponse> {
   return apiFetch<AdminDonorsResponse>(
-    `/api/v1/admin/donors?page=${page}&pageSize=${pageSize}`,
+    `/api/v1/admin/donors?page=${page}&page_size=${pageSize}`,
   );
 }
 
@@ -1094,7 +1103,7 @@ export async function getAdminDonors(
  */
 export async function updateDonorStatus(
   id: number,
-  data: { status: 'active' | 'inactive' | 'deleted' },
+  data: { status: 'active' | 'flagged' | 'suspended'; reason?: string },
 ): Promise<GenericOkResponse> {
   return apiFetch<GenericOkResponse>(
     `/api/v1/admin/donors/${id}/status`,
@@ -1113,9 +1122,9 @@ export async function updateDonorStatus(
 export async function getAdminProjects(
   status?: AdminProjectStatus,
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminProjectsResponse> {
-  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
   if (status) params.set('status', status);
   return apiFetch<AdminProjectsResponse>(`/api/v1/admin/projects?${params}`);
 }
@@ -1140,10 +1149,10 @@ export async function updateAdminProjectStatus(
  */
 export async function getAdminActiveCharities(
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminActiveCharitiesResponse> {
   return apiFetch<AdminActiveCharitiesResponse>(
-    `/api/v1/admin/charities/active?page=${page}&pageSize=${pageSize}`,
+    `/api/v1/admin/charities/active?page=${page}&page_size=${pageSize}`,
   );
 }
 
@@ -1153,10 +1162,10 @@ export async function getAdminActiveCharities(
 export async function getAdminCharityProjects(
   charityId: number,
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
 ): Promise<AdminProjectsResponse> {
   return apiFetch<AdminProjectsResponse>(
-    `/api/v1/admin/charities/${charityId}/projects?page=${page}&pageSize=${pageSize}`,
+    `/api/v1/admin/charities/${charityId}/projects?page=${page}&page_size=${pageSize}`,
   );
 }
 
@@ -1180,12 +1189,12 @@ export async function updateAdminCharityStatus(
  */
 export async function getAdminDonations(
   page = 1,
-  pageSize = 20,
+  pageSize = 30,
   status?: string,
   dateFrom?: string,
   dateTo?: string,
 ): Promise<AdminDonationsResponse> {
-  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) });
+  const params = new URLSearchParams({ page: String(page), page_size: String(pageSize) });
   if (status) params.set('status', status);
   if (dateFrom) params.set('date_from', dateFrom);
   if (dateTo) params.set('date_to', dateTo);
@@ -1287,8 +1296,8 @@ export async function markAllNotificationsRead(): Promise<GenericOkResponse> {
  */
 export async function sendAdminMessage(
   data: AdminMessage,
-): Promise<GenericOkResponse> {
-  return apiFetch<GenericOkResponse>(
+): Promise<AdminMessageResponse> {
+  return apiFetch<AdminMessageResponse>(
     '/api/v1/admin/messages',
     { method: 'POST', body: JSON.stringify(data) },
   );
