@@ -50,12 +50,14 @@ import {
   IconToolsKitchen2,
   IconSchool,
   IconPaw,
+  IconRoute,
 } from '@tabler/icons-react';
 import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip,
   ResponsiveContainer, PieChart, Pie, Cell, Legend,
 } from 'recharts';
 import { RewardsTab } from '@/components/RewardsTab';
+import { RecurringDonationsCard } from '@/components/RecurringDonationsCard';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -251,33 +253,121 @@ function OverviewTab() {
           ))
         )}
       </Card>
+
+      {/* Recurring Donations */}
+      <Box mt={20}>
+        <RecurringDonationsCard items={items} />
+      </Box>
     </>
   );
 }
 
 // ===================== My Impact 탭 =====================
-const IMPACT_MONTHLY = [
-  { month: 'Oct', amount: 50 },
-  { month: 'Nov', amount: 120 },
-  { month: 'Dec', amount: 200 },
-  { month: 'Jan', amount: 80 },
-  { month: 'Feb', amount: 150 },
-  { month: 'Mar', amount: 300 },
-];
+const IMPACT_COLORS = ['#4A7C71', '#C4724A', '#4b6bfb', '#fab005', '#be4bdb', '#20c997'];
 
-const IMPACT_CATEGORIES = [
-  { name: 'Environment', value: 40 },
-  { name: 'Education', value: 25 },
-  { name: 'Community', value: 20 },
-  { name: 'Health', value: 10 },
-  { name: 'Animal Welfare', value: 5 },
+// 마일스톤 정의
+interface Milestone {
+  id: string;
+  icon: typeof IconTree;
+  label: string;
+  description: string;
+  color: string;
+  check: (stats: { count: number; total: number; streak: number; categories: number }) => boolean;
+}
+
+const MILESTONES: Milestone[] = [
+  { id: 'first', icon: IconHeart, label: 'First Giver', description: 'Made your first donation', color: 'terracotta', check: (s) => s.count >= 1 },
+  { id: 'five', icon: IconSparkles, label: 'High Five', description: '5 donations completed', color: 'sage', check: (s) => s.count >= 5 },
+  { id: 'ten', icon: IconTree, label: 'Tree Hugger', description: '10 donations completed', color: 'sage', check: (s) => s.count >= 10 },
+  { id: 'hundred', icon: IconCoin, label: 'Century Club', description: 'Donated $100 in total', color: 'terracotta', check: (s) => s.total >= 100 },
+  { id: 'fivehundred', icon: IconShieldCheck, label: 'Champion', description: 'Donated $500 in total', color: 'blue', check: (s) => s.total >= 500 },
+  { id: 'thousand', icon: IconGift, label: 'Philanthropist', description: 'Donated $1,000 in total', color: 'grape', check: (s) => s.total >= 1000 },
+  { id: 'streak3', icon: IconCalendar, label: 'Hat Trick', description: '3-month giving streak', color: 'sage', check: (s) => s.streak >= 3 },
+  { id: 'diverse', icon: IconChartBar, label: 'Diversifier', description: 'Donated to 3+ categories', color: 'blue', check: (s) => s.categories >= 3 },
 ];
-const IMPACT_COLORS = ['#8eb897', '#4b6bfb', '#e67e5e', '#fab005', '#be4bdb'];
 
 function ImpactTab() {
-  const { items } = useApiDonations(100);
-  const succeededItems = items.filter((d) => d.donation_status === 'succeeded');
-  const totalNZD = succeededItems.reduce((s, d) => s + d.donation_amount_minor, 0) / 100;
+  const { items, loading } = useApiDonations(500);
+  const succeededItems = useMemo(
+    () => items.filter((d) => d.donation_status === 'succeeded'),
+    [items]
+  );
+  const totalNZD = useMemo(
+    () => succeededItems.reduce((s, d) => s + d.donation_amount_minor, 0) / 100,
+    [succeededItems]
+  );
+
+  // ── 실제 데이터 기반 월별 트렌드 ──
+  const monthlyData = useMemo(() => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    const now = new Date();
+    const result: { month: string; amount: number }[] = [];
+
+    // 최근 6개월
+    for (let i = 5; i >= 0; i--) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthIdx = d.getMonth();
+      const year = d.getFullYear();
+
+      const monthTotal = succeededItems
+        .filter((item) => {
+          const itemDate = new Date(item.paid_at || item.created_at || '');
+          return itemDate.getMonth() === monthIdx && itemDate.getFullYear() === year;
+        })
+        .reduce((sum, item) => sum + item.donation_amount_minor, 0) / 100;
+
+      result.push({ month: months[monthIdx], amount: monthTotal });
+    }
+    return result;
+  }, [succeededItems]);
+
+  // ── 실제 데이터 기반 카테고리 분석 ──
+  const categoryData = useMemo(() => {
+    const map = new Map<string, number>();
+    succeededItems.forEach((item) => {
+      const name = item.charity_display_name || 'Other';
+      map.set(name, (map.get(name) || 0) + item.donation_amount_minor / 100);
+    });
+    return Array.from(map.entries())
+      .map(([name, value]) => ({ name, value: Math.round(value) }))
+      .sort((a, b) => b.value - a.value)
+      .slice(0, 6); // 상위 6개
+  }, [succeededItems]);
+
+  // ── 기부 스트릭 계산 ──
+  const givingStreak = useMemo(() => {
+    const now = new Date();
+    let streak = 0;
+
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const monthIdx = d.getMonth();
+      const year = d.getFullYear();
+
+      const hasGiving = succeededItems.some((item) => {
+        const itemDate = new Date(item.paid_at || item.created_at || '');
+        return itemDate.getMonth() === monthIdx && itemDate.getFullYear() === year;
+      });
+
+      if (hasGiving) {
+        streak++;
+      } else {
+        break;
+      }
+    }
+    return streak;
+  }, [succeededItems]);
+
+  // ── 유니크 카테고리 수 (charity name 기반) ──
+  const uniqueCategories = useMemo(
+    () => new Set(succeededItems.map((d) => d.charity_display_name)).size,
+    [succeededItems]
+  );
+
+  // ── 마일스톤 체크 ──
+  const milestoneStats = { count: succeededItems.length, total: totalNZD, streak: givingStreak, categories: uniqueCategories };
+  const earnedMilestones = MILESTONES.filter((m) => m.check(milestoneStats));
+  const nextMilestone = MILESTONES.find((m) => !m.check(milestoneStats));
 
   // Impact analogies based on total donated
   const treesPlanted = Math.floor(totalNZD / 25);
@@ -285,9 +375,65 @@ function ImpactTab() {
   const booksForKids = Math.floor(totalNZD / 15);
   const shelterNights = Math.floor(totalNZD / 35);
 
+  if (loading) {
+    return (
+      <Box ta="center" py={60}>
+        <Loader size="lg" color="sage" />
+        <Text size="sm" c="var(--bm-text-muted)" mt={12}>Loading your impact data...</Text>
+      </Box>
+    );
+  }
+
+  if (succeededItems.length === 0) {
+    return (
+      <Card padding="xl" radius="lg" withBorder ta="center" py={60}>
+        <ThemeIcon size={64} radius="xl" color="sage" variant="light" mx="auto" mb={16}>
+          <IconSparkles size={32} />
+        </ThemeIcon>
+        <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={8}>Start Your Impact Journey</Text>
+        <Text size="sm" c="var(--bm-text-muted)" maw={400} mx="auto" lh={1.6} mb={20}>
+          Make your first donation to see your real-world impact, earn milestones, and track your giving journey.
+        </Text>
+        <Button component={Link} href="/projects" color="sage" radius="xl" size="md" rightSection={<IconArrowRight size={16} />}>
+          Explore Projects
+        </Button>
+      </Card>
+    );
+  }
+
   return (
     <Stack gap={24}>
-      {/* Impact Analogies */}
+      {/* ── Giving Streak Banner ── */}
+      {givingStreak > 0 && (
+        <Card padding="lg" radius="lg" withBorder
+          style={{
+            background: givingStreak >= 3
+              ? 'linear-gradient(135deg, rgba(196,114,74,0.08) 0%, rgba(74,124,113,0.08) 100%)'
+              : 'linear-gradient(135deg, rgba(74,124,113,0.04) 0%, rgba(255,255,255,1) 100%)',
+          }}
+        >
+          <Group gap={12}>
+            <ThemeIcon size={44} radius="xl" color={givingStreak >= 3 ? 'terracotta' : 'sage'} variant="light">
+              <IconCalendar size={22} />
+            </ThemeIcon>
+            <Box style={{ flex: 1 }}>
+              <Group gap={8}>
+                <Text fw={800} size="xl" c="var(--bm-text-dark)">{givingStreak}</Text>
+                <Text fw={700} size="md" c="var(--bm-text-dark)">month giving streak 🔥</Text>
+              </Group>
+              <Text size="xs" c="var(--bm-text-muted)">
+                {givingStreak >= 6
+                  ? "Incredible commitment! You're a true changemaker."
+                  : givingStreak >= 3
+                    ? "Amazing consistency! Keep the momentum going."
+                    : "Great start! Donate next month to keep your streak alive."}
+              </Text>
+            </Box>
+          </Group>
+        </Card>
+      )}
+
+      {/* ── Impact Analogies ── */}
       <Box>
         <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Your Real-World Impact</Text>
         <Text size="sm" c="var(--bm-text-muted)" mb={16}>Here&apos;s what your <strong>{formatNZD(totalNZD)}</strong> in donations could achieve:</Text>
@@ -312,15 +458,69 @@ function ImpactTab() {
         </SimpleGrid>
       </Box>
 
-      {/* Charts Row */}
+      {/* ── Milestones ── */}
+      <Box>
+        <Group gap={8} mb={12}>
+          <Text fw={700} size="md" c="var(--bm-text-dark)">Milestones</Text>
+          <Badge size="sm" color="sage" variant="light">{earnedMilestones.length}/{MILESTONES.length}</Badge>
+        </Group>
+
+        <SimpleGrid cols={{ base: 2, sm: 4 }} spacing={10}>
+          {MILESTONES.map((m) => {
+            const earned = m.check(milestoneStats);
+            const MIcon = m.icon;
+            return (
+              <Tooltip key={m.id} label={m.description} position="top" withArrow>
+                <Card
+                  padding="md"
+                  radius="lg"
+                  withBorder
+                  style={{
+                    opacity: earned ? 1 : 0.35,
+                    background: earned
+                      ? 'linear-gradient(135deg, rgba(74,124,113,0.06) 0%, rgba(196,114,74,0.04) 100%)'
+                      : undefined,
+                    cursor: 'default',
+                    transition: 'all 0.2s ease',
+                  }}
+                  ta="center"
+                >
+                  <ThemeIcon
+                    size={32}
+                    radius="xl"
+                    color={earned ? m.color : 'gray'}
+                    variant={earned ? 'light' : 'subtle'}
+                    mx="auto"
+                    mb={6}
+                  >
+                    <MIcon size={16} />
+                  </ThemeIcon>
+                  <Text fw={700} size="xs" c={earned ? 'var(--bm-text-dark)' : 'dimmed'}>{m.label}</Text>
+                  {earned && <Text size="xs" c="var(--bm-text-muted)">✓ Earned</Text>}
+                </Card>
+              </Tooltip>
+            );
+          })}
+        </SimpleGrid>
+
+        {nextMilestone && (
+          <Alert color="sage" variant="light" radius="md" mt={12} icon={<IconSparkles size={16} />}>
+            <Text size="xs">
+              <strong>Next milestone:</strong> {nextMilestone.label} — {nextMilestone.description}
+            </Text>
+          </Alert>
+        )}
+      </Box>
+
+      {/* ── Charts Row ── */}
       <SimpleGrid cols={{ base: 1, md: 2 }} spacing={16}>
-        {/* Monthly Trend */}
+        {/* Monthly Trend — REAL DATA */}
         <Card padding="xl" radius="lg" withBorder>
           <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Monthly Giving Trend</Text>
-          <Text size="xs" c="var(--bm-text-muted)" mb={20}>Your donation pattern over the last 6 months</Text>
+          <Text size="xs" c="var(--bm-text-muted)" mb={20}>Your actual donation pattern over the last 6 months</Text>
           <Box h={220}>
             <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={IMPACT_MONTHLY} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
+              <AreaChart data={monthlyData} margin={{ top: 5, right: 10, left: -20, bottom: 0 }}>
                 <defs>
                   <linearGradient id="impactGrad" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="var(--bm-sage-dark)" stopOpacity={0.3}/>
@@ -338,28 +538,34 @@ function ImpactTab() {
           </Box>
         </Card>
 
-        {/* Category Breakdown */}
+        {/* Top Charities Supported — REAL DATA */}
         <Card padding="xl" radius="lg" withBorder>
-          <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Giving by Category</Text>
+          <Text fw={700} size="md" c="var(--bm-text-dark)" mb={4}>Top Charities Supported</Text>
           <Text size="xs" c="var(--bm-text-muted)" mb={12}>Where your donations are making an impact</Text>
-          <Box h={220}>
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie data={IMPACT_CATEGORIES} innerRadius={55} outerRadius={80} paddingAngle={2} dataKey="value" cx="50%" cy="45%">
-                  {IMPACT_CATEGORIES.map((_, index) => (
-                    <Cell key={`cell-${index}`} fill={IMPACT_COLORS[index % IMPACT_COLORS.length]} />
-                  ))}
-                </Pie>
-                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                <RechartsTooltip formatter={(value: any) => `${value}%`} />
-                <Legend verticalAlign="bottom" height={32} iconType="circle" wrapperStyle={{fontSize: '11px'}} />
-              </PieChart>
-            </ResponsiveContainer>
-          </Box>
+          {categoryData.length > 0 ? (
+            <Box h={220}>
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie data={categoryData} innerRadius={55} outerRadius={80} paddingAngle={2} dataKey="value" cx="50%" cy="45%">
+                    {categoryData.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={IMPACT_COLORS[index % IMPACT_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
+                  <RechartsTooltip formatter={(value: any) => `$${value}`} />
+                  <Legend verticalAlign="bottom" height={36} iconType="circle" wrapperStyle={{fontSize: '10px'}} />
+                </PieChart>
+              </ResponsiveContainer>
+            </Box>
+          ) : (
+            <Box ta="center" py={40}>
+              <Text size="sm" c="dimmed">No data yet</Text>
+            </Box>
+          )}
         </Card>
       </SimpleGrid>
 
-      {/* Encouragement */}
+      {/* ── Encouragement ── */}
       <Card padding="lg" radius="lg" withBorder
         style={{ background: 'linear-gradient(135deg, rgba(142,184,151,0.08) 0%, rgba(230,126,94,0.06) 100%)', textAlign: 'center' }}
       >
@@ -368,8 +574,11 @@ function ImpactTab() {
           <Text fw={700} size="md" c="var(--bm-text-dark)">You&apos;re making a difference!</Text>
         </Group>
         <Text size="sm" c="var(--bm-text-muted)" maw={500} mx="auto" lh={1.6}>
-          Every dollar you donate helps build a stronger, more compassionate New Zealand.
-          Keep it up — your generosity inspires others to give too.
+          {totalNZD >= 500
+            ? "Your incredible generosity is transforming lives across Aotearoa. You're a true champion of change!"
+            : totalNZD >= 100
+              ? "Your consistent giving is building a stronger New Zealand. Every dollar creates ripples of positive change."
+              : "Every dollar you donate helps build a stronger, more compassionate New Zealand. Keep it up — your generosity inspires others to give too."}
         </Text>
       </Card>
     </Stack>
@@ -923,9 +1132,22 @@ function ReceiptVaultTab() {
   );
 }
 
-// ===================== My Causes 탭 =====================
+// ===================== My Causes 탭 + Donor Journey =====================
+interface CharityRelationship {
+  charityName: string;
+  charityId?: number;
+  totalDonated: number;
+  donationCount: number;
+  firstDonation: string;
+  lastDonation: string;
+  currency: string;
+  donations: { amount: number; date: string; status: string }[];
+}
+
 function MyCausesTab() {
   const { favorites, toggleFavorite } = useFavorites();
+  const { items, loading } = useApiDonations(500);
+  const [expandedCharity, setExpandedCharity] = useState<string | null>(null);
 
   const savedOrgs = useMemo(() => {
     return favorites.organizations
@@ -939,9 +1161,53 @@ function MyCausesTab() {
       .filter(Boolean) as Campaign[];
   }, [favorites.projects]);
 
-  const totalSaved = savedOrgs.length + savedProjects.length;
+  // ── 기관별 관계 데이터 구축 ──
+  const charityRelationships = useMemo(() => {
+    const succeededItems = items.filter((d) => d.donation_status === 'succeeded');
+    const map = new Map<string, CharityRelationship>();
 
-  if (totalSaved === 0) {
+    succeededItems.forEach((d) => {
+      const name = d.charity_display_name || 'Unknown Charity';
+      const dateStr = d.paid_at || d.created_at || new Date().toISOString();
+      const existing = map.get(name);
+
+      if (existing) {
+        existing.totalDonated += d.donation_amount_minor;
+        existing.donationCount += 1;
+        if (dateStr < existing.firstDonation) existing.firstDonation = dateStr;
+        if (dateStr > existing.lastDonation) existing.lastDonation = dateStr;
+        existing.donations.push({
+          amount: d.donation_amount_minor,
+          date: dateStr,
+          status: d.donation_status,
+        });
+      } else {
+        map.set(name, {
+          charityName: name,
+          charityId: d.charity_id,
+          totalDonated: d.donation_amount_minor,
+          donationCount: 1,
+          firstDonation: dateStr,
+          lastDonation: dateStr,
+          currency: d.currency_code || 'NZD',
+          donations: [{ amount: d.donation_amount_minor, date: dateStr, status: d.donation_status }],
+        });
+      }
+    });
+
+    // 날짜순 정렬 (각 기관 내)
+    map.forEach((rel) => {
+      rel.donations.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    });
+
+    return Array.from(map.values()).sort((a, b) => b.totalDonated - a.totalDonated);
+  }, [items]);
+
+  const totalSaved = savedOrgs.length + savedProjects.length;
+  const hasJourney = charityRelationships.length > 0;
+  const hasAnything = totalSaved > 0 || hasJourney;
+
+  if (!hasAnything && !loading) {
     return (
       <Card padding="xl" radius="lg" withBorder>
         <Box className={classes.emptyState}>
@@ -967,7 +1233,156 @@ function MyCausesTab() {
 
   return (
     <Stack gap={28}>
-      {/* Saved Charities */}
+      {/* ── Your Giving Journey ── */}
+      {(hasJourney || loading) && (
+        <Box>
+          <Group gap={8} mb={4}>
+            <IconRoute size={20} color="var(--bm-terracotta)" />
+            <Text fw={700} size="md" c="var(--bm-text-dark)">Your Giving Journey</Text>
+            {hasJourney && (
+              <Badge size="sm" variant="light" color="terracotta">{charityRelationships.length} charities</Badge>
+            )}
+          </Group>
+          <Text size="xs" c="var(--bm-text-muted)" mb={16}>
+            Your relationship with the charities you&apos;ve supported
+          </Text>
+
+          {loading ? (
+            <Box ta="center" py={30}>
+              <Loader size="sm" color="sage" />
+              <Text size="xs" c="dimmed" mt={8}>Loading your journey...</Text>
+            </Box>
+          ) : (
+            <Stack gap={12}>
+              {charityRelationships.map((rel) => {
+                const isExpanded = expandedCharity === rel.charityName;
+                const monthsSinceFirst = Math.max(1, Math.ceil(
+                  (Date.now() - new Date(rel.firstDonation).getTime()) / (1000 * 60 * 60 * 24 * 30)
+                ));
+
+                return (
+                  <Card
+                    key={rel.charityName}
+                    padding="lg"
+                    radius="lg"
+                    withBorder
+                    className={classes.statCard}
+                    style={{
+                      cursor: 'pointer',
+                      background: isExpanded
+                        ? 'linear-gradient(135deg, rgba(74,124,113,0.03) 0%, rgba(196,114,74,0.02) 100%)'
+                        : undefined,
+                    }}
+                    onClick={() => setExpandedCharity(isExpanded ? null : rel.charityName)}
+                  >
+                    {/* Header */}
+                    <Group justify="space-between" mb={12}>
+                      <Box style={{ flex: 1 }}>
+                        <Text size="sm" fw={700} c="var(--bm-text-dark)" lineClamp={1}>
+                          {rel.charityName}
+                        </Text>
+                        <Text size="xs" c="var(--bm-text-muted)">
+                          Supporter since {formatDate(rel.firstDonation)} · {monthsSinceFirst}mo
+                        </Text>
+                      </Box>
+                      <Text size="xs" c="dimmed">{isExpanded ? '▲' : '▼'}</Text>
+                    </Group>
+
+                    {/* Stats Row */}
+                    <SimpleGrid cols={3} spacing={8}>
+                      <Box ta="center" p={8} style={{ background: 'rgba(74,124,113,0.04)', borderRadius: 8 }}>
+                        <Text fw={800} size="sm" c="var(--bm-sage-dark)">
+                          {formatMinor(rel.totalDonated, rel.currency)}
+                        </Text>
+                        <Text size="xs" c="var(--bm-text-muted)">Total Donated</Text>
+                      </Box>
+                      <Box ta="center" p={8} style={{ background: 'rgba(196,114,74,0.04)', borderRadius: 8 }}>
+                        <Text fw={800} size="sm" c="var(--bm-terracotta-dark, var(--bm-terracotta))">
+                          {rel.donationCount}
+                        </Text>
+                        <Text size="xs" c="var(--bm-text-muted)">Donations</Text>
+                      </Box>
+                      <Box ta="center" p={8} style={{ background: 'rgba(75,107,251,0.04)', borderRadius: 8 }}>
+                        <Text fw={800} size="sm" c="#4b6bfb">
+                          {formatMinor(Math.round(rel.totalDonated / rel.donationCount), rel.currency)}
+                        </Text>
+                        <Text size="xs" c="var(--bm-text-muted)">Avg Gift</Text>
+                      </Box>
+                    </SimpleGrid>
+
+                    {/* Expanded Timeline */}
+                    {isExpanded && (
+                      <Box mt={16} pt={16} style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
+                        <Text size="xs" fw={700} c="var(--bm-text-dark)" mb={12}>
+                          Donation Timeline
+                        </Text>
+                        <Stack gap={0}>
+                          {rel.donations.map((don, idx) => (
+                            <Group
+                              key={idx}
+                              gap={12}
+                              style={{
+                                position: 'relative',
+                                paddingLeft: 20,
+                                paddingBottom: idx < rel.donations.length - 1 ? 16 : 0,
+                              }}
+                            >
+                              {/* Timeline dot + line */}
+                              <Box
+                                style={{
+                                  position: 'absolute',
+                                  left: 0,
+                                  top: 4,
+                                  width: 10,
+                                  height: 10,
+                                  borderRadius: '50%',
+                                  background: idx === 0 ? 'var(--bm-terracotta)' : 'var(--bm-sage)',
+                                  border: '2px solid white',
+                                  boxShadow: '0 0 0 1px rgba(0,0,0,0.08)',
+                                  zIndex: 1,
+                                }}
+                              />
+                              {idx < rel.donations.length - 1 && (
+                                <Box
+                                  style={{
+                                    position: 'absolute',
+                                    left: 4,
+                                    top: 14,
+                                    width: 2,
+                                    height: 'calc(100% - 6px)',
+                                    background: 'var(--mantine-color-gray-3)',
+                                  }}
+                                />
+                              )}
+
+                              <Box style={{ flex: 1 }}>
+                                <Group justify="space-between">
+                                  <Text size="sm" fw={600} c="var(--bm-text-dark)">
+                                    {formatMinor(don.amount, rel.currency)}
+                                  </Text>
+                                  <Text size="xs" c="dimmed">{formatDate(don.date)}</Text>
+                                </Group>
+                                {idx === rel.donations.length - 1 && (
+                                  <Badge size="xs" variant="light" color="sage" mt={4}>First donation 🌱</Badge>
+                                )}
+                                {idx === 0 && rel.donations.length > 1 && (
+                                  <Badge size="xs" variant="light" color="terracotta" mt={4}>Most recent</Badge>
+                                )}
+                              </Box>
+                            </Group>
+                          ))}
+                        </Stack>
+                      </Box>
+                    )}
+                  </Card>
+                );
+              })}
+            </Stack>
+          )}
+        </Box>
+      )}
+
+      {/* ── Saved Charities ── */}
       {savedOrgs.length > 0 && (
         <Box>
           <Group gap={8} mb={16}>
@@ -1014,7 +1429,7 @@ function MyCausesTab() {
         </Box>
       )}
 
-      {/* Saved Projects */}
+      {/* ── Saved Projects ── */}
       {savedProjects.length > 0 && (
         <Box>
           <Group gap={8} mb={16}>
@@ -1160,8 +1575,8 @@ function DashboardContent() {
               <Tabs.Tab value="rewards" leftSection={<IconGift size={16} />}>
                 My Rewards
               </Tabs.Tab>
-              <Tabs.Tab value="causes" leftSection={<IconHeart size={16} />}>
-                My Causes
+              <Tabs.Tab value="causes" leftSection={<IconRoute size={16} />}>
+                My Causes & Journey
               </Tabs.Tab>
             </Tabs.List>
 

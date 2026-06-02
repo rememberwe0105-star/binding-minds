@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DearGiver — Backend API Integration Requirements</title>
+<style>
+  @page { size: A4; margin: 20mm; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    line-height: 1.6;
+    color: #1a1a1a;
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  h1 { font-size: 22px; color: #2d5a4e; border-bottom: 3px solid #2d5a4e; padding-bottom: 8px; margin-top: 30px; }
+  h2 { font-size: 17px; color: #c4724a; border-bottom: 1px solid #eee; padding-bottom: 6px; margin-top: 28px; }
+  h3 { font-size: 14px; color: #333; margin-top: 20px; }
+  p { margin: 6px 0; }
+  code { background: #f4f4f4; padding: 2px 5px; border-radius: 3px; font-family: 'SF Mono', Consolas, monospace; font-size: 10px; }
+  pre { background: #1e1e1e; color: #d4d4d4; padding: 12px 16px; border-radius: 6px; overflow-x: auto; margin: 12px 0; }
+  pre code { background: none; color: #d4d4d4; padding: 0; font-size: 10px; }
+  table { border-collapse: collapse; width: 100%; margin: 12px 0; font-size: 10.5px; }
+  th { background: #2d5a4e; color: white; padding: 8px 12px; text-align: left; font-weight: 600; }
+  td { padding: 7px 12px; border-bottom: 1px solid #e0e0e0; }
+  tr:nth-child(even) { background: #f8f8f8; }
+  blockquote { border-left: 3px solid #c4724a; margin: 12px 0; padding: 8px 16px; background: #fef7f3; color: #555; font-style: italic; }
+  hr { border: none; border-top: 2px solid #e0e0e0; margin: 24px 0; }
+  ul { padding-left: 20px; }
+  li { margin: 3px 0; }
+  strong { color: #1a1a1a; }
+  .page-break { page-break-before: always; }
+</style>
+</head>
+<body>
+<h1>DearGiver — Backend API 추가 요청서 (v7.0)</h1>
+<h1>작성일: 2026-06-03</h1>
+<h1>대상: 백엔드 팀</h1>
+<h1>참조: 이전 요청서 (BACKEND_REQUEST_FINAL.md, 5월 20일) — 기존 항목 해결 완료</h1>
+
+<blockquote>이전 v6.0 요청사항 (Stripe Key, 리다이렉트 URL, Role System, 단체 온보딩 등)은</blockquote>
+<blockquote>모두 해결 완료되었습니다. 본 문서는 <strong>신규 추가된 기능</strong>만 다룹니다.</blockquote>
+
+<blockquote>프론트엔드 주소: https://binding-minds.vercel.app</blockquote>
+<blockquote>백엔드 API 주소: http://libertron.iptime.org:8787</blockquote>
+
+<hr/>
+
+<h2>이번 요청 요약</h2>
+
+<table><thead><tr><th>순위</th><th>기능</th><th>난이도</th><th>의존성</th></tr></thead><tbody><tr><td>P0</td><td>Recurring Donations (정기 기부)</td><td>높음</td><td>Stripe Subscriptions API</td></tr>
+<tr><td>P1</td><td>Gift Donation Metadata (선물 기부)</td><td>낮음</td><td>DB 스키마 추가</td></tr>
+<tr><td>P2</td><td>Interest Notification Email (기관 초대)</td><td>중간</td><td>Resend + 도메인 인증</td></tr>
+<tr><td>P3</td><td>Donor Journey API (기부자 관계)</td><td>낮음</td><td>기존 API 확장</td></tr>
+<tr><td>--</td><td>Impact Dashboard</td><td>--</td><td>백엔드 작업 불필요</td></tr></tbody></table>
+<hr/>
+
+<h2>변경 사항 안내</h2>
+
+<h3>1. 수수료 모델 변경</h3>
+
+<table><thead><tr><th>항목</th><th>이전 (v6.0)</th><th>현재 (v7.0)</th></tr></thead><tbody><tr><td>플랫폼 수수료</td><td>고정 $1/건</td><td>Starter 2.5% / Growth 1.0%</td></tr>
+<tr><td>최소 수수료</td><td>--</td><td>$0.50</td></tr>
+<tr><td>최소 기부금액</td><td>$20</td><td>$10</td></tr>
+<tr><td>월 구독료 (Growth)</td><td>--</td><td>$49/월</td></tr></tbody></table>
+<ul><li>POST /api/v1/checkout/donations에서 최소 금액 검증을 $20 -> $10으로 변경 필요</li>
+<p></ul></p>
+<h3>2. Stripe NZ 수수료 정정</h3>
+
+<p>이전 문서에서 ~1.5%로 안내했으나 잘못된 수치였습니다.</p>
+
+<table><thead><tr><th>유형</th><th>올바른 수수료</th></tr></thead><tbody><tr><td>국내 카드 (NZ)</td><td>2.7% + NZ$0.30</td></tr>
+<tr><td>해외 카드</td><td>3.5% + NZ$0.30</td></tr></tbody></table>
+<p>프론트엔드에서 기부자가 선택적으로 수수료 커버 가능 (국내 기준 계산).</p>
+
+<hr/>
+
+<h2>[P0] Recurring Donations — 정기 기부</h2>
+
+<h3>현재 상태</h3>
+<ul><li>프론트엔드: DonationCheckoutModal에서 recurring: true 파라미터를 이미 전송 중</li>
+<li>프론트엔드: 대시보드에 RecurringDonationsCard 구독 관리 UI 구현 완료</li>
+<li>백엔드: POST /api/v1/checkout/donations에서 recurring 파라미터 무시 중</li>
+<p></ul></p>
+<h3>1. Checkout Session 수정</h3>
+
+<p>엔드포인트: POST /api/v1/checkout/donations (기존 엔드포인트 확장)</p>
+
+<p>프론트엔드가 보내는 요청:</p>
+
+<p>``<code>json</p>
+<p>{</p>
+<p>  "amount": 50,</p>
+<p>  "currency": "NZD",</p>
+<p>  "charityAccountId": "acct_xxx",</p>
+<p>  "charityName": "Trees That Count",</p>
+<p>  "coverStripeFee": true,</p>
+<p>  "addSupport": false,</p>
+<p>  "recurring": true</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<p>백엔드 로직:</p>
+
+<p></code>`<code></p>
+<p>if recurring == true:</p>
+<p>  -> Stripe Checkout Session mode: "subscription"</p>
+<p>  -> Price 객체 동적 생성 (recurring interval: "month")</p>
+<p>  -> subscription_data에 metadata 포함</p>
+<p>else:</p>
+<p>  -> 기존 mode: "payment" 유지 (변경 없음)</p>
+<p></code>`<code></p>
+
+<p>Stripe API 호출 예시 (recurring === true):</p>
+
+<p></code>`<code>javascript</p>
+<p>const session = await stripe.checkout.sessions.create({</p>
+<p>  mode: 'subscription',</p>
+<p>  line_items: [{</p>
+<p>    price_data: {</p>
+<p>      currency: 'nzd',</p>
+<p>      product_data: { name: </code>Monthly donation to ${charityName}<code> },</p>
+<p>      unit_amount: amountInCents,</p>
+<p>      recurring: { interval: 'month' },</p>
+<p>    },</p>
+<p>    quantity: 1,</p>
+<p>  }],</p>
+<p>  subscription_data: {</p>
+<p>    metadata: {</p>
+<p>      charity_account_id: charityAccountId,</p>
+<p>      platform_fee_percent: '2.5',</p>
+<p>      donor_id: userId,</p>
+<p>    },</p>
+<p>    application_fee_percent: platformFeePercent,</p>
+<p>  },</p>
+<p>  success_url: </code>${FRONTEND_URL}/donation/success?project=${charityName}&amount=${amount}<code>,</p>
+<p>  cancel_url: </code>${FRONTEND_URL}/donation/cancel<code>,</p>
+<p>});</p>
+<p></code>`<code></p>
+
+<h3>2. Subscription 관리 API (신규)</h3>
+
+<table><thead><tr><th>Method</th><th>Endpoint</th><th>설명</th></tr></thead><tbody><tr><td>GET</td><td>/api/v1/me/subscriptions</td><td>내 정기 기부 목록</td></tr>
+<tr><td>PATCH</td><td>/api/v1/me/subscriptions/:id</td><td>정기 기부 수정 (금액, 상태)</td></tr>
+<tr><td>DELETE</td><td>/api/v1/me/subscriptions/:id</td><td>정기 기부 취소</td></tr></tbody></table>
+<p>GET /api/v1/me/subscriptions 응답:</p>
+
+<p></code>`<code>json</p>
+<p>{</p>
+<p>  "subscriptions": [</p>
+<p>    {</p>
+<p>      "id": "sub_xxx",</p>
+<p>      "charity_display_name": "Trees That Count",</p>
+<p>      "charity_id": 42,</p>
+<p>      "amount_minor": 5000,</p>
+<p>      "currency_code": "NZD",</p>
+<p>      "interval": "month",</p>
+<p>      "status": "active",</p>
+<p>      "current_period_start": "2026-05-01T00:00:00Z",</p>
+<p>      "current_period_end": "2026-06-01T00:00:00Z",</p>
+<p>      "next_payment_date": "2026-06-01T00:00:00Z",</p>
+<p>      "created_at": "2026-01-15T00:00:00Z",</p>
+<p>      "total_paid_minor": 25000,</p>
+<p>      "payment_count": 5,</p>
+<p>      "stripe_subscription_id": "sub_xxx"</p>
+<p>    }</p>
+<p>  ],</p>
+<p>  "total": 1</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<p>PATCH /api/v1/me/subscriptions/:id 요청:</p>
+
+<p></code>`<code>json</p>
+<p>{</p>
+<p>  "amount_minor": 10000,</p>
+<p>  "status": "paused"</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<ul><li>status: "active" | "paused"</li>
+<li>Stripe pause = subscription.pause_collection</li>
+<li>금액 변경 = subscription.items의 price 업데이트</li>
+<p></ul></p>
+<h3>3. Webhook 처리</h3>
+
+<table><thead><tr><th>Event</th><th>처리</th></tr></thead><tbody><tr><td>invoice.payment_succeeded</td><td>DB에 새 donation 레코드 생성</td></tr>
+<tr><td>customer.subscription.updated</td><td>상태 업데이트 (pause/resume)</td></tr>
+<tr><td>customer.subscription.deleted</td><td>취소 처리</td></tr>
+<tr><td>invoice.payment_failed</td><td>기부자에게 알림 이메일</td></tr></tbody></table>
+<h3>4. DB 스키마</h3>
+
+<p></code>`<code>sql</p>
+<p>CREATE TABLE subscriptions (</p>
+<p>  id              SERIAL PRIMARY KEY,</p>
+<p>  user_id         INTEGER NOT NULL REFERENCES users(id),</p>
+<p>  charity_id      INTEGER NOT NULL REFERENCES charities(id),</p>
+<p>  stripe_sub_id   VARCHAR(255) UNIQUE NOT NULL,</p>
+<p>  amount_minor    INTEGER NOT NULL,</p>
+<p>  currency_code   VARCHAR(3) NOT NULL DEFAULT 'NZD',</p>
+<p>  interval        VARCHAR(10) NOT NULL DEFAULT 'month',</p>
+<p>  status          VARCHAR(20) NOT NULL DEFAULT 'active',</p>
+<p>  next_payment_at TIMESTAMPTZ,</p>
+<p>  created_at      TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>  cancelled_at    TIMESTAMPTZ,</p>
+<p>  total_paid_minor INTEGER NOT NULL DEFAULT 0,</p>
+<p>  payment_count    INTEGER NOT NULL DEFAULT 0</p>
+<p>);</p>
+
+<p>CREATE INDEX idx_subscriptions_user ON subscriptions(user_id);</p>
+<p>CREATE INDEX idx_subscriptions_status ON subscriptions(status);</p>
+<p></code>`<code></p>
+
+<hr/>
+
+<h2>[P1] Gift Donation Metadata — 선물 기부</h2>
+
+<h3>현재 상태</h3>
+<ul><li>프론트엔드: localStorage에 선물 데이터 저장 -> 성공 페이지에서 디지털 카드 표시</li>
+<li>백엔드: 선물 메타데이터 저장 안 됨</li>
+<p></ul></p>
+<h3>1. Checkout Session에 Gift Metadata 추가</h3>
+
+<p>POST /api/v1/checkout/donations 요청에 추가할 필드:</p>
+
+<p></code>`<code>json</p>
+<p>{</p>
+<p>  "amount": 50,</p>
+<p>  "currency": "NZD",</p>
+<p>  "charityAccountId": "acct_xxx",</p>
+<p>  "gift": {</p>
+<p>    "recipientName": "Sarah Kim",</p>
+<p>    "recipientEmail": "sarah@email.com",</p>
+<p>    "message": "Happy birthday!"</p>
+<p>  }</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<ul><li>gift 필드는 optional</li>
+<li>recipientEmail은 optional</li>
+<li>message는 max 200자</li>
+<p></ul></p>
+<h3>2. 처리 플로우</h3>
+
+<p></code>`<code></p>
+<p>1. Stripe session metadata에 gift 정보 포함</p>
+<p>2. donation 레코드에 gift 필드 저장</p>
+<p>3. recipientEmail이 있으면 -> 결제 성공 후 선물 카드 이메일 발송</p>
+<p></code>`<code></p>
+
+<h3>3. DonationItem 타입 확장</h3>
+
+<p></code>`<code>typescript</p>
+<p>interface DonationItem {</p>
+<p>  // ... 기존 필드 ...</p>
+<p>  is_gift?: boolean;</p>
+<p>  gift_recipient_name?: string;</p>
+<p>  gift_recipient_email?: string;</p>
+<p>  gift_message?: string;</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<h3>4. Gift Card 이메일</h3>
+
+<p>결제 성공 + gift.recipientEmail 존재 시:</p>
+
+<p></code>`<code></p>
+<p>From: noreply@deargiver.nz</p>
+<p>To: sarah@email.com</p>
+<p>Subject: A donation was made in your honor!</p>
+
+<ul><li>"{donorName}" made a donation of $50 to {charityName} in your name!</li>
+<li>Message: "Happy birthday!"</li>
+<li>Learn more at deargiver.nz</li>
+<p></ul></code>`<code></p>
+
+<h3>5. DB 스키마 추가</h3>
+
+<p></code>`<code>sql</p>
+<p>ALTER TABLE donations</p>
+<p>  ADD COLUMN is_gift         BOOLEAN DEFAULT FALSE,</p>
+<p>  ADD COLUMN gift_recipient  VARCHAR(255),</p>
+<p>  ADD COLUMN gift_email      VARCHAR(255),</p>
+<p>  ADD COLUMN gift_message    TEXT;</p>
+<p></code>`<code></p>
+
+<hr/>
+
+<h2>[P2] Interest Notification Email — 기관 초대</h2>
+
+<h3>현재 상태</h3>
+<ul><li>프론트엔드: POST /api/interest-notify Next.js API 라우트 구현 완료</li>
+<li>UNCLAIMED 단체 페이지에 "I'd love to donate!" 버튼 동작 중</li>
+<li>이슈: Resend 무료 티어에서 인증된 도메인만 외부 이메일 발송 가능</li>
+<p></ul></p>
+<h3>1. 도메인 인증 (Resend)</h3>
+
+<p></code>`<code></p>
+<p>1. Resend 대시보드 -> Domains -> Add Domain: deargiver.nz</p>
+<p>2. DNS 레코드 추가:</p>
+<p>   - MX record</p>
+<p>   - SPF (TXT): v=spf1 include:amazonses.com ~all</p>
+<p>   - DKIM (CNAME): resend 제공 값</p>
+<p>3. 인증 완료 후 환경변수 업데이트:</p>
+<p>   INTEREST_EMAIL_FROM=hello@deargiver.nz</p>
+<p></code>`<code></p>
+
+<h3>2. 이메일 발송 로그 DB</h3>
+
+<p></code>`<code>sql</p>
+<p>CREATE TABLE interest_notifications (</p>
+<p>  id              SERIAL PRIMARY KEY,</p>
+<p>  charity_slug    VARCHAR(255) NOT NULL,</p>
+<p>  charity_name    VARCHAR(255) NOT NULL,</p>
+<p>  donor_name      VARCHAR(255),</p>
+<p>  donor_email     VARCHAR(255),</p>
+<p>  sent_at         TIMESTAMPTZ NOT NULL DEFAULT NOW(),</p>
+<p>  resend_id       VARCHAR(255)</p>
+<p>);</p>
+
+<p>CREATE INDEX idx_interest_charity ON interest_notifications(charity_slug);</p>
+<p></code>`<code></p>
+
+<ul><li>현재 인메모리 스팸 방지 -> 프로덕션에서 DB 기반으로 전환 필요</li>
+<p></ul></p>
+<hr/>
+
+<h2>[P3] Donor Journey API — 기부자 관계</h2>
+
+<h3>현재 상태</h3>
+<ul><li>프론트엔드: useApiDonations(500)으로 전체 기부 내역 로드 후 클라이언트 집계</li>
+<li>문제: 기부 건수 증가 시 성능 저하</li>
+<p></ul></p>
+<h3>기관별 집계 API (신규)</h3>
+
+<p>엔드포인트: GET /api/v1/me/charity-relationships</p>
+
+<p>응답:</p>
+
+<p></code>`<code>json</p>
+<p>{</p>
+<p>  "relationships": [</p>
+<p>    {</p>
+<p>      "charity_id": 42,</p>
+<p>      "charity_display_name": "Trees That Count",</p>
+<p>      "total_donated_minor": 15000,</p>
+<p>      "donation_count": 5,</p>
+<p>      "first_donation_at": "2026-01-15T00:00:00Z",</p>
+<p>      "last_donation_at": "2026-05-10T00:00:00Z",</p>
+<p>      "avg_donation_minor": 3000,</p>
+<p>      "currency_code": "NZD",</p>
+<p>      "recent_donations": [</p>
+<p>        {</p>
+<p>          "amount_minor": 5000,</p>
+<p>          "paid_at": "2026-05-10T00:00:00Z",</p>
+<p>          "status": "succeeded"</p>
+<p>        }</p>
+<p>      ]</p>
+<p>    }</p>
+<p>  ],</p>
+<p>  "total_charities": 3,</p>
+<p>  "total_donated_minor": 45000</p>
+<p>}</p>
+<p></code>`<code></p>
+
+<hr/>
+
+<h2>신규 API 전체 매핑</h2>
+
+<table><thead><tr><th>Method</th><th>Endpoint</th><th>용도</th><th>우선순위</th></tr></thead><tbody><tr><td>POST</td><td>/api/v1/checkout/donations</td><td>recurring 파라미터 처리 추가</td><td>P0</td></tr>
+<tr><td>GET</td><td>/api/v1/me/subscriptions</td><td>정기 기부 목록</td><td>P0</td></tr>
+<tr><td>PATCH</td><td>/api/v1/me/subscriptions/:id</td><td>정기 기부 수정</td><td>P0</td></tr>
+<tr><td>DELETE</td><td>/api/v1/me/subscriptions/:id</td><td>정기 기부 취소</td><td>P0</td></tr>
+<tr><td>POST</td><td>/api/v1/checkout/donations</td><td>gift 메타데이터 저장</td><td>P1</td></tr>
+<tr><td>GET</td><td>/api/v1/me/charity-relationships</td><td>기관별 관계 집계</td><td>P3</td></tr></tbody></table>
+<hr/>
+
+<h2>환경 변수 추가</h2>
+
+<p></code>`<code>bash</p>
+<h1>기존 환경 변수는 유지. 아래만 추가/변경:</h1>
+
+<h1>최소 기부금액 변경 ($20 -> $10)</h1>
+<p>MIN_DONATION_AMOUNT=1000  # $10 in cents</p>
+
+<h1>Resend 도메인 인증 후 변경</h1>
+<p>INTEREST_EMAIL_FROM=hello@deargiver.nz  # 현재: onboarding@resend.dev</p>
+<p></code>``</p>
+
+<hr/>
+
+<h2>프론트엔드 연결 포인트 (백엔드 완성 후)</h2>
+
+<table><thead><tr><th>파일</th><th>수정 내용</th></tr></thead><tbody><tr><td>components/RecurringDonationsCard.tsx</td><td>목업 -> GET /api/v1/me/subscriptions</td></tr>
+<tr><td>app/donation/success/page.tsx</td><td>localStorage -> API 응답에서 gift 데이터</td></tr>
+<tr><td>app/api/interest-notify/route.ts</td><td>인메모리 -> DB 기반 스팸 방지</td></tr>
+<tr><td>app/dashboard/page.tsx (MyCausesTab)</td><td>500건 풀로드 -> GET /api/v1/me/charity-relationships</td></tr></tbody></table>
+<p>** 위 수정은 백엔드 API가 완성된 후에 진행합니다.</p>
+<p>** 현재 프론트엔드는 목업/클라이언트 로직으로 완전 동작합니다.</p>
+
+<hr/>
+
+<h2>백엔드 팀 응답 체크리스트</h2>
+
+<p>완료된 항목에 [x] 표시 후 프론트엔드 팀에 회신해 주세요.</p>
+
+<h3>정기 기부 (P0)</h3>
+<ul><li>[ ] POST /api/v1/checkout/donations — recurring 처리 추가</li>
+<li>[ ] GET /api/v1/me/subscriptions</li>
+<li>[ ] PATCH /api/v1/me/subscriptions/:id</li>
+<li>[ ] DELETE /api/v1/me/subscriptions/:id</li>
+<li>[ ] Webhook 처리 (invoice.payment_succeeded 등 4종)</li>
+<li>[ ] subscriptions 테이블 생성</li>
+<p></ul></p>
+<h3>선물 기부 (P1)</h3>
+<ul><li>[ ] POST /api/v1/checkout/donations — gift 메타데이터 저장</li>
+<li>[ ] donations 테이블에 gift 컬럼 추가</li>
+<li>[ ] Gift Card 이메일 발송 (recipientEmail 존재 시)</li>
+<p></ul></p>
+<h3>기관 초대 (P2)</h3>
+<ul><li>[ ] Resend 도메인 인증 (deargiver.nz)</li>
+<li>[ ] interest_notifications 테이블 생성</li>
+<p></ul></p>
+<h3>기부자 관계 (P3)</h3>
+<ul><li>[ ] GET /api/v1/me/charity-relationships</li>
+<p></ul></p>
+<h3>변경 사항</h3>
+<ul><li>[ ] 최소 기부금액 검증 $20 -> $10 변경</li>
+<p></ul></p>
+<hr/>
+
+<p>문서 끝. 질문이 있으면 프론트엔드 팀에 연락해주세요.</p>
+
+</body>
+</html>

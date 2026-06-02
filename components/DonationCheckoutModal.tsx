@@ -7,11 +7,13 @@ import {
   Button,
   Group,
   TextInput,
+  Textarea,
   Box,
   Badge,
   Divider,
   Stack,
   Checkbox,
+  Switch,
   ThemeIcon,
   SimpleGrid,
   Loader,
@@ -26,6 +28,8 @@ import {
   IconReceipt,
   IconAlertCircle,
   IconAlertTriangle,
+  IconGift,
+  IconRepeat,
 } from '@tabler/icons-react';
 import type { Campaign } from '@/data/campaigns';
 import { createCheckoutSession } from '@/lib/api';
@@ -81,6 +85,12 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   const [coverFee, setCoverFee] = useState(false); // Stripe 수수료 부담 여부
   const [tipPlatform, setTipPlatform] = useState(false); // 자발적 플랫폼 팁
 
+  // 선물 기부
+  const [isGift, setIsGift] = useState(false);
+  const [giftRecipientName, setGiftRecipientName] = useState('');
+  const [giftRecipientEmail, setGiftRecipientEmail] = useState('');
+  const [giftMessage, setGiftMessage] = useState('');
+
   // 로딩/에러
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -90,7 +100,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   // DearGiver 플랫폼 수수료: MAX($0.50, 기부금의 1%)
   const platformFee = Math.max(0.50, Math.round(amount * 0.01 * 100) / 100);
   // Stripe 수수료: ~1.5% (Stripe NZ 요금 기준)
-  const stripeFee = coverFee ? Math.round(amount * 0.015 * 100) / 100 : 0;
+  const stripeFee = coverFee ? Math.round((amount * 0.027 + 0.30) * 100) / 100 : 0;
   // 자발적 플랫폼 팁
   const tipAmount = tipPlatform ? PLATFORM_TIP_AMOUNT : 0;
   const totalCharge = amount + stripeFee + platformFee + tipAmount;
@@ -105,6 +115,10 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
     setCurrency('NZD');
     setCoverFee(false);
     setTipPlatform(false);
+    setIsGift(false);
+    setGiftRecipientName('');
+    setGiftRecipientEmail('');
+    setGiftMessage('');
     setApiError(null);
     onClose();
   }, [onClose]);
@@ -119,6 +133,21 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       // 백엔드 API: amount는 기부 원금(달러 단위, 소수점 가능). 수수료는 백엔드가 계산.
       const charityAccountId = campaign.stripeAccountId ?? 'acct_1TLekBRHr11OamkF';
 
+      // 선물 기부 데이터를 localStorage에 저장 (Stripe 리디렉트 후 사용)
+      if (isGift && giftRecipientName.trim()) {
+        localStorage.setItem('deargiver_gift', JSON.stringify({
+          recipientName: giftRecipientName.trim(),
+          recipientEmail: giftRecipientEmail.trim() || null,
+          message: giftMessage.trim() || null,
+          charityName: campaign.name,
+          amount,
+          currency,
+          timestamp: new Date().toISOString(),
+        }));
+      } else {
+        localStorage.removeItem('deargiver_gift');
+      }
+
       const session = await createCheckoutSession({
         amount,
         currency: currency as 'NZD' | 'AUD' | 'USD',
@@ -126,6 +155,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
         charityName: campaign.name,
         coverStripeFee: coverFee,
         addSupport: tipPlatform,
+        recurring: frequency === 'monthly',
       });
 
       // Stripe Checkout 페이지로 리다이렉트
@@ -168,6 +198,29 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       {step === 0 && (
         <div className={classes.stepContent}>
           {/* 통화 선택 */}
+
+          {/* 월간 기부 혜택 배너 */}
+          {frequency === 'monthly' && (
+            <Alert
+              icon={<IconRepeat size={16} />}
+              color="sage"
+              variant="light"
+              radius="md"
+              mb={16}
+            >
+              <Text size="sm" fw={600}>Monthly Giving Benefits</Text>
+              <Text size="xs" mt={2} lh={1.5}>
+                {amount >= MIN_AMOUNT ? (
+                  <>Your <strong>{formatAmount(amount, currency)}/mo</strong> = <strong>{formatAmount(amount * 12, currency)}/year</strong> of sustained impact.
+                  {currency === 'NZD' && <> Est. annual tax credit: <strong>{formatAmount(taxRefund(amount * 12), 'NZD')}</strong>.</>}
+                  </>
+                ) : (
+                  'Set a monthly amount to see your annual impact projection.'
+                )}
+              </Text>
+            </Alert>
+          )}
+
           <Select
             label="Currency"
             data={CURRENCY_OPTIONS}
@@ -268,8 +321,9 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             mt={16}
             label={
               <Text size="sm">
-                Cover the ~1.5% Stripe processing fee
+                Cover the Stripe processing fee (~2.7% + $0.30)
                 {stripeFee > 0 ? ` (+${formatAmount(stripeFee, currency)})` : ''}
+                <Text size="xs" c="dimmed" mt={2}>International cards: ~3.5% + $0.30</Text>
               </Text>
             }
             description="Helps more of your donation reach the charity directly"
@@ -291,6 +345,70 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             onChange={(e) => setTipPlatform(e.currentTarget.checked)}
             color="terracotta"
           />
+
+          {/* ── 선물 기부 토글 ── */}
+          <Box
+            mt={16}
+            p={16}
+            style={{
+              background: isGift
+                ? 'linear-gradient(135deg, rgba(196,114,74,0.06) 0%, rgba(74,124,113,0.04) 100%)'
+                : 'rgba(0,0,0,0.02)',
+              borderRadius: 12,
+              border: isGift ? '1px solid rgba(196,114,74,0.2)' : '1px solid rgba(0,0,0,0.06)',
+              transition: 'all 0.2s ease',
+            }}
+          >
+            <Switch
+              checked={isGift}
+              onChange={(e) => setIsGift(e.currentTarget.checked)}
+              color="terracotta"
+              label={
+                <Group gap={6}>
+                  <IconGift size={16} color={isGift ? 'var(--bm-terracotta)' : 'var(--bm-text-muted)'} />
+                  <Text size="sm" fw={600} c={isGift ? 'var(--bm-text-dark)' : 'var(--bm-text-muted)'}>
+                    Gift this donation
+                  </Text>
+                </Group>
+              }
+              description="Dedicate this donation to someone special"
+            />
+
+            {isGift && (
+              <Stack gap={10} mt={12}>
+                <TextInput
+                  label="Recipient's name"
+                  placeholder="e.g. Sarah Kim"
+                  value={giftRecipientName}
+                  onChange={(e) => setGiftRecipientName(e.currentTarget.value)}
+                  radius="md"
+                  size="sm"
+                  required
+                />
+                <TextInput
+                  label="Recipient's email (optional)"
+                  placeholder="e.g. sarah@email.com"
+                  value={giftRecipientEmail}
+                  onChange={(e) => setGiftRecipientEmail(e.currentTarget.value)}
+                  radius="md"
+                  size="sm"
+                  description="We'll send them a beautiful gift card"
+                />
+                <Textarea
+                  label="Personal message (optional)"
+                  placeholder="Happy birthday! I donated in your name 🎉"
+                  value={giftMessage}
+                  onChange={(e) => setGiftMessage(e.currentTarget.value)}
+                  radius="md"
+                  size="sm"
+                  maxLength={200}
+                  autosize
+                  minRows={2}
+                  maxRows={3}
+                />
+              </Stack>
+            )}
+          </Box>
 
           {/* 플랫폼 수수료 투명 표시 */}
           {amount >= MIN_AMOUNT && (
@@ -338,6 +456,27 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       {/* ── Step 1: 확인 및 결제 ── */}
       {step === 1 && (
         <div className={classes.stepContent}>
+          {/* 선물 기부 표시 */}
+          {isGift && giftRecipientName.trim() && (
+            <Box
+              mb={16}
+              p={14}
+              style={{
+                background: 'linear-gradient(135deg, rgba(196,114,74,0.06) 0%, rgba(74,124,113,0.04) 100%)',
+                borderRadius: 12,
+                border: '1px solid rgba(196,114,74,0.15)',
+              }}
+            >
+              <Group gap={8} mb={4}>
+                <IconGift size={16} color="var(--bm-terracotta)" />
+                <Text size="sm" fw={700} c="var(--bm-terracotta)">Gift Donation</Text>
+              </Group>
+              <Text size="xs" c="var(--bm-text-muted)" lh={1.5}>
+                Dedicated to <strong>{giftRecipientName.trim()}</strong>
+                {giftMessage.trim() ? ` — "${giftMessage.trim()}"` : ''}
+              </Text>
+            </Box>
+          )}
           <Stack gap={0} mb={20}>
             <div className={classes.paymentPreview}>
               <Group justify="space-between" mb={8}>

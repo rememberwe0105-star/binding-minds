@@ -772,6 +772,7 @@ export async function createCheckoutSession(data: {
   charityName?: string;
   coverStripeFee?: boolean;
   addSupport?: boolean;
+  recurring?: boolean;
 }): Promise<CheckoutSession> {
   return apiFetch<CheckoutSession>('/api/v1/checkout/donations', {
     method: 'POST',
@@ -1384,4 +1385,169 @@ export function minorToDisplay(amountMinor: number): number {
  */
 export function displayToMinor(amountDisplay: number): number {
   return Math.round(amountDisplay * 100);
+}
+
+// ---------------------------------------------------------------------------
+// API 함수들 — 이메일 템플릿 + 영수증 (감사 이메일 자동화)
+// ---------------------------------------------------------------------------
+
+/** 감사 이메일 템플릿 */
+export interface EmailTemplate {
+  id: number;
+  charity_id: number;
+  title: string;
+  body: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface EmailTemplatesResponse {
+  items: EmailTemplate[];
+  total: number;
+}
+
+export interface CreateEmailTemplateRequest {
+  title: string;
+  body: string;
+  is_active?: boolean;
+}
+
+/** 영수증 다운로드 정보 */
+export interface ReceiptInfo {
+  receipt_no: string;
+  receipt_url: string | null;
+  receipt_status: 'pending' | 'generated' | 'emailed';
+}
+
+// ── 감사 이메일 템플릿 CRUD ──
+
+const TEMPLATE_STORAGE_KEY = 'dg-email-templates';
+
+function loadLocalTemplates(charityId: number): EmailTemplate[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(`${TEMPLATE_STORAGE_KEY}-${charityId}`);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveLocalTemplates(charityId: number, templates: EmailTemplate[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(`${TEMPLATE_STORAGE_KEY}-${charityId}`, JSON.stringify(templates));
+  } catch { /* ignore */ }
+}
+
+/**
+ * 감사 이메일 템플릿 목록 조회
+ * - 백엔드 연동 시: GET /api/v1/charities/:id/email-templates
+ * - 백엔드 미연동 시: localStorage fallback
+ */
+export async function getEmailTemplates(
+  charityId: number,
+): Promise<EmailTemplatesResponse> {
+  try {
+    return await apiFetch<EmailTemplatesResponse>(
+      `/api/v1/charities/${charityId}/email-templates`,
+    );
+  } catch {
+    // Fallback to localStorage
+    const items = loadLocalTemplates(charityId);
+    return { items, total: items.length };
+  }
+}
+
+/**
+ * 감사 이메일 템플릿 생성
+ */
+export async function createEmailTemplate(
+  charityId: number,
+  data: CreateEmailTemplateRequest,
+): Promise<EmailTemplate> {
+  try {
+    return await apiFetch<EmailTemplate>(
+      `/api/v1/charities/${charityId}/email-templates`,
+      { method: 'POST', body: JSON.stringify(data) },
+    );
+  } catch {
+    // Fallback: save to localStorage
+    const items = loadLocalTemplates(charityId);
+    const newTemplate: EmailTemplate = {
+      id: Date.now(),
+      charity_id: charityId,
+      title: data.title,
+      body: data.body,
+      is_active: data.is_active ?? false,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString(),
+    };
+    items.push(newTemplate);
+    saveLocalTemplates(charityId, items);
+    return newTemplate;
+  }
+}
+
+/**
+ * 감사 이메일 템플릿 수정
+ */
+export async function updateEmailTemplate(
+  charityId: number,
+  templateId: number,
+  data: Partial<CreateEmailTemplateRequest>,
+): Promise<EmailTemplate> {
+  try {
+    return await apiFetch<EmailTemplate>(
+      `/api/v1/charities/${charityId}/email-templates/${templateId}`,
+      { method: 'PATCH', body: JSON.stringify(data) },
+    );
+  } catch {
+    // Fallback
+    const items = loadLocalTemplates(charityId);
+    const idx = items.findIndex(t => t.id === templateId);
+    if (idx >= 0) {
+      items[idx] = { ...items[idx], ...data, updated_at: new Date().toISOString() };
+      saveLocalTemplates(charityId, items);
+      return items[idx];
+    }
+    throw new Error('Template not found');
+  }
+}
+
+/**
+ * 감사 이메일 템플릿 삭제
+ */
+export async function deleteEmailTemplate(
+  charityId: number,
+  templateId: number,
+): Promise<GenericOkResponse> {
+  try {
+    return await apiFetch<GenericOkResponse>(
+      `/api/v1/charities/${charityId}/email-templates/${templateId}`,
+      { method: 'DELETE' },
+    );
+  } catch {
+    // Fallback
+    const items = loadLocalTemplates(charityId);
+    const filtered = items.filter(t => t.id !== templateId);
+    saveLocalTemplates(charityId, filtered);
+    return { ok: true, message: 'Template deleted' } as GenericOkResponse;
+  }
+}
+
+/**
+ * 영수증 다운로드 URL 조회
+ * - 백엔드가 PDF를 생성/저장했다면 URL을 반환
+ * - 아직 미생성이면 null 반환
+ */
+export async function getReceiptDownloadUrl(
+  donationId: number,
+): Promise<ReceiptInfo | null> {
+  try {
+    return await apiFetch<ReceiptInfo>(
+      `/api/v1/receipts/${donationId}/pdf`,
+    );
+  } catch {
+    return null;
+  }
 }

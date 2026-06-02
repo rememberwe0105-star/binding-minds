@@ -11,6 +11,7 @@ import {
   ThemeIcon,
   Button,
   Timeline,
+  Badge,
 } from '@mantine/core';
 import {
   IconHeart,
@@ -24,6 +25,11 @@ import {
   IconFolderCheck,
   IconChartBar,
   IconCircleCheck,
+  IconGift,
+  IconSparkles,
+  IconRepeat,
+  IconRoute,
+  IconArrowRight,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -39,17 +45,65 @@ const values = [
   {
     icon: IconShieldCheck,
     title: 'Trust & Verification',
-    description: 'All charities on our platform are verified and registered with New Zealand\'s Charities Services.',
+    description: 'All charities are verified with NZ Charities Services. We display their CC registration number so you can confirm.',
   },
   {
     icon: IconReceipt,
     title: 'Tax Made Simple',
-    description: 'We automatically generate your donation receipts and help you claim your 33.33% tax refund.',
+    description: 'Auto-generated receipts, annual tax summaries, and 33.33% tax credit calculations — all in your dashboard.',
+  },
+  {
+    icon: IconGift,
+    title: 'Gift Giving',
+    description: 'Dedicate a donation to someone special with a personal message. A beautiful digital gift card is created instantly.',
+  },
+  {
+    icon: IconSparkles,
+    title: 'Impact Tracking',
+    description: 'Milestones, giving streaks, and a personal journey timeline — watch your generosity grow over time.',
   },
   {
     icon: IconUsers,
     title: 'Community First',
-    description: 'We\'re built by and for the communities of Aotearoa, with a focus on local impact.',
+    description: 'Built by and for Aotearoa. We connect Kiwi donors with local charities making a real difference.',
+  },
+];
+
+const differentiators = [
+  {
+    icon: IconReceipt,
+    color: 'sage',
+    title: 'NZ Tax Credit Engine',
+    description: 'Automatic 33.33% tax credit calculations, annual summaries, and IRD-ready PDF exports. No other NZ platform does this.',
+    badge: 'NZ Exclusive',
+  },
+  {
+    icon: IconSparkles,
+    color: 'terracotta',
+    title: 'Impact Dashboard & Milestones',
+    description: '8 achievement badges, giving streaks, monthly trend charts, and personalised encouragement messages.',
+    badge: 'Unique',
+  },
+  {
+    icon: IconGift,
+    color: 'blue',
+    title: 'Gift Donations',
+    description: 'Dedicate a donation to someone with a custom message. A digital gift card is created and shareable instantly.',
+    badge: 'Unique',
+  },
+  {
+    icon: IconRoute,
+    color: 'grape',
+    title: 'Donor Journey Timeline',
+    description: 'Track your relationship with every charity — first donation date, total given, per-charity timeline with visual dots.',
+    badge: 'Unique',
+  },
+  {
+    icon: IconRepeat,
+    color: 'orange',
+    title: 'Smart Recurring',
+    description: 'Set up monthly giving with annual impact projections. Manage, pause, or adjust subscriptions from your dashboard.',
+    badge: null,
   },
 ];
 
@@ -71,9 +125,9 @@ export default function AboutPage() {
               Connecting Hearts,<br />Changing the World
             </Title>
             <Text size="lg" c="var(--bm-text-muted)" maw={600} lh={1.8} mt={16}>
-              DearGiver is a New Zealand-based platform that makes giving effortless.
-              We connect donors with verified charities, simplify payments, and help you
-              claim your tax refund — all in one place.
+              DearGiver is a New Zealand-based giving platform that makes generosity effortless.
+              We connect donors with verified charities, automate tax credits, and turn every
+              donation into a meaningful journey — with gift cards, impact milestones, and more.
             </Text>
           </Container>
         </section>
@@ -85,7 +139,7 @@ export default function AboutPage() {
               What We Stand For
             </Title>
             <Text size="md" c="var(--bm-text-muted)" mb={40} maw={500}>
-              Our platform is built on four core principles that guide everything we do.
+              Our platform is built on core principles that guide everything we do.
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={24}>
@@ -133,8 +187,8 @@ export default function AboutPage() {
                   bullet={<IconCreditCard size={20} />}
                 >
                   <Text size="sm" c="var(--bm-text-muted)" lh={1.7} mt={4}>
-                    Choose one-time or monthly. Your donation goes directly to the
-                    charity through Stripe — we never touch your money.
+                    Choose one-time or monthly. Dedicate it as a gift if you like.
+                    Your donation goes directly to the charity through Stripe — we never touch your money.
                   </Text>
                 </Timeline.Item>
 
@@ -221,8 +275,8 @@ export default function AboutPage() {
               Honest. Simple. Transparent.
             </Title>
             <Text size="md" c="var(--bm-text-muted)" mb={40} maw={560} lh={1.8}>
-              We believe you deserve to know exactly what happens to every dollar you give.
-              Here&apos;s a complete breakdown — no fine print, no surprises.
+              We believe you deserve to know exactly what happens to every dollar.
+              Donors never pay mandatory fees — here&apos;s our full breakdown.
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={20} mb={32}>
@@ -242,23 +296,23 @@ export default function AboutPage() {
                 <ThemeIcon size={48} radius="md" color="sage" variant="filled" mb={16}>
                   <IconShieldCheck size={24} />
                 </ThemeIcon>
-                <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>DearGiver Fee</Text>
-                <Text size="xl" fw={900} c="var(--bm-sage-dark)" mb={8}>Just 1%</Text>
+                <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>For Donors</Text>
+                <Text size="xl" fw={900} c="var(--bm-sage-dark)" mb={8}>$0 Mandatory</Text>
                 <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-                  A simple 1% fee per donation (min $0.50). No subscriptions,
-                  no hidden fees. This is how we keep the lights on — simply and fairly.
+                  You can <strong>optionally</strong> cover Stripe&apos;s processing fee (~2.7% + $0.30 for NZ cards).
+                  International cards may be ~3.5% + $0.30. This is always your choice, never forced.
                 </Text>
               </Card>
 
               <Card padding="xl" radius="lg" withBorder className={classes.valueCard}>
-                <ThemeIcon size={48} radius="md" color="orange" variant="light" mb={16}>
-                  <IconCreditCard size={24} />
+                <ThemeIcon size={48} radius="md" color="terracotta" variant="light" mb={16}>
+                  <IconChartBar size={24} />
                 </ThemeIcon>
-                <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>Stripe Processing</Text>
-                <Text size="xl" fw={900} c="var(--bm-text-dark)" mb={8}>~1.5%</Text>
+                <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>For Charities</Text>
+                <Text size="xl" fw={900} c="var(--bm-terracotta)" mb={8}>From $0</Text>
                 <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-                  Stripe charges a standard payment processing fee. You can choose to cover
-                  this so 100% of your donation reaches the charity.
+                  Charities start completely free. A small platform fee only applies
+                  when donations come through — no donations, no cost.
                 </Text>
               </Card>
             </SimpleGrid>
@@ -268,24 +322,68 @@ export default function AboutPage() {
                 <IconShieldCheck size={18} color="var(--bm-sage-dark)" />
                 <Text fw={700} size="sm" c="var(--bm-sage-dark)">Real Example: A $50 NZD donation</Text>
               </Group>
-              <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={12}>
+              <SimpleGrid cols={{ base: 1, sm: 4 }} spacing={12}>
                 <Box>
-                  <Text size="xs" c="var(--bm-text-muted)" mb={2}>You pay in total</Text>
-                  <Text fw={700} size="md" c="var(--bm-text-dark)">$50.50</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">$50 donation + $0.50 DearGiver fee (1%)</Text>
+                  <Text size="xs" c="var(--bm-text-muted)" mb={2}>Donor pays</Text>
+                  <Text fw={700} size="md" c="var(--bm-text-dark)">$50.00</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">No extra fees required</Text>
+                </Box>
+                <Box>
+                  <Text size="xs" c="var(--bm-text-muted)" mb={2}>Optional fee cover</Text>
+                  <Text fw={700} size="md" c="dimmed">+$1.65</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">Stripe ~2.7% + $0.30 (donor&apos;s choice)</Text>
                 </Box>
                 <Box>
                   <Text size="xs" c="var(--bm-text-muted)" mb={2}>Charity receives</Text>
-                  <Text fw={700} size="md" c="var(--bm-terracotta)">$49.75</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">After Stripe processing (~1.5%)</Text>
+                  <Text fw={700} size="md" c="var(--bm-terracotta)">$48.35 – $50</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">Depending on fee cover choice</Text>
                 </Box>
                 <Box>
                   <Text size="xs" c="var(--bm-text-muted)" mb={2}>Your IRD tax credit</Text>
                   <Text fw={700} size="md" c="var(--bm-sage-dark)">~$16.65</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">33.33% of $50 claimed via myIR</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">33.33% of $50 via myIR</Text>
                 </Box>
               </SimpleGrid>
             </Card>
+          </Container>
+        </section>
+
+        {/* Why DearGiver Is Different */}
+        <section className={classes.section}>
+          <Container size="lg">
+            <Group gap={8} mb={12}>
+              <IconSparkles size={20} color="var(--bm-terracotta)" />
+              <Text size="sm" fw={600} tt="uppercase" c="var(--bm-terracotta)" style={{ letterSpacing: '1.5px' }}>
+                What Sets Us Apart
+              </Text>
+            </Group>
+            <Title order={2} className={classes.sectionTitle} mb={8}>
+              Features You Won&apos;t Find Elsewhere
+            </Title>
+            <Text size="md" c="var(--bm-text-muted)" mb={40} maw={560} lh={1.8}>
+              We built DearGiver with features that no other NZ giving platform offers.
+            </Text>
+
+            <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing={20}>
+              {differentiators.map((item) => (
+                <Card key={item.title} padding="xl" radius="lg" withBorder className={classes.valueCard}>
+                  <Group justify="space-between" mb={12}>
+                    <ThemeIcon size={44} radius="md" color={item.color} variant="light">
+                      <item.icon size={22} />
+                    </ThemeIcon>
+                    {item.badge && (
+                      <Badge size="xs" variant="light" color={item.color}>{item.badge}</Badge>
+                    )}
+                  </Group>
+                  <Text fw={700} size="md" c="var(--bm-text-dark)" mb={6}>
+                    {item.title}
+                  </Text>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    {item.description}
+                  </Text>
+                </Card>
+              ))}
+            </SimpleGrid>
           </Container>
         </section>
 
@@ -298,15 +396,19 @@ export default function AboutPage() {
             <Text size="lg" c="rgba(255,255,255,0.7)" mb={40}>
               Whether you&apos;re here to give or to grow — DearGiver is for you.
             </Text>
-            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={16} maw={520} mx="auto">
-              <div style={{ textAlign: 'center' }}>
-                <Text size="xs" fw={600} tt="uppercase" c="rgba(255,255,255,0.5)" mb={8} style={{ letterSpacing: '1px' }}>
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={24} maw={700} mx="auto">
+              <Card padding="xl" radius="lg" style={{ background: 'rgba(255,255,255,0.12)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.15)' }}>
+                <Text size="xs" fw={600} tt="uppercase" c="rgba(255,255,255,0.6)" mb={16} style={{ letterSpacing: '1px' }}>
                   For Donors
+                </Text>
+                <Text size="sm" c="rgba(255,255,255,0.8)" lh={1.7} mb={20}>
+                  Explore verified NZ charities, earn milestones, auto-calculate your tax credits,
+                  and gift donations to loved ones.
                 </Text>
                 <Button
                   component={Link}
                   href="/projects"
-                  size="lg"
+                  size="md"
                   radius="xl"
                   color="white"
                   variant="white"
@@ -315,24 +417,30 @@ export default function AboutPage() {
                 >
                   Explore Campaigns
                 </Button>
-              </div>
-              <div style={{ textAlign: 'center' }}>
-                <Text size="xs" fw={600} tt="uppercase" c="rgba(255,255,255,0.5)" mb={8} style={{ letterSpacing: '1px' }}>
+              </Card>
+              <Card padding="xl" radius="lg" style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(10px)', border: '1px solid rgba(255,255,255,0.1)' }}>
+                <Text size="xs" fw={600} tt="uppercase" c="rgba(255,255,255,0.6)" mb={16} style={{ letterSpacing: '1px' }}>
                   For Charities
+                </Text>
+                <Text size="sm" c="rgba(255,255,255,0.8)" lh={1.7} mb={4}>
+                  Register for free. No donations = no fees.
+                </Text>
+                <Text size="sm" c="rgba(255,255,255,0.6)" lh={1.7} mb={20}>
+                  Get 3 months of our Growth plan free — analytics, donor CRM, and campaign tools included.
                 </Text>
                 <Button
                   component={Link}
                   href="/charity/apply"
-                  size="lg"
+                  size="md"
                   radius="xl"
                   variant="outline"
                   color="white"
                   fullWidth
-                  style={{ borderColor: 'rgba(255,255,255,0.5)', color: 'white' }}
+                  style={{ borderColor: 'rgba(255,255,255,0.4)', color: 'white' }}
                 >
-                  Register Your Charity
+                  Register Charity
                 </Button>
-              </div>
+              </Card>
             </SimpleGrid>
           </Container>
         </section>

@@ -103,7 +103,7 @@ We've already planted 12,000 trees across 15 conservation sites, with 200+ volun
 
 ### Why It Matters
 Native forests are not just trees — they're water filters, carbon sinks, and habitats. For every hectare restored, we protect the nesting grounds of 3-5 endangered bird species.`,
-    image: '/images/hero-campaign.png',
+    image: '/images/categories/environment.png',
     raised: 36400,
     goal: 50000,
     donorCount: 482,
@@ -141,7 +141,7 @@ In rural Canterbury, many schools lack basic resources — up-to-date textbooks,
 
 ### Your Contribution
 Every dollar directly funds educational resources. We operate with less than 5% administrative overhead, ensuring maximum impact for every donation.`,
-    image: '/images/charity-education.png',
+    image: '/images/categories/education.png',
     raised: 13600,
     goal: 20000,
     donorCount: 215,
@@ -175,7 +175,7 @@ Wetlands are Earth's kidneys — they filter water, prevent flooding, and store 
 
 ### Join Us
 Whether you donate, volunteer, or simply spread the word, you're part of a movement to protect what makes Aotearoa special.`,
-    image: '/images/charity-nature.png',
+    image: '/images/categories/environment.png',
     raised: 9120,
     goal: 20000,
     donorCount: 134,
@@ -209,7 +209,7 @@ Our muralists represent the full spectrum of Wellington's creative community —
 
 ### Impact Beyond Art
 Public art reduces graffiti, increases foot traffic to local businesses, and creates a sense of pride and ownership in communities. Studies show that neighbourhoods with public art see a 15% increase in community engagement.`,
-    image: '/images/charity-art.png',
+    image: '/images/categories/arts-culture.png',
     raised: 19250,
     goal: 24000,
     donorCount: 308,
@@ -243,7 +243,7 @@ We use UV filtration combined with activated carbon filters — a proven, low-ma
 
 ### Current Status
 3 systems installed and operational, serving 450 people. 12 more planned for installation over the next 6 months.`,
-    image: '/images/trending-water.png',
+    image: '/images/categories/environment.png',
     raised: 28800,
     goal: 40000,
     donorCount: 367,
@@ -277,7 +277,7 @@ Since launching, 340 young people have participated. 85% report increased confid
 
 ### Locations
 Currently operating in 8 community centres across South and West Auckland, with plans to expand to 15 by year-end.`,
-    image: '/images/trending-music.png',
+    image: '/images/categories/education.png',
     raised: 8400,
     goal: 24000,
     donorCount: 156,
@@ -314,7 +314,7 @@ New Zealand's coastline stretches over 15,000 kilometres, and plastic pollution 
 
 ### What Makes Us Different
 We don't just clean — we track. Every cleanup is documented with GPS data, weight measurements, and debris categorisation. This data is shared with councils and researchers to drive systemic change.`,
-    image: '/images/trending-beach.png',
+    image: '/images/categories/environment.png',
     raised: 15600,
     goal: 24000,
     donorCount: 243,
@@ -348,7 +348,7 @@ We rescue surplus food from supermarkets, bakeries, and restaurants, then transf
 
 ### Volunteers
 Our 200+ volunteers include professional chefs, students, retirees, and families. Everyone is welcome — no cooking experience needed.`,
-    image: '/images/trending-food.png',
+    image: '/images/categories/community.png',
     raised: 21120,
     goal: 24000,
     donorCount: 412,
@@ -385,7 +385,7 @@ Currently serving 450 seniors across 6 Wellington community centres, with 80 tra
 - 78% of participants report feeling less lonely
 - 65% report improved physical health
 - 92% say the programme has made them happier`,
-    image: '/images/charity-seniors.png',
+    image: '/images/categories/health.png',
     raised: 11500,
     goal: 22000,
     donorCount: 189,
@@ -419,7 +419,7 @@ Studies show that art education improves critical thinking, empathy, and problem
 
 ### Partner Artists
 We work with 15 professional Canterbury artists who bring real-world creative experience into the classroom, showing students that art can be a viable career path.`,
-    image: '/images/trending-art.png',
+    image: '/images/categories/arts-culture.png',
     raised: 10080,
     goal: 24000,
     donorCount: 167,

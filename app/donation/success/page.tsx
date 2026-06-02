@@ -4,16 +4,21 @@ import { useEffect, useState, useCallback, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import {
   Container, Title, Text, Button, Box, ThemeIcon,
-  Card, Group, Stack,
+  Card, Group, Stack, Badge,
 } from '@mantine/core';
 import {
   IconConfetti, IconHeart, IconChartBar,
   IconBrandFacebook, IconBrandX, IconLink,
   IconCheck, IconSparkles,
+  IconDownload, IconMail, IconReceipt, IconArrowRight,
+  IconGift,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { useAuth } from '@/contexts/AuthContext';
+import { downloadReceiptPdf } from '@/lib/generateReceiptPdf';
+import type { DonationItem } from '@/lib/api';
 
 const SITE_URL = 'https://binding-minds.vercel.app';
 export const dynamic = 'force-dynamic';
@@ -32,6 +37,8 @@ function buildShareUrl(path: string = '/projects'): string {
 function SuccessContent() {
   const [mounted, setMounted] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
+  const { user } = useAuth();
+  const [receiptDownloading, setReceiptDownloading] = useState(false);
   const searchParams = useSearchParams();
 
   const projectName = searchParams.get('project') || undefined;
@@ -41,9 +48,33 @@ function SuccessContent() {
   const shareMessage = buildShareMessage(projectName);
   const shareUrl = buildShareUrl(projectName ? `/projects` : '/projects');
 
+  // 선물 기부 데이터
+  const [giftData, setGiftData] = useState<{
+    recipientName: string;
+    recipientEmail: string | null;
+    message: string | null;
+    charityName: string;
+    amount: number;
+    currency: string;
+  } | null>(null);
+
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
+
+    // localStorage에서 선물 기부 데이터 읽기
+    try {
+      const stored = localStorage.getItem('deargiver_gift');
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        // eslint-disable-next-line react-hooks/set-state-in-effect
+        setGiftData(parsed);
+        // 읽은 후 삭제 (재방문 시 중복 표시 방지)
+        localStorage.removeItem('deargiver_gift');
+      }
+    } catch (e) {
+      // ignore
+    }
   }, []);
 
   const copyLink = useCallback(() => {
@@ -51,6 +82,38 @@ function SuccessContent() {
     setLinkCopied(true);
     setTimeout(() => setLinkCopied(false), 2500);
   }, [shareMessage, shareUrl]);
+
+  const handleDownloadReceipt = async () => {
+    if (!user) return;
+    setReceiptDownloading(true);
+    try {
+      // Build a DonationItem-like object from URL params
+      const mockItem: DonationItem = {
+        id: 0,
+        donation_amount_minor: amountRaw ? Math.round(Number(amountRaw) * 100) : 0,
+        platform_fee_amount_minor: 0,
+        charity_net_amount_minor: 0,
+        currency_code: 'NZD',
+        donation_status: 'succeeded',
+        paid_at: new Date().toISOString(),
+        created_at: new Date().toISOString(),
+        charity_display_name: projectName || 'DearGiver Charity',
+        charity_id: 0,
+        cc_number: undefined,
+        stripe_checkout_session_id: undefined,
+        stripe_payment_intent_id: undefined,
+        receipt_no: undefined,
+        receipt_status: undefined,
+      };
+      await downloadReceiptPdf({
+        item: mockItem,
+        donorName: user.displayName || user.email || 'Valued Donor',
+        donorEmail: user.email || undefined,
+      });
+    } finally {
+      setReceiptDownloading(false);
+    }
+  };
 
   const shareToFacebook = () => {
     window.open(
@@ -105,10 +168,150 @@ function SuccessContent() {
               </Text>
             )}
 
-            <Text size="sm" c="var(--bm-text-muted)" mb={32} maw={420} mx="auto">
-              A receipt will be sent to your email. Your donation is eligible for a
-              <strong> 33.33% NZ tax credit</strong> — claim it via myIR any time.
-            </Text>
+            {/* ── Gift Donation Card ── */}
+            {giftData && (
+              <Card
+                padding={0}
+                radius="xl"
+                withBorder
+                maw={480}
+                mx="auto"
+                mb={24}
+                style={{
+                  overflow: 'hidden',
+                  border: '2px solid rgba(196,114,74,0.2)',
+                }}
+              >
+                {/* 상단 배너 */}
+                <Box
+                  p={24}
+                  style={{
+                    background: 'linear-gradient(135deg, #4A7C71 0%, #3a6a5f 50%, #C4724A 100%)',
+                    textAlign: 'center',
+                  }}
+                >
+                  <ThemeIcon size={48} radius="xl" color="white" variant="subtle" mx="auto" mb={8}>
+                    <IconGift size={28} color="white" />
+                  </ThemeIcon>
+                  <Text size="xs" c="rgba(255,255,255,0.8)" tt="uppercase" fw={700} style={{ letterSpacing: 2 }}>
+                    Gift Donation
+                  </Text>
+                </Box>
+
+                {/* 본문 */}
+                <Box p={24} ta="center">
+                  <Text size="sm" c="var(--bm-text-muted)" mb={4}>
+                    A donation of
+                  </Text>
+                  <Text size="xl" fw={800} c="var(--bm-terracotta)" mb={4}>
+                    {amount || `$${giftData.amount}`}
+                  </Text>
+                  <Text size="sm" c="var(--bm-text-muted)" mb={12}>
+                    to <strong>{giftData.charityName}</strong>
+                  </Text>
+
+                  <Text size="sm" c="var(--bm-text-muted)" mb={2}>has been dedicated to</Text>
+                  <Text size="lg" fw={800} c="var(--bm-text-dark)" mb={8}>
+                    {giftData.recipientName} 🌿
+                  </Text>
+
+                  {giftData.message && (
+                    <Box
+                      p={16}
+                      mb={12}
+                      style={{
+                        background: 'rgba(74,124,113,0.04)',
+                        borderRadius: 12,
+                        borderLeft: '3px solid var(--bm-sage)',
+                      }}
+                    >
+                      <Text size="sm" c="var(--bm-text-dark)" fs="italic" lh={1.6}>
+                        &ldquo;{giftData.message}&rdquo;
+                      </Text>
+                    </Box>
+                  )}
+
+                  <Text size="xs" c="dimmed" mb={12}>
+                    {user?.displayName || 'Someone special'} made this gift through DearGiver
+                  </Text>
+
+                  <Group justify="center" gap={8}>
+                    <Button
+                      variant="light"
+                      color="sage"
+                      size="xs"
+                      radius="md"
+                      leftSection={<IconLink size={14} />}
+                      onClick={() => {
+                        const msg = `🎁 A gift donation of ${amount || `$${giftData.amount}`} was made to ${giftData.charityName} in honor of ${giftData.recipientName} via DearGiver! ${giftData.message ? `"${giftData.message}"` : ''}`;
+                        navigator.clipboard.writeText(msg);
+                      }}
+                    >
+                      Copy Gift Message
+                    </Button>
+                  </Group>
+                </Box>
+              </Card>
+            )}
+
+            {/* Receipt & Email Status */}
+            <Card
+              padding="lg"
+              radius="lg"
+              withBorder
+              maw={480}
+              mx="auto"
+              mb={32}
+              style={{ borderColor: 'var(--mantine-color-gray-3)' }}
+            >
+              <Stack gap={12}>
+                <Group gap={10}>
+                  <ThemeIcon size={32} radius="md" color="sage" variant="light">
+                    <IconReceipt size={16} />
+                  </ThemeIcon>
+                  <Box style={{ flex: 1, textAlign: 'left' }}>
+                    <Text size="sm" fw={600} c="var(--bm-text-dark)">Donation Receipt</Text>
+                    <Text size="xs" c="var(--bm-text-muted)">Your receipt is ready to download</Text>
+                  </Box>
+                  <Button
+                    variant="light"
+                    color="sage"
+                    size="xs"
+                    radius="md"
+                    leftSection={<IconDownload size={14} />}
+                    onClick={handleDownloadReceipt}
+                    loading={receiptDownloading}
+                    disabled={!amountRaw}
+                  >
+                    Download PDF
+                  </Button>
+                </Group>
+
+                <Group gap={10}>
+                  <ThemeIcon size={32} radius="md" color="terracotta" variant="light">
+                    <IconMail size={16} />
+                  </ThemeIcon>
+                  <Box style={{ flex: 1, textAlign: 'left' }}>
+                    <Text size="sm" fw={600} c="var(--bm-text-dark)">Thank-You Email</Text>
+                    <Text size="xs" c="var(--bm-text-muted)">
+                      {user?.email
+                        ? <>A receipt and thank-you message will be sent to <strong>{user.email}</strong></>
+                        : 'Log in to receive receipt emails automatically'
+                      }
+                    </Text>
+                  </Box>
+                  <Badge size="sm" variant="light" color="sage">Coming Soon</Badge>
+                </Group>
+
+                <Box pt={8} style={{ borderTop: '1px solid var(--mantine-color-gray-2)' }}>
+                  <Text size="xs" c="var(--bm-text-muted)" ta="center">
+                    Your donation is eligible for a <strong>33.33% NZ tax credit</strong>.
+                    View all receipts in your{' '}
+                    <a href="/dashboard?tab=receipts" style={{ color: 'var(--bm-sage-dark)', fontWeight: 600, textDecoration: 'none' }}>Receipt Vault</a>.
+                  </Text>
+                </Box>
+              </Stack>
+            </Card>
 
             {/* Primary Actions */}
             <Box style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }} mb={40}>

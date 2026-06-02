@@ -95,8 +95,11 @@ export default function CharitiesPage() {
                 value={search}
                 onChange={handleSearchChange}
                 onCategoryPick={(cat) => {
-                  if (!selectedCategories.includes(cat)) {
-                    handleCategoriesChange([...selectedCategories, cat]);
+                  // 같은 카테고리 클릭 → 해제, 다른 카테고리 → 교체
+                  if (selectedCategories.length === 1 && selectedCategories[0] === cat) {
+                    handleCategoriesChange([]);
+                  } else {
+                    handleCategoriesChange([cat]);
                   }
                 }}
                 placeholder="Search charities & causes..."

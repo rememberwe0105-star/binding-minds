@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import {
   Box,
   Text,
@@ -10,6 +10,8 @@ import {
   Alert,
   Divider,
   Modal,
+  Checkbox,
+  Loader,
 } from '@mantine/core';
 import {
   IconBuilding,
@@ -17,6 +19,8 @@ import {
   IconHeart,
   IconCheck,
   IconUsers,
+  IconMail,
+  IconConfetti,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -30,26 +34,13 @@ interface ClaimProfileBannerProps {
 
 export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
   const [interestSent, setInterestSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [emailSent, setEmailSent] = useState(false);
+  const [shareNameAgreed, setShareNameAgreed] = useState(true);
   const { user } = useAuth();
   const router = useRouter();
   const [loginModalOpened, { open: openLoginModal, close: closeLoginModal }] = useDisclosure(false);
-
-  const handleInterest = () => {
-    if (!user) {
-      openLoginModal();
-      return;
-    }
-    // TODO: POST /api/v1/interest — 백엔드 연동 시 실제 API 호출로 교체
-    // 현재는 localStorage에 기록하여 UI 상태만 유지
-    const key = `interest_${organization.id}`;
-    if (typeof window !== 'undefined') {
-      const existing = localStorage.getItem(key);
-      if (!existing) {
-        localStorage.setItem(key, new Date().toISOString());
-      }
-    }
-    setInterestSent(true);
-  };
+  const [consentModalOpened, { open: openConsentModal, close: closeConsentModal }] = useDisclosure(false);
 
   // 이미 관심을 표현한 적 있는지 확인
   const alreadySent = typeof window !== 'undefined'
@@ -57,6 +48,63 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
     : false;
 
   const showSent = interestSent || alreadySent;
+
+  // "I'd love to donate!" 클릭 핸들러
+  const handleInterestClick = useCallback(() => {
+    if (!user) {
+      openLoginModal();
+      return;
+    }
+    // 이미 보낸 경우
+    if (alreadySent) {
+      setInterestSent(true);
+      return;
+    }
+    // 동의 모달 열기
+    openConsentModal();
+  }, [user, alreadySent, openLoginModal, openConsentModal]);
+
+  // 실제 관심 표현 + 이메일 발송
+  const handleConfirmInterest = useCallback(async () => {
+    if (!user) return;
+
+    setSending(true);
+    closeConsentModal();
+
+    try {
+      const donorName = shareNameAgreed
+        ? (user.displayName || user.email?.split('@')[0] || 'A DearGiver user')
+        : 'A DearGiver user';
+
+      const res = await fetch('/api/interest-notify', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          charityId: organization.id,
+          charityName: organization.name,
+          charitySlug: organization.slug,
+          charityEmail: organization.contactEmail,
+          donorName,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.ok) {
+        // localStorage에 기록
+        localStorage.setItem(`interest_${organization.id}`, new Date().toISOString());
+        setInterestSent(true);
+        setEmailSent(data.emailSent === true);
+      }
+    } catch (err) {
+      console.error('Failed to send interest:', err);
+      // 실패해도 localStorage에 기록
+      localStorage.setItem(`interest_${organization.id}`, new Date().toISOString());
+      setInterestSent(true);
+    } finally {
+      setSending(false);
+    }
+  }, [user, shareNameAgreed, organization, closeConsentModal]);
 
   return (
     <Box
@@ -129,14 +177,18 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
 
         {showSent ? (
           <Alert
-            icon={<IconCheck size={16} />}
+            icon={emailSent ? <IconConfetti size={16} /> : <IconCheck size={16} />}
             color="sage"
             variant="light"
             radius="md"
           >
             <Group gap={8}>
-              <Text size="sm" fw={600}>Interest recorded!</Text>
-              {organization.interestCount > 0 && (
+              <Text size="sm" fw={600}>
+                {emailSent
+                  ? `${organization.name} has been notified! 🎉`
+                  : 'Interest recorded!'}
+              </Text>
+              {(organization.interestCount > 0 || interestSent) && (
                 <Group gap={4}>
                   <IconUsers size={14} />
                   <Text size="xs" c="dimmed">
@@ -146,10 +198,18 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
               )}
             </Group>
             <Text size="xs" mt={4} c="var(--bm-text-muted)">
-              We&apos;ll let {organization.name} know that donors are waiting.
-              You&apos;ll be notified when donations become available.
+              {emailSent
+                ? `We've sent an invitation email to ${organization.name} on your behalf. You'll be notified when they join DearGiver!`
+                : `We'll let ${organization.name} know that donors are waiting. You'll be notified when donations become available.`}
             </Text>
           </Alert>
+        ) : sending ? (
+          <Group gap={12}>
+            <Loader size="sm" color="sage" />
+            <Text size="sm" c="var(--bm-text-muted)">
+              Sending your interest to {organization.name}...
+            </Text>
+          </Group>
         ) : (
           <Group gap={12}>
             <Button
@@ -158,7 +218,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
               radius="xl"
               size="md"
               leftSection={<IconHeart size={16} />}
-              onClick={handleInterest}
+              onClick={handleInterestClick}
             >
               I&apos;d love to donate!
             </Button>
@@ -173,6 +233,88 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
           </Group>
         )}
       </Box>
+
+      {/* ── 동의 모달 ── */}
+      <Modal
+        opened={consentModalOpened}
+        onClose={closeConsentModal}
+        title={<Text fw={700} size="lg">Notify {organization.name}</Text>}
+        centered
+        radius="lg"
+      >
+        <Box py="sm">
+          <ThemeIcon size={56} radius="xl" color="terracotta" variant="light" mx="auto" mb={16} style={{ display: 'flex' }}>
+            <IconMail size={28} />
+          </ThemeIcon>
+
+          <Text size="md" fw={600} c="var(--bm-text-dark)" ta="center" mb={8}>
+            Let {organization.name} know you&apos;re waiting!
+          </Text>
+
+          <Text size="sm" c="var(--bm-text-muted)" lh={1.6} mb={20} ta="center">
+            DearGiver will send an invitation email to <strong>{organization.name}</strong> on your behalf,
+            encouraging them to claim their profile so you can donate directly.
+          </Text>
+
+          {/* 이름 공유 동의 */}
+          <Box
+            mb={24}
+            p={16}
+            style={{
+              background: 'rgba(74,124,113,0.06)',
+              borderRadius: 12,
+              border: '1px solid rgba(74,124,113,0.1)',
+            }}
+          >
+            <Checkbox
+              checked={shareNameAgreed}
+              onChange={(e) => setShareNameAgreed(e.currentTarget.checked)}
+              label={
+                <Text size="sm" c="var(--bm-text-dark)">
+                  Share my name with {organization.name}
+                </Text>
+              }
+              description={
+                shareNameAgreed && user
+                  ? `The email will say "${user.displayName || user.email?.split('@')[0] || 'You'} is waiting to support ${organization.name}"`
+                  : 'The email will say "A DearGiver user is waiting to support your charity"'
+              }
+              color="sage"
+              radius="sm"
+            />
+          </Box>
+
+          {!organization.contactEmail && (
+            <Alert color="yellow" variant="light" radius="md" mb={16}>
+              <Text size="xs">
+                We don&apos;t have a contact email for this charity yet.
+                Your interest will be recorded and we&apos;ll reach out when we can.
+              </Text>
+            </Alert>
+          )}
+
+          <Button
+            color="terracotta"
+            fullWidth
+            radius="xl"
+            size="md"
+            leftSection={<IconHeart size={16} />}
+            onClick={handleConfirmInterest}
+          >
+            {organization.contactEmail ? 'Send My Interest' : 'Record My Interest'}
+          </Button>
+          <Button
+            variant="subtle"
+            color="gray"
+            fullWidth
+            radius="xl"
+            mt={8}
+            onClick={closeConsentModal}
+          >
+            Cancel
+          </Button>
+        </Box>
+      </Modal>
 
       {/* 로그인 유도 모달 */}
       <Modal

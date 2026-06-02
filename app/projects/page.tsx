@@ -107,8 +107,10 @@ export default function ProjectsPage() {
                 value={search}
                 onChange={handleSearchChange}
                 onCategoryPick={(cat) => {
-                  if (!selectedCategories.includes(cat)) {
-                    handleCategoriesChange([...selectedCategories, cat]);
+                  if (selectedCategories.length === 1 && selectedCategories[0] === cat) {
+                    handleCategoriesChange([]);
+                  } else {
+                    handleCategoriesChange([cat as Category]);
                   }
                 }}
                 placeholder="Search projects & charities..."

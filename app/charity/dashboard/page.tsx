@@ -16,6 +16,7 @@ import {
   IconCheck, IconDeviceFloppy, IconWorld, IconMail,
   IconPhone, IconMapPin, IconTrendingUp,
   IconUsersGroup, IconX, IconTrash, IconMoodEmpty,
+  IconReceipt, IconSend,
 } from '@tabler/icons-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -909,6 +910,34 @@ function saveTemplates(templates: ThankYouTemplate[]): void {
   } catch { /* ignore */ }
 }
 
+// ── Email Settings (localStorage, backend 연동 시 API로 전환) ──
+const EMAIL_SETTINGS_KEY = 'dg-email-settings';
+
+interface EmailSettings {
+  autoSendThankYou: boolean;
+  attachReceipt: boolean;
+  replyToEmail: string;
+}
+
+const DEFAULT_EMAIL_SETTINGS: EmailSettings = {
+  autoSendThankYou: true,
+  attachReceipt: true,
+  replyToEmail: '',
+};
+
+function loadEmailSettings(): EmailSettings {
+  if (typeof window === 'undefined') return DEFAULT_EMAIL_SETTINGS;
+  try {
+    const raw = localStorage.getItem(EMAIL_SETTINGS_KEY);
+    return raw ? { ...DEFAULT_EMAIL_SETTINGS, ...JSON.parse(raw) } : DEFAULT_EMAIL_SETTINGS;
+  } catch { return DEFAULT_EMAIL_SETTINGS; }
+}
+
+function saveEmailSettings(settings: EmailSettings): void {
+  if (typeof window === 'undefined') return;
+  try { localStorage.setItem(EMAIL_SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
+}
+
 function DonorUpdatesTab() {
   const [templates, setTemplates] = useState<ThankYouTemplate[]>(() => loadTemplates());
   const [createOpened, setCreateOpened] = useState(false);
@@ -917,8 +946,11 @@ function DonorUpdatesTab() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState('');
   const [formBody, setFormBody] = useState('');
+  const [emailSettings, setEmailSettings] = useState<EmailSettings>(() => loadEmailSettings());
+  const [settingsSaved, setSettingsSaved] = useState(false);
 
   useEffect(() => { saveTemplates(templates); }, [templates]);
+  useEffect(() => { saveEmailSettings(emailSettings); }, [emailSettings]);
 
   const handleCreate = () => {
     if (!formTitle.trim() || !formBody.trim()) return;
@@ -983,6 +1015,92 @@ function DonorUpdatesTab() {
 
   return (
     <Stack gap={24}>
+      {/* ── Email Sending Settings ── */}
+      <Card padding="lg" radius="lg" withBorder style={{ background: 'linear-gradient(135deg, rgba(46,125,107,0.04) 0%, rgba(216,169,95,0.04) 100%)' }}>
+        <Group gap={10} mb={16}>
+          <ThemeIcon size={32} radius="md" color="sage" variant="light">
+            <IconSettings size={16} />
+          </ThemeIcon>
+          <Box>
+            <Text fw={700} size="sm" c="var(--bm-text-dark)">Email Sending Settings</Text>
+            <Text size="xs" c="var(--bm-text-muted)">Configure how thank-you emails are sent to your donors</Text>
+          </Box>
+        </Group>
+
+        <Stack gap={0}>
+          {/* Auto-send toggle */}
+          <Group justify="space-between" py={12}>
+            <Box style={{ flex: 1 }}>
+              <Group gap={6}>
+                <IconSend size={14} color="var(--bm-sage-dark)" />
+                <Text size="sm" fw={600} c="var(--bm-text-dark)">Auto Thank-You Email</Text>
+              </Group>
+              <Text size="xs" c="var(--bm-text-muted)">
+                Automatically send a personalised thank-you email after every donation
+              </Text>
+            </Box>
+            <Switch
+              checked={emailSettings.autoSendThankYou}
+              onChange={(e) => setEmailSettings(prev => ({ ...prev, autoSendThankYou: e.currentTarget.checked }))}
+              color="sage"
+              label={emailSettings.autoSendThankYou ? 'On' : 'Off'}
+              styles={{ label: { fontSize: '12px', color: 'var(--bm-text-muted)' } }}
+            />
+          </Group>
+
+          <Divider />
+
+          {/* Attach receipt toggle */}
+          <Group justify="space-between" py={12}>
+            <Box style={{ flex: 1 }}>
+              <Group gap={6}>
+                <IconReceipt size={14} color="var(--bm-sage-dark)" />
+                <Text size="sm" fw={600} c="var(--bm-text-dark)">Attach Receipt PDF</Text>
+              </Group>
+              <Text size="xs" c="var(--bm-text-muted)">
+                Include the official NZ donation receipt as a PDF attachment in the email
+              </Text>
+            </Box>
+            <Switch
+              checked={emailSettings.attachReceipt}
+              onChange={(e) => setEmailSettings(prev => ({ ...prev, attachReceipt: e.currentTarget.checked }))}
+              color="sage"
+              disabled={!emailSettings.autoSendThankYou}
+              label={emailSettings.attachReceipt ? 'On' : 'Off'}
+              styles={{ label: { fontSize: '12px', color: 'var(--bm-text-muted)' } }}
+            />
+          </Group>
+
+          <Divider />
+
+          {/* Reply-to email */}
+          <Box py={12}>
+            <Group gap={6} mb={4}>
+              <IconMail size={14} color="var(--bm-sage-dark)" />
+              <Text size="sm" fw={600} c="var(--bm-text-dark)">Reply-To Email</Text>
+            </Group>
+            <Text size="xs" c="var(--bm-text-muted)" mb={8}>
+              Donors can reply to thank-you emails at this address. Leave blank to use the default no-reply.
+            </Text>
+            <TextInput
+              placeholder="e.g. hello@yourcharity.org.nz"
+              radius="md"
+              size="sm"
+              value={emailSettings.replyToEmail}
+              onChange={(e) => setEmailSettings(prev => ({ ...prev, replyToEmail: e.currentTarget.value }))}
+              disabled={!emailSettings.autoSendThankYou}
+              styles={{ input: { maxWidth: 360 } }}
+            />
+          </Box>
+        </Stack>
+
+        <Group justify="flex-end" mt={8}>
+          <Badge size="xs" variant="light" color="sage">
+            {settingsSaved ? '✓ Saved' : 'Auto-saved locally'}
+          </Badge>
+        </Group>
+      </Card>
+
       {/* Header */}
       <Group justify="space-between" align="flex-start">
         <Box>
