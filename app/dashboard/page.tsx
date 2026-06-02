@@ -25,6 +25,7 @@ import {
   Tooltip,
   Modal,
   Stack,
+  ActionIcon,
 } from '@mantine/core';
 import {
   IconHeart,
@@ -43,6 +44,7 @@ import {
   IconMoodEmpty,
   IconGift,
   IconLoader2,
+  IconHeartFilled,
   IconSparkles,
   IconTree,
   IconToolsKitchen2,
@@ -76,6 +78,11 @@ import {
   getAvailableTaxYears,
   filterByTaxYear,
 } from '@/lib/generateTaxSummaryPdf';
+import { useFavorites } from '@/contexts/FavoritesContext';
+import { getCampaignBySlug, getProgress, formatCurrency } from '@/data/campaigns';
+import type { Campaign } from '@/data/campaigns';
+import { getOrganizationBySlug } from '@/data/organizations';
+import type { Organization } from '@/data/organizations';
 import classes from './page.module.css';
 
 // ── 모바일 PDF 안내 모달 ────────────────────────────────────
@@ -116,7 +123,7 @@ function MobilePdfNotice({
           </Text>
           <Text size="xs" c="var(--bm-text-muted)" lh={1.7}>
             PC에서 <strong>binding-minds.vercel.app</strong>에 접속하신 후
-            대시보드 → Receipt Vault 또는 Tax Summary 탭에서 다운로드해 주세요.
+            대시보드 → Receipt Vault 또는 Donation Tax Credit 탭에서 다운로드해 주세요.
           </Text>
         </Box>
         <Button
@@ -613,7 +620,7 @@ function TaxSummaryTab() {
               label={
                 yearItems.length === 0
                   ? 'No completed donations for this tax year'
-                  : `Download ${taxYear} Tax Summary (${yearItems.length} donation${yearItems.length !== 1 ? 's' : ''})`
+                  : `Download ${taxYear} Giving Summary (${yearItems.length} donation${yearItems.length !== 1 ? 's' : ''})`
               }
               withArrow
             >
@@ -630,7 +637,7 @@ function TaxSummaryTab() {
                 loading={downloading}
                 onClick={handleDownload}
               >
-                {downloading ? 'Preparing PDF...' : 'Download Tax Summary'}
+                {downloading ? 'Preparing PDF...' : 'Download Giving Summary'}
               </Button>
             </Tooltip>
           </Group>
@@ -916,6 +923,165 @@ function ReceiptVaultTab() {
   );
 }
 
+// ===================== My Causes 탭 =====================
+function MyCausesTab() {
+  const { favorites, toggleFavorite } = useFavorites();
+
+  const savedOrgs = useMemo(() => {
+    return favorites.organizations
+      .map((slug) => getOrganizationBySlug(slug))
+      .filter(Boolean) as Organization[];
+  }, [favorites.organizations]);
+
+  const savedProjects = useMemo(() => {
+    return favorites.projects
+      .map((slug) => getCampaignBySlug(slug))
+      .filter(Boolean) as Campaign[];
+  }, [favorites.projects]);
+
+  const totalSaved = savedOrgs.length + savedProjects.length;
+
+  if (totalSaved === 0) {
+    return (
+      <Card padding="xl" radius="lg" withBorder>
+        <Box className={classes.emptyState}>
+          <IconHeart size={48} color="var(--bm-sage)" style={{ opacity: 0.3 }} />
+          <Text size="md" c="var(--bm-text-dark)" fw={600} mt={16}>
+            No saved causes yet
+          </Text>
+          <Text size="sm" c="var(--bm-text-muted)" mt={4} maw={400} mx="auto">
+            Browse charities and projects, then tap ♡ to save them here for quick access.
+          </Text>
+          <Group gap={12} mt={20} justify="center">
+            <Button component={Link} href="/charities" variant="outline" color="sage" radius="xl">
+              Browse Charities
+            </Button>
+            <Button component={Link} href="/projects" color="terracotta" radius="xl" rightSection={<IconArrowRight size={16} />}>
+              Explore Projects
+            </Button>
+          </Group>
+        </Box>
+      </Card>
+    );
+  }
+
+  return (
+    <Stack gap={28}>
+      {/* Saved Charities */}
+      {savedOrgs.length > 0 && (
+        <Box>
+          <Group gap={8} mb={16}>
+            <Text fw={700} size="md" c="var(--bm-text-dark)">Saved Charities</Text>
+            <Badge size="sm" variant="light" color="sage">{savedOrgs.length}</Badge>
+          </Group>
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={16}>
+            {savedOrgs.map((org) => (
+              <Card key={org.id} padding="lg" radius="lg" withBorder className={classes.statCard}>
+                <Group justify="space-between" mb={12}>
+                  <Badge size="xs" variant="light" color="sage">{org.category}</Badge>
+                  <Tooltip label="Remove from saved" withArrow>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      size="sm"
+                      onClick={() => toggleFavorite('organization', org.slug)}
+                    >
+                      <IconHeartFilled size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+                <Text size="sm" fw={700} c="var(--bm-text-dark)" mb={4} lineClamp={1}>
+                  {org.name}
+                </Text>
+                <Text size="xs" c="var(--bm-text-muted)" mb={12} lineClamp={2} lh={1.5}>
+                  {org.mission}
+                </Text>
+                <Button
+                  component={Link}
+                  href={`/charities/${org.slug}`}
+                  variant="light"
+                  color="sage"
+                  size="xs"
+                  radius="md"
+                  fullWidth
+                  rightSection={<IconArrowRight size={14} />}
+                >
+                  View Charity
+                </Button>
+              </Card>
+            ))}
+          </SimpleGrid>
+        </Box>
+      )}
+
+      {/* Saved Projects */}
+      {savedProjects.length > 0 && (
+        <Box>
+          <Group gap={8} mb={16}>
+            <Text fw={700} size="md" c="var(--bm-text-dark)">Saved Projects</Text>
+            <Badge size="sm" variant="light" color="terracotta">{savedProjects.length}</Badge>
+          </Group>
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 3 }} spacing={16}>
+            {savedProjects.map((project) => (
+              <Card key={project.id} padding="lg" radius="lg" withBorder className={classes.statCard}>
+                <Group justify="space-between" mb={12}>
+                  <Badge size="xs" variant="light" color="terracotta">{project.category}</Badge>
+                  <Tooltip label="Remove from saved" withArrow>
+                    <ActionIcon
+                      variant="subtle"
+                      color="red"
+                      size="sm"
+                      onClick={() => toggleFavorite('project', project.slug)}
+                    >
+                      <IconHeartFilled size={16} />
+                    </ActionIcon>
+                  </Tooltip>
+                </Group>
+                <Text size="sm" fw={700} c="var(--bm-text-dark)" mb={4} lineClamp={1}>
+                  {project.name}
+                </Text>
+                <Text size="xs" c="var(--bm-text-muted)" mb={8} lineClamp={2} lh={1.5}>
+                  {project.description}
+                </Text>
+                <Box mb={12}>
+                  <Group justify="space-between" mb={4}>
+                    <Text size="xs" fw={600} c="var(--bm-sage-dark)">
+                      {formatCurrency(project.raised)}
+                    </Text>
+                    <Text size="xs" c="var(--bm-text-muted)">
+                      of {formatCurrency(project.goal)}
+                    </Text>
+                  </Group>
+                  <Box style={{ height: 4, borderRadius: 2, background: 'rgba(143,151,121,0.12)' }}>
+                    <Box style={{
+                      height: '100%',
+                      borderRadius: 2,
+                      width: `${Math.min(getProgress(project), 100)}%`,
+                      background: 'var(--bm-sage)',
+                    }} />
+                  </Box>
+                </Box>
+                <Button
+                  component={Link}
+                  href={`/projects/${project.slug}`}
+                  variant="light"
+                  color="terracotta"
+                  size="xs"
+                  radius="md"
+                  fullWidth
+                  rightSection={<IconArrowRight size={14} />}
+                >
+                  View Project
+                </Button>
+              </Card>
+            ))}
+          </SimpleGrid>
+        </Box>
+      )}
+    </Stack>
+  );
+}
+
 // ===================== 메인 대시보드 =====================
 function DashboardContent() {
   const { user } = useAuth();
@@ -986,13 +1152,16 @@ function DashboardContent() {
                 Donation History
               </Tabs.Tab>
               <Tabs.Tab value="tax" leftSection={<IconCalculator size={16} />}>
-                Tax Summary
+                Donation Tax Credit
               </Tabs.Tab>
               <Tabs.Tab value="receipts" leftSection={<IconFileText size={16} />}>
                 Receipt Vault
               </Tabs.Tab>
               <Tabs.Tab value="rewards" leftSection={<IconGift size={16} />}>
                 My Rewards
+              </Tabs.Tab>
+              <Tabs.Tab value="causes" leftSection={<IconHeart size={16} />}>
+                My Causes
               </Tabs.Tab>
             </Tabs.List>
 
@@ -1018,6 +1187,10 @@ function DashboardContent() {
 
             <Tabs.Panel value="rewards">
               <RewardsTab />
+            </Tabs.Panel>
+
+            <Tabs.Panel value="causes">
+              <MyCausesTab />
             </Tabs.Panel>
           </Tabs>
         </Container>

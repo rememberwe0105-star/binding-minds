@@ -3,14 +3,14 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   Container, Title, Text, Box, Group, Button, Badge,
-  Card, SimpleGrid, ThemeIcon, Tabs, Table, Modal,
+  Card, SimpleGrid, ThemeIcon, Tabs, Table, Modal, Switch,
   TextInput, Textarea, Select, Alert, Stack, Divider,
   Avatar, Tooltip, Progress, ActionIcon, Flex, Loader, Pagination,
 } from '@mantine/core';
 import {
   IconChartBar, IconCoin,
   IconCalendar, IconPlus, IconEdit, IconEye,
-  IconBrandStripe, IconShieldCheck, IconAlertCircle,
+  IconBrandStripe, IconShieldCheck, IconAlertCircle, IconInfoCircle,
   IconUsers, IconDownload,
   IconClipboardList, IconSettings,
   IconCheck, IconDeviceFloppy, IconWorld, IconMail,
@@ -870,6 +870,274 @@ function ProfileTab({ charityId }: { charityId: number }) {
   );
 }
 
+// ===================== Donor Updates Tab =====================
+const TEMPLATE_STORAGE_KEY = 'dg-thankyou-templates';
+
+interface ThankYouTemplate {
+  id: string;
+  title: string;
+  body: string;
+  active: boolean;
+  createdAt: string;
+}
+
+const DEFAULT_TEMPLATES: ThankYouTemplate[] = [
+  {
+    id: 'default-1',
+    title: 'Thank You for Your Generosity',
+    body: 'Dear {donor_name},\n\nThank you so much for your generous donation of {amount} to {charity_name}. Your support makes a real difference in our community and helps us continue our mission.\n\nWith heartfelt gratitude,\n{charity_name}',
+    active: true,
+    createdAt: new Date().toISOString(),
+  },
+];
+
+function loadTemplates(): ThankYouTemplate[] {
+  if (typeof window === 'undefined') return DEFAULT_TEMPLATES;
+  try {
+    const raw = localStorage.getItem(TEMPLATE_STORAGE_KEY);
+    if (!raw) return DEFAULT_TEMPLATES;
+    return JSON.parse(raw);
+  } catch {
+    return DEFAULT_TEMPLATES;
+  }
+}
+
+function saveTemplates(templates: ThankYouTemplate[]): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(TEMPLATE_STORAGE_KEY, JSON.stringify(templates));
+  } catch { /* ignore */ }
+}
+
+function DonorUpdatesTab() {
+  const [templates, setTemplates] = useState<ThankYouTemplate[]>(() => loadTemplates());
+  const [createOpened, setCreateOpened] = useState(false);
+  const [editId, setEditId] = useState<string | null>(null);
+  const [previewId, setPreviewId] = useState<string | null>(null);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+  const [formTitle, setFormTitle] = useState('');
+  const [formBody, setFormBody] = useState('');
+
+  useEffect(() => { saveTemplates(templates); }, [templates]);
+
+  const handleCreate = () => {
+    if (!formTitle.trim() || !formBody.trim()) return;
+    setTemplates(prev => [...prev, {
+      id: `tmpl-${Date.now()}`,
+      title: formTitle,
+      body: formBody,
+      active: false,
+      createdAt: new Date().toISOString(),
+    }]);
+    setFormTitle(''); setFormBody('');
+    setCreateOpened(false);
+  };
+
+  const handleEdit = () => {
+    if (!editId || !formTitle.trim() || !formBody.trim()) return;
+    setTemplates(prev => prev.map(t =>
+      t.id === editId ? { ...t, title: formTitle, body: formBody } : t
+    ));
+    setEditId(null); setFormTitle(''); setFormBody('');
+  };
+
+  const handleDelete = () => {
+    if (!deleteId) return;
+    setTemplates(prev => prev.filter(t => t.id !== deleteId));
+    setDeleteId(null);
+  };
+
+  const toggleActive = (id: string) => {
+    setTemplates(prev => prev.map(t =>
+      t.id === id ? { ...t, active: !t.active } : t
+    ));
+  };
+
+  const openEdit = (template: ThankYouTemplate) => {
+    setFormTitle(template.title);
+    setFormBody(template.body);
+    setEditId(template.id);
+  };
+
+  const openCreate = () => {
+    setFormTitle('');
+    setFormBody('');
+    setCreateOpened(true);
+  };
+
+  const previewTemplate = templates.find(t => t.id === previewId);
+  const previewBody = previewTemplate?.body
+    .replace(/\{donor_name\}/g, 'Sarah Johnson')
+    .replace(/\{amount\}/g, '$50.00')
+    .replace(/\{project_name\}/g, 'Restore Native Forest')
+    .replace(/\{charity_name\}/g, 'Forest & Bird NZ')
+    .replace(/\{date\}/g, new Date().toLocaleDateString('en-NZ'));
+
+  const placeholders = [
+    { tag: '{donor_name}', desc: "Donor's name" },
+    { tag: '{amount}', desc: 'Donation amount' },
+    { tag: '{project_name}', desc: 'Project name' },
+    { tag: '{charity_name}', desc: 'Your charity' },
+    { tag: '{date}', desc: 'Donation date' },
+  ];
+
+  return (
+    <Stack gap={24}>
+      {/* Header */}
+      <Group justify="space-between" align="flex-start">
+        <Box>
+          <Text fw={700} size="md" c="var(--bm-text-dark)">Auto Thank-You Messages</Text>
+          <Text size="sm" c="var(--bm-text-muted)">
+            Create message templates that are automatically sent to donors after a donation.
+          </Text>
+        </Box>
+        <Button color="terracotta" radius="xl" leftSection={<IconPlus size={16} />} onClick={openCreate}>
+          New Template
+        </Button>
+      </Group>
+
+      {/* Templates list */}
+      {templates.length === 0 ? (
+        <Card padding="xl" radius="lg" withBorder>
+          <Box ta="center" py={40}>
+            <IconMail size={48} color="var(--bm-sage)" style={{ opacity: 0.3 }} />
+            <Text size="md" c="var(--bm-text-dark)" fw={600} mt={16}>No templates yet</Text>
+            <Text size="sm" c="var(--bm-text-muted)" mt={4}>Create your first thank-you message template.</Text>
+            <Button color="terracotta" radius="xl" mt={20} leftSection={<IconPlus size={16} />} onClick={openCreate}>
+              Create Template
+            </Button>
+          </Box>
+        </Card>
+      ) : (
+        <Stack gap={16}>
+          {templates.map(template => (
+            <Card key={template.id} padding="lg" radius="lg" withBorder>
+              <Group justify="space-between" mb={12}>
+                <Group gap={8}>
+                  <Badge size="sm" variant="light" color={template.active ? 'green' : 'gray'}>
+                    {template.active ? 'Active' : 'Inactive'}
+                  </Badge>
+                  <Text size="sm" fw={700} c="var(--bm-text-dark)">{template.title}</Text>
+                </Group>
+                <Switch
+                  checked={template.active}
+                  onChange={() => toggleActive(template.id)}
+                  color="sage"
+                  size="sm"
+                  label={template.active ? 'On' : 'Off'}
+                  styles={{ label: { fontSize: '12px', color: 'var(--bm-text-muted)' } }}
+                />
+              </Group>
+              <Text size="xs" c="var(--bm-text-muted)" lineClamp={2} lh={1.6} mb={12} style={{ whiteSpace: 'pre-line' }}>
+                {template.body}
+              </Text>
+              <Group gap={8}>
+                <Button variant="light" color="sage" size="xs" radius="md" leftSection={<IconEye size={14} />} onClick={() => setPreviewId(template.id)}>
+                  Preview
+                </Button>
+                <Button variant="light" color="blue" size="xs" radius="md" leftSection={<IconEdit size={14} />} onClick={() => openEdit(template)}>
+                  Edit
+                </Button>
+                <Button variant="light" color="red" size="xs" radius="md" leftSection={<IconTrash size={14} />} onClick={() => setDeleteId(template.id)}>
+                  Delete
+                </Button>
+              </Group>
+            </Card>
+          ))}
+        </Stack>
+      )}
+
+      {/* Placeholders guide */}
+      <Card padding="lg" radius="lg" withBorder style={{ background: 'linear-gradient(135deg, rgba(142,184,151,0.04) 0%, rgba(255,255,255,1) 100%)' }}>
+        <Group gap={8} mb={12}>
+          <IconInfoCircle size={16} color="var(--bm-sage-dark)" />
+          <Text fw={700} size="sm" c="var(--bm-text-dark)">Available Placeholders</Text>
+        </Group>
+        <Text size="xs" c="var(--bm-text-muted)" mb={12}>
+          Use these in your templates — they&apos;ll be replaced with real data when the message is sent.
+        </Text>
+        <SimpleGrid cols={{ base: 1, xs: 2, sm: 3 }} spacing={8}>
+          {placeholders.map(p => (
+            <Group key={p.tag} gap={8}>
+              <Badge size="sm" variant="outline" color="sage" style={{ fontFamily: 'monospace' }}>{p.tag}</Badge>
+              <Text size="xs" c="var(--bm-text-muted)">{p.desc}</Text>
+            </Group>
+          ))}
+        </SimpleGrid>
+      </Card>
+
+      {/* Create Modal */}
+      <Modal opened={createOpened} onClose={() => setCreateOpened(false)} size="lg" radius="lg" title={
+        <Group gap={8}><IconPlus size={18} color="var(--bm-sage-dark)" /><Text fw={700}>New Thank-You Template</Text></Group>
+      }>
+        <Stack gap={16}>
+          <TextInput label="Template Title" placeholder="e.g. Thank You for Your Generosity" radius="md" value={formTitle} onChange={e => setFormTitle(e.currentTarget.value)} />
+          <Textarea label="Message Body" placeholder={'Dear {donor_name},\n\nThank you for your donation of {amount}...'} radius="md" autosize minRows={6} value={formBody} onChange={e => setFormBody(e.currentTarget.value)} />
+          <Alert icon={<IconInfoCircle size={14} />} color="sage" variant="light" radius="md">
+            <Text size="xs">Use placeholders like <strong>{'{donor_name}'}</strong>, <strong>{'{amount}'}</strong>, <strong>{'{project_name}'}</strong> to personalise each message.</Text>
+          </Alert>
+          <Divider />
+          <Group justify="flex-end">
+            <Button variant="subtle" color="gray" onClick={() => setCreateOpened(false)}>Cancel</Button>
+            <Button color="terracotta" radius="xl" leftSection={<IconCheck size={16} />} onClick={handleCreate} disabled={!formTitle.trim() || !formBody.trim()}>
+              Create Template
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Edit Modal */}
+      <Modal opened={!!editId} onClose={() => setEditId(null)} size="lg" radius="lg" title={
+        <Group gap={8}><IconEdit size={18} color="blue" /><Text fw={700}>Edit Template</Text></Group>
+      }>
+        <Stack gap={16}>
+          <TextInput label="Template Title" radius="md" value={formTitle} onChange={e => setFormTitle(e.currentTarget.value)} />
+          <Textarea label="Message Body" radius="md" autosize minRows={6} value={formBody} onChange={e => setFormBody(e.currentTarget.value)} />
+          <Divider />
+          <Group justify="flex-end">
+            <Button variant="subtle" color="gray" onClick={() => setEditId(null)}>Cancel</Button>
+            <Button color="blue" radius="xl" leftSection={<IconDeviceFloppy size={16} />} onClick={handleEdit} disabled={!formTitle.trim() || !formBody.trim()}>
+              Save Changes
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
+
+      {/* Preview Modal */}
+      <Modal opened={!!previewId} onClose={() => setPreviewId(null)} size="md" radius="lg" title={
+        <Group gap={8}><IconEye size={18} color="var(--bm-sage-dark)" /><Text fw={700}>Message Preview</Text></Group>
+      }>
+        <Stack gap={16}>
+          <Alert icon={<IconInfoCircle size={14} />} color="sage" variant="light" radius="md">
+            <Text size="xs">This is how the message will look with sample data filled in.</Text>
+          </Alert>
+          <Card padding="lg" radius="md" withBorder>
+            <Text fw={700} size="sm" c="var(--bm-text-dark)" mb={8}>{previewTemplate?.title}</Text>
+            <Divider mb={12} />
+            <Text size="sm" c="var(--bm-text-dark)" lh={1.8} style={{ whiteSpace: 'pre-line' }}>
+              {previewBody}
+            </Text>
+          </Card>
+          <Button variant="light" color="sage" radius="xl" fullWidth onClick={() => setPreviewId(null)}>Close Preview</Button>
+        </Stack>
+      </Modal>
+
+      {/* Delete Confirmation */}
+      <Modal opened={!!deleteId} onClose={() => setDeleteId(null)} size="sm" radius="lg" title={
+        <Group gap={8}><IconTrash size={18} color="var(--mantine-color-red-6)" /><Text fw={700}>Delete Template</Text></Group>
+      }>
+        <Text size="sm" c="var(--bm-text-muted)" mb={20}>
+          Are you sure you want to delete this template? This action cannot be undone.
+        </Text>
+        <Group justify="flex-end">
+          <Button variant="subtle" color="gray" onClick={() => setDeleteId(null)}>Cancel</Button>
+          <Button color="red" radius="xl" leftSection={<IconTrash size={14} />} onClick={handleDelete}>Delete</Button>
+        </Group>
+      </Modal>
+    </Stack>
+  );
+}
+
 // ===================== Main Dashboard =====================
 function CharityDashboardContent() {
   const { displayName, serviceUser, userRole, demoRole } = useAuth();
@@ -914,6 +1182,7 @@ function CharityDashboardContent() {
               <Tabs.Tab value="donations" leftSection={<IconCoin size={16} />}>Donations</Tabs.Tab>
               <Tabs.Tab value="analytics" leftSection={<IconTrendingUp size={16} />}>Analytics</Tabs.Tab>
               <Tabs.Tab value="projects" leftSection={<IconClipboardList size={16} />}>Projects</Tabs.Tab>
+              <Tabs.Tab value="updates" leftSection={<IconMail size={16} />}>Donor Updates</Tabs.Tab>
               <Tabs.Tab value="profile" leftSection={<IconSettings size={16} />}>Profile</Tabs.Tab>
             </Tabs.List>
 
@@ -921,6 +1190,7 @@ function CharityDashboardContent() {
             <Tabs.Panel value="donations"><DonationsTab charityId={charityId} /></Tabs.Panel>
             <Tabs.Panel value="analytics"><AnalyticsTab /></Tabs.Panel>
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
+            <Tabs.Panel value="updates"><DonorUpdatesTab /></Tabs.Panel>
             <Tabs.Panel value="profile"><ProfileTab charityId={charityId} /></Tabs.Panel>
           </Tabs>
         </Container>
