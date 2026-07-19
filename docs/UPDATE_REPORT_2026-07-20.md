@@ -93,6 +93,20 @@
 - 참고: 기존 빌드가 Turbopack 워크스페이스 루트 오추론(한글 경로 포함)으로 실패하는 문제가
   있어 `next.config.ts`에 `turbopack.root`를 고정하여 해결함 (이번 변경과 무관한 환경 이슈)
 
+## 추가 작업 (같은 날 2차) — Gift Donation 기능 삭제
+
+법적으로 구현이 불가능하다는 판단에 따라 **선물 기부(Gift Donation) 기능을 전면 제거**:
+
+- `components/DonationCheckoutModal.tsx` — "Gift this donation" 토글/입력 폼, 확인 단계 표시,
+  localStorage(`deargiver_gift`) 저장 로직 제거
+- `app/donation/success/page.tsx` — Gift Donation 카드 및 관련 상태 제거
+  (과거 저장된 localStorage 데이터는 방문 시 정리)
+- `app/about/page.tsx` — "Gift Giving"/"Gift Donations" 소개 항목을
+  "Privacy & Choice"/"Personal & Organisation Giving"(익명·회사 기부)으로 교체, 관련 문구 정리
+- `docs/BACKEND_API_REQUEST_V8.md` — v7.0 P1 Gift Donation Metadata 요청 철회 안내 추가
+- 유지된 것: 대시보드 배지·탭의 IconGift 아이콘, "Avg Gift"(평균 기부액) 라벨 등
+  선물 기부 기능과 무관한 표현
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

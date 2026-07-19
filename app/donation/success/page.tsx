@@ -11,7 +11,6 @@ import {
   IconBrandFacebook, IconBrandX, IconLink,
   IconCheck, IconSparkles,
   IconDownload, IconMail, IconReceipt, IconArrowRight,
-  IconGift,
 } from '@tabler/icons-react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
@@ -48,33 +47,12 @@ function SuccessContent() {
   const shareMessage = buildShareMessage(projectName);
   const shareUrl = buildShareUrl(projectName ? `/projects` : '/projects');
 
-  // 선물 기부 데이터
-  const [giftData, setGiftData] = useState<{
-    recipientName: string;
-    recipientEmail: string | null;
-    message: string | null;
-    charityName: string;
-    amount: number;
-    currency: string;
-  } | null>(null);
-
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
 
-    // localStorage에서 선물 기부 데이터 읽기
-    try {
-      const stored = localStorage.getItem('deargiver_gift');
-      if (stored) {
-        const parsed = JSON.parse(stored);
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        setGiftData(parsed);
-        // 읽은 후 삭제 (재방문 시 중복 표시 방지)
-        localStorage.removeItem('deargiver_gift');
-      }
-    } catch (e) {
-      // ignore
-    }
+    // 과거 선물 기부 기능이 남긴 localStorage 데이터 정리
+    localStorage.removeItem('deargiver_gift');
   }, []);
 
   const copyLink = useCallback(() => {
@@ -166,92 +144,6 @@ function SuccessContent() {
               <Text size="sm" fw={600} c="var(--bm-sage-dark)" mb={8}>
                 Project: {projectName}
               </Text>
-            )}
-
-            {/* ── Gift Donation Card ── */}
-            {giftData && (
-              <Card
-                padding={0}
-                radius="xl"
-                withBorder
-                maw={480}
-                mx="auto"
-                mb={24}
-                style={{
-                  overflow: 'hidden',
-                  border: '2px solid rgba(196,114,74,0.2)',
-                }}
-              >
-                {/* 상단 배너 */}
-                <Box
-                  p={24}
-                  style={{
-                    background: 'linear-gradient(135deg, #4A7C71 0%, #3a6a5f 50%, #C4724A 100%)',
-                    textAlign: 'center',
-                  }}
-                >
-                  <ThemeIcon size={48} radius="xl" color="white" variant="subtle" mx="auto" mb={8}>
-                    <IconGift size={28} color="white" />
-                  </ThemeIcon>
-                  <Text size="xs" c="rgba(255,255,255,0.8)" tt="uppercase" fw={700} style={{ letterSpacing: 2 }}>
-                    Gift Donation
-                  </Text>
-                </Box>
-
-                {/* 본문 */}
-                <Box p={24} ta="center">
-                  <Text size="sm" c="var(--bm-text-muted)" mb={4}>
-                    A donation of
-                  </Text>
-                  <Text size="xl" fw={800} c="var(--bm-terracotta)" mb={4}>
-                    {amount || `$${giftData.amount}`}
-                  </Text>
-                  <Text size="sm" c="var(--bm-text-muted)" mb={12}>
-                    to <strong>{giftData.charityName}</strong>
-                  </Text>
-
-                  <Text size="sm" c="var(--bm-text-muted)" mb={2}>has been dedicated to</Text>
-                  <Text size="lg" fw={800} c="var(--bm-text-dark)" mb={8}>
-                    {giftData.recipientName} 🌿
-                  </Text>
-
-                  {giftData.message && (
-                    <Box
-                      p={16}
-                      mb={12}
-                      style={{
-                        background: 'rgba(74,124,113,0.04)',
-                        borderRadius: 12,
-                        borderLeft: '3px solid var(--bm-sage)',
-                      }}
-                    >
-                      <Text size="sm" c="var(--bm-text-dark)" fs="italic" lh={1.6}>
-                        &ldquo;{giftData.message}&rdquo;
-                      </Text>
-                    </Box>
-                  )}
-
-                  <Text size="xs" c="dimmed" mb={12}>
-                    {user?.displayName || 'Someone special'} made this gift through DearGiver
-                  </Text>
-
-                  <Group justify="center" gap={8}>
-                    <Button
-                      variant="light"
-                      color="sage"
-                      size="xs"
-                      radius="md"
-                      leftSection={<IconLink size={14} />}
-                      onClick={() => {
-                        const msg = `🎁 A gift donation of ${amount || `$${giftData.amount}`} was made to ${giftData.charityName} in honor of ${giftData.recipientName} via DearGiver! ${giftData.message ? `"${giftData.message}"` : ''}`;
-                        navigator.clipboard.writeText(msg);
-                      }}
-                    >
-                      Copy Gift Message
-                    </Button>
-                  </Group>
-                </Box>
-              </Card>
             )}
 
             {/* Receipt & Email Status */}

@@ -7,13 +7,11 @@ import {
   Button,
   Group,
   TextInput,
-  Textarea,
   Box,
   Badge,
   Divider,
   Stack,
   Checkbox,
-  Switch,
   SimpleGrid,
   Loader,
   Alert,
@@ -27,7 +25,6 @@ import {
   IconArrowRight,
   IconAlertCircle,
   IconAlertTriangle,
-  IconGift,
   IconRepeat,
   IconBuilding,
   IconEyeOff,
@@ -91,12 +88,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   // 익명 기부
   const [anonymous, setAnonymous] = useState(false);
 
-  // 선물 기부
-  const [isGift, setIsGift] = useState(false);
-  const [giftRecipientName, setGiftRecipientName] = useState('');
-  const [giftRecipientEmail, setGiftRecipientEmail] = useState('');
-  const [giftMessage, setGiftMessage] = useState('');
-
   // 로딩/에러
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
@@ -122,10 +113,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
     setDonorType('individual');
     setOrganizationName('');
     setAnonymous(false);
-    setIsGift(false);
-    setGiftRecipientName('');
-    setGiftRecipientEmail('');
-    setGiftMessage('');
     setApiError(null);
     onClose();
   }, [onClose]);
@@ -139,21 +126,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
     try {
       // 백엔드 API: amount는 기부 원금(달러 단위, 소수점 가능). 수수료는 백엔드가 계산.
       const charityAccountId = campaign.stripeAccountId ?? 'acct_1TLekBRHr11OamkF';
-
-      // 선물 기부 데이터를 localStorage에 저장 (Stripe 리디렉트 후 사용)
-      if (isGift && giftRecipientName.trim()) {
-        localStorage.setItem('deargiver_gift', JSON.stringify({
-          recipientName: giftRecipientName.trim(),
-          recipientEmail: giftRecipientEmail.trim() || null,
-          message: giftMessage.trim() || null,
-          charityName: campaign.name,
-          amount,
-          currency,
-          timestamp: new Date().toISOString(),
-        }));
-      } else {
-        localStorage.removeItem('deargiver_gift');
-      }
 
       const session = await createCheckoutSession({
         amount,
@@ -408,70 +380,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             color="terracotta"
           />
 
-          {/* ── 선물 기부 토글 ── */}
-          <Box
-            mt={16}
-            p={16}
-            style={{
-              background: isGift
-                ? 'linear-gradient(135deg, rgba(196,114,74,0.06) 0%, rgba(74,124,113,0.04) 100%)'
-                : 'rgba(0,0,0,0.02)',
-              borderRadius: 12,
-              border: isGift ? '1px solid rgba(196,114,74,0.2)' : '1px solid rgba(0,0,0,0.06)',
-              transition: 'all 0.2s ease',
-            }}
-          >
-            <Switch
-              checked={isGift}
-              onChange={(e) => setIsGift(e.currentTarget.checked)}
-              color="terracotta"
-              label={
-                <Group gap={6}>
-                  <IconGift size={16} color={isGift ? 'var(--bm-terracotta)' : 'var(--bm-text-muted)'} />
-                  <Text size="sm" fw={600} c={isGift ? 'var(--bm-text-dark)' : 'var(--bm-text-muted)'}>
-                    Gift this donation
-                  </Text>
-                </Group>
-              }
-              description="Dedicate this donation to someone special"
-            />
-
-            {isGift && (
-              <Stack gap={10} mt={12}>
-                <TextInput
-                  label="Recipient's name"
-                  placeholder="e.g. Sarah Kim"
-                  value={giftRecipientName}
-                  onChange={(e) => setGiftRecipientName(e.currentTarget.value)}
-                  radius="md"
-                  size="sm"
-                  required
-                />
-                <TextInput
-                  label="Recipient's email (optional)"
-                  placeholder="e.g. sarah@email.com"
-                  value={giftRecipientEmail}
-                  onChange={(e) => setGiftRecipientEmail(e.currentTarget.value)}
-                  radius="md"
-                  size="sm"
-                  description="We'll send them a beautiful gift card"
-                />
-                <Textarea
-                  label="Personal message (optional)"
-                  placeholder="Happy birthday! I donated in your name 🎉"
-                  value={giftMessage}
-                  onChange={(e) => setGiftMessage(e.currentTarget.value)}
-                  radius="md"
-                  size="sm"
-                  maxLength={200}
-                  autosize
-                  minRows={2}
-                  maxRows={3}
-                />
-              </Stack>
-            )}
-          </Box>
-
           <Divider my={20} />
 
           <Group justify="flex-end">
@@ -493,27 +401,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       {/* ── Step 1: 확인 및 결제 ── */}
       {step === 1 && (
         <div className={classes.stepContent}>
-          {/* 선물 기부 표시 */}
-          {isGift && giftRecipientName.trim() && (
-            <Box
-              mb={16}
-              p={14}
-              style={{
-                background: 'linear-gradient(135deg, rgba(196,114,74,0.06) 0%, rgba(74,124,113,0.04) 100%)',
-                borderRadius: 12,
-                border: '1px solid rgba(196,114,74,0.15)',
-              }}
-            >
-              <Group gap={8} mb={4}>
-                <IconGift size={16} color="var(--bm-terracotta)" />
-                <Text size="sm" fw={700} c="var(--bm-terracotta)">Gift Donation</Text>
-              </Group>
-              <Text size="xs" c="var(--bm-text-muted)" lh={1.5}>
-                Dedicated to <strong>{giftRecipientName.trim()}</strong>
-                {giftMessage.trim() ? ` — "${giftMessage.trim()}"` : ''}
-              </Text>
-            </Box>
-          )}
           <Stack gap={0} mb={20}>
             <div className={classes.paymentPreview}>
               <Group justify="space-between" mb={8}>

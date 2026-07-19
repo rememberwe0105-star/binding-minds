@@ -25,7 +25,8 @@ import {
   IconFolderCheck,
   IconChartBar,
   IconCircleCheck,
-  IconGift,
+  IconEyeOff,
+  IconBuilding,
   IconSparkles,
   IconRepeat,
   IconRoute,
@@ -53,9 +54,9 @@ const values = [
     description: 'Auto-generated receipts, annual tax summaries, and 33.33% tax credit calculations — all in your dashboard.',
   },
   {
-    icon: IconGift,
-    title: 'Gift Giving',
-    description: 'Dedicate a donation to someone special with a personal message. A beautiful digital gift card is created instantly.',
+    icon: IconEyeOff,
+    title: 'Privacy & Choice',
+    description: 'Donate anonymously or in your organisation\'s name — you decide how your generosity appears.',
   },
   {
     icon: IconSparkles,
@@ -85,10 +86,10 @@ const differentiators = [
     badge: 'Unique',
   },
   {
-    icon: IconGift,
+    icon: IconBuilding,
     color: 'blue',
-    title: 'Gift Donations',
-    description: 'Dedicate a donation to someone with a custom message. A digital gift card is created and shareable instantly.',
+    title: 'Personal & Organisation Giving',
+    description: 'Donate as yourself or in your organisation\'s legal name, with receipts issued accordingly — and go anonymous whenever you prefer.',
     badge: 'Unique',
   },
   {
@@ -127,7 +128,7 @@ export default function AboutPage() {
             <Text size="lg" c="var(--bm-text-muted)" maw={600} lh={1.8} mt={16}>
               DearGiver is a New Zealand-based giving platform that makes generosity effortless.
               We connect donors with verified charities, automate tax credits, and turn every
-              donation into a meaningful journey — with gift cards, impact milestones, and more.
+              donation into a meaningful journey — with impact milestones, donor journeys, and more.
             </Text>
           </Container>
         </section>
@@ -187,7 +188,7 @@ export default function AboutPage() {
                   bullet={<IconCreditCard size={20} />}
                 >
                   <Text size="sm" c="var(--bm-text-muted)" lh={1.7} mt={4}>
-                    Choose one-time or monthly. Dedicate it as a gift if you like.
+                    Choose one-time or monthly, personally or as an organisation.
                     Your donation goes directly to the charity through Stripe — we never touch your money.
                   </Text>
                 </Timeline.Item>
@@ -405,7 +406,7 @@ export default function AboutPage() {
                 </Text>
                 <Text size="sm" c="rgba(255,255,255,0.8)" lh={1.7} mb={20}>
                   Explore verified NZ charities, earn milestones, auto-calculate your tax credits,
-                  and gift donations to loved ones.
+                  and follow your giving journey over time.
                 </Text>
                 <Button
                   component={Link}
