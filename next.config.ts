@@ -3,6 +3,11 @@ import type { NextConfig } from "next";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://libertron.iptime.org:8787';
 
 const nextConfig: NextConfig = {
+  // 한글 상위 경로가 모듈 식별자에 포함되면 Turbopack char-boundary 패닉이 발생하므로
+  // 워크스페이스 루트를 프로젝트 디렉토리로 고정한다 (~/package-lock.json 오인 방지)
+  turbopack: {
+    root: __dirname,
+  },
   images: {
     remotePatterns: [
       {

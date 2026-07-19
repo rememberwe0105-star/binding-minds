@@ -1,6 +1,7 @@
 import { Header } from '@/components/Header';
 import { Hero } from '@/components/Hero';
 import { TrendingNow } from '@/components/TrendingNow';
+import { ExploreOrganisations } from '@/components/ExploreOrganisations';
 import { HowItWorks } from '@/components/HowItWorks';
 import { ImpactCounter } from '@/components/ImpactCounter';
 import { ImpactStories } from '@/components/ImpactStories';
@@ -16,6 +17,7 @@ export default function Home() {
       <main>
         <Hero />
         <TrendingNow />
+        <ExploreOrganisations />
         <HowItWorks />
         <ImpactCounter />
         <ImpactStories />

@@ -297,10 +297,11 @@ export default function AboutPage() {
                   <IconShieldCheck size={24} />
                 </ThemeIcon>
                 <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>For Donors</Text>
-                <Text size="xl" fw={900} c="var(--bm-sage-dark)" mb={8}>$0 Mandatory</Text>
+                <Text size="xl" fw={900} c="var(--bm-sage-dark)" mb={8}>$0 Added</Text>
                 <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-                  You can <strong>optionally</strong> cover Stripe&apos;s processing fee (~2.7% + $0.30 for NZ cards).
-                  International cards may be ~3.5% + $0.30. This is always your choice, never forced.
+                  You pay <strong>exactly what you choose to give</strong> — nothing is added
+                  at checkout. Your donation receipts are stored automatically, ready for
+                  your IRD tax credit claim.
                 </Text>
               </Card>
 
@@ -311,8 +312,9 @@ export default function AboutPage() {
                 <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>For Charities</Text>
                 <Text size="xl" fw={900} c="var(--bm-terracotta)" mb={8}>From $0</Text>
                 <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-                  Charities start completely free. A small platform fee only applies
-                  when donations come through — no donations, no cost.
+                  Charities start completely free — a small service cost only applies when
+                  donations come through. Full plan details are on the{' '}
+                  <Link href="/charity/apply" style={{ color: 'var(--bm-sage-dark)' }}>charity registration page</Link>.
                 </Text>
               </Card>
             </SimpleGrid>
@@ -326,17 +328,17 @@ export default function AboutPage() {
                 <Box>
                   <Text size="xs" c="var(--bm-text-muted)" mb={2}>Donor pays</Text>
                   <Text fw={700} size="md" c="var(--bm-text-dark)">$50.00</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">No extra fees required</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">Exactly what you chose — nothing added</Text>
                 </Box>
                 <Box>
-                  <Text size="xs" c="var(--bm-text-muted)" mb={2}>Optional fee cover</Text>
-                  <Text fw={700} size="md" c="dimmed">+$1.65</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">Stripe ~2.7% + $0.30 (donor&apos;s choice)</Text>
+                  <Text size="xs" c="var(--bm-text-muted)" mb={2}>Payment processing</Text>
+                  <Text fw={700} size="md" c="dimmed">~$1.65</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">Stripe ~2.7% + $0.30, handled charity-side</Text>
                 </Box>
                 <Box>
                   <Text size="xs" c="var(--bm-text-muted)" mb={2}>Charity receives</Text>
-                  <Text fw={700} size="md" c="var(--bm-terracotta)">$48.35 – $50</Text>
-                  <Text size="xs" c="var(--bm-text-muted)">Depending on fee cover choice</Text>
+                  <Text fw={700} size="md" c="var(--bm-terracotta)">$50 − costs</Text>
+                  <Text size="xs" c="var(--bm-text-muted)">Processing & service costs come from the charity side</Text>
                 </Box>
                 <Box>
                   <Text size="xs" c="var(--bm-text-muted)" mb={2}>Your IRD tax credit</Text>
@@ -423,10 +425,11 @@ export default function AboutPage() {
                   For Charities
                 </Text>
                 <Text size="sm" c="rgba(255,255,255,0.8)" lh={1.7} mb={4}>
-                  Register for free. No donations = no fees.
+                  Register for free. No donations = no cost.
                 </Text>
                 <Text size="sm" c="rgba(255,255,255,0.6)" lh={1.7} mb={20}>
-                  Get 3 months of our Growth plan free — analytics, donor CRM, and campaign tools included.
+                  Early Access spots are open now — join early for founding-charity benefits
+                  and a 30-day free trial of our paid plan.
                 </Text>
                 <Button
                   component={Link}

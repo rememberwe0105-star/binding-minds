@@ -20,8 +20,12 @@ import classes from './page.module.css';
 
 const CATEGORIES = [
   { value: 'Community', label: '🏘️ Community & Social Services' },
-  { value: 'Health', label: '🏥 Health & Medical' },
-  { value: 'Education', label: '📚 Education & Youth' },
+  { value: 'Health & Wellbeing', label: '🏥 Health & Wellbeing (incl. mental health)' },
+  { value: 'Education', label: '📚 Education' },
+  { value: 'Children & Youth', label: '🧒 Children & Youth' },
+  { value: 'Food & Housing', label: '🏠 Food & Housing' },
+  { value: 'Disability', label: '♿ Disability' },
+  { value: 'Maori, Pasifika & Ethnic Communities', label: '🌺 Māori, Pasifika & Ethnic Communities' },
   { value: 'Environment', label: '🌿 Environment & Conservation' },
   { value: 'Animal Welfare', label: '🐾 Animal Welfare' },
   { value: 'Arts', label: '🎨 Arts & Culture' },
@@ -47,7 +51,7 @@ interface FormData {
 
   bankAccountNumber: string;
   irdNumber: string;
-  gstRegistered: 'yes' | 'no' | 'exempt';
+  gstRegistered: 'yes' | 'no' | 'not_sure' | 'in_progress';
   
   agreed: boolean;
 }
@@ -68,7 +72,7 @@ const INITIAL: FormData = {
 
   bankAccountNumber: '',
   irdNumber: '',
-  gstRegistered: 'exempt',
+  gstRegistered: 'not_sure',
   
   agreed: false,
 };
@@ -504,12 +508,14 @@ export default function CharityApplyPage() {
                     data={[
                       { value: 'yes', label: '✅ GST Registered' },
                       { value: 'no', label: '❌ Not GST Registered' },
-                      { value: 'exempt', label: '🔄 GST Exempt (Charity)' },
+                      { value: 'not_sure', label: '🤔 Not sure / To be confirmed' },
+                      { value: 'in_progress', label: '🔄 Registration in progress' },
                     ]}
                     value={form.gstRegistered}
-                    onChange={(val) => set('gstRegistered')(val || 'exempt')}
+                    onChange={(val) => set('gstRegistered')(val || 'not_sure')}
                     size="md"
                     mt="md"
+                    description="Not sure? You can confirm this later with our team — it won't block your application."
                   />
                 </div>
               )}
@@ -606,6 +612,51 @@ export default function CharityApplyPage() {
                 </>
               )}
             </Group>
+          </Card>
+
+          {/* 요금제 안내 — 서비스 비용은 메인 페이지가 아닌 기관 가입 페이지에서만 상세 설명한다 */}
+          <Card shadow="sm" radius="md" p={{ base: 20, sm: 40 }} withBorder mt={32}>
+            <Title order={3} mb={8} c="var(--bm-text-dark)">Plans & Pricing</Title>
+            <Text c="var(--bm-text-muted)" size="sm" mb={24}>
+              Simple, honest pricing. Donors always pay exactly what they choose to give —
+              our service cost comes from the charity side, never added at checkout.
+            </Text>
+
+            <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb={20}>
+              <Card withBorder radius="md" p="lg">
+                <Text size="xs" fw={600} tt="uppercase" c="var(--bm-sage-dark)" mb={8} style={{ letterSpacing: '1px' }}>
+                  Free Plan
+                </Text>
+                <Text size="xl" fw={900} c="var(--bm-text-dark)">NZ$0<Text span size="sm" fw={500} c="dimmed">/month</Text></Text>
+                <Text size="sm" fw={600} c="var(--bm-terracotta)" mb={12}>+ 2.5% per donation</Text>
+                <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                  Everything you need to receive online donations: automatic donation receipts,
+                  a basic dashboard, one thank-you message template, campaign setup,
+                  CSV export, and 1 team member.
+                </Text>
+              </Card>
+              <Card withBorder radius="md" p="lg" style={{ borderColor: 'var(--bm-sage)', borderWidth: 2 }}>
+                <Text size="xs" fw={600} tt="uppercase" c="var(--bm-sage-dark)" mb={8} style={{ letterSpacing: '1px' }}>
+                  Paid Plan
+                </Text>
+                <Text size="xl" fw={900} c="var(--bm-text-dark)">NZ$119–129<Text span size="sm" fw={500} c="dimmed">/month</Text></Text>
+                <Text size="sm" fw={600} c="var(--bm-terracotta)" mb={12}>+ 2.0% per donation · or NZ$1,119–1,290/year</Text>
+                <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                  Everything in Free, plus campaign & supporter management, analytics
+                  and reporting, donor segments with scheduled follow-up emails,
+                  customisable donation tiers with photos, and 3 team members.
+                </Text>
+              </Card>
+            </SimpleGrid>
+
+            <Alert color="sage" variant="light" radius="md" icon={<IconInfoCircle size={16} />}>
+              <Text size="sm" lh={1.7}>
+                <strong>All pricing is GST inclusive (15%).</strong> Any charity can try the paid
+                plan free for 30 days (one trial per organisation — only the per-donation
+                service cost applies during the trial). Early Access charities have the
+                platform service fee waived on their first NZ$5,000 processed.
+              </Text>
+            </Alert>
           </Card>
         </Container>
       </main>

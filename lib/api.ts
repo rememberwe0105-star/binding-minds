@@ -99,6 +99,10 @@ export interface DonationItem {
   stripe_payment_intent_id?: string;
   receipt_no?: string;
   receipt_status?: string;
+  /** 기부 주체 구분 — 백엔드 v8.0 필드 (없으면 개인 기부로 간주) */
+  donor_type?: 'individual' | 'organization';
+  /** 회사 기부 시 영수증 발급 명의 */
+  organization_name?: string;
   [key: string]: unknown;
 }
 
@@ -114,7 +118,8 @@ export interface CharityApplyRequest {
   category: string;
   bank_account_number: string;
   ird_number: string;
-  gst_registered: 'yes' | 'no' | 'exempt';
+  /** GST 등록 상태 — v8.0: exempt 삭제, not_sure/in_progress 추가 */
+  gst_registered: 'yes' | 'no' | 'not_sure' | 'in_progress';
   contact_name: string;
   contact_email: string;
 }
@@ -770,9 +775,13 @@ export async function createCheckoutSession(data: {
   currency: 'NZD' | 'AUD' | 'USD';
   charityAccountId: string;
   charityName?: string;
-  coverStripeFee?: boolean;
   addSupport?: boolean;
   recurring?: boolean;
+  /** 익명 기부 — 공개 피드/서포터 목록에 이름 미노출 (백엔드 v8.0 요청) */
+  anonymous?: boolean;
+  /** 기부 주체 — 회사(organization) 기부 시 영수증을 회사 명의로 발급 (백엔드 v8.0 요청) */
+  donorType?: 'individual' | 'organization';
+  organizationName?: string;
 }): Promise<CheckoutSession> {
   return apiFetch<CheckoutSession>('/api/v1/checkout/donations', {
     method: 'POST',

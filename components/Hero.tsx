@@ -1,10 +1,43 @@
 'use client';
 
-import { Container, Title, Text, Button, Group, Box, Card, Progress, Badge } from '@mantine/core';
-import { IconSearch, IconArrowRight } from '@tabler/icons-react';
-import NextImage from 'next/image';
+import { Container, Title, Text, Button, Group, Box, Card, Badge, Stack, ThemeIcon } from '@mantine/core';
+import {
+  IconSearch,
+  IconShieldCheck,
+  IconHeartHandshake,
+  IconReceipt,
+  IconBuildingCommunity,
+} from '@tabler/icons-react';
 import Link from 'next/link';
 import classes from './Hero.module.css';
+
+// 히어로는 특정 기관/캠페인을 노출하지 않는다 — 플랫폼 자체의 가치만 중립적으로 전달
+const PLATFORM_HIGHLIGHTS = [
+  {
+    icon: IconShieldCheck,
+    color: 'sage',
+    title: 'Verified NZ charities',
+    description: 'Every organisation is checked against the NZ Charities Register.',
+  },
+  {
+    icon: IconHeartHandshake,
+    color: 'terracotta',
+    title: '100% goes to the charity',
+    description: 'You pay exactly what you choose to give — nothing added at checkout.',
+  },
+  {
+    icon: IconReceipt,
+    color: 'sage',
+    title: 'Effortless tax receipts',
+    description: 'Donation receipts are stored for you, ready for your IRD tax credit claim.',
+  },
+  {
+    icon: IconBuildingCommunity,
+    color: 'terracotta',
+    title: 'For every cause',
+    description: 'From conservation to community wellbeing — find causes across Aotearoa.',
+  },
+];
 
 export function Hero() {
   return (
@@ -18,13 +51,13 @@ export function Hero() {
           {/* 왼쪽: 텍스트 블록 */}
           <Box className={classes.textBlock}>
             <Badge
-              color="terracotta"
+              color="sage"
               variant="light"
               size="lg"
               radius="sm"
               className={classes.spotlightBadge}
             >
-              Spotlight Campaign
+              Aotearoa&apos;s transparent giving platform
             </Badge>
 
             <Title order={1} className={classes.title}>
@@ -63,56 +96,34 @@ export function Hero() {
             </Group>
           </Box>
 
-          {/* 오른쪽: Spotlight Campaign 카드 */}
+          {/* 오른쪽: 플랫폼 가치 카드 (특정 기관 노출 없음) */}
           <div className={classes.campaignBlock}>
             <Card
               shadow="xl"
               radius="lg"
-              padding={0}
+              padding="xl"
               className={classes.campaignCard}
             >
-              <Card.Section className={classes.campaignImageSection}>
-                <div className={classes.campaignImageWrapper}>
-                  <NextImage
-                    src="/images/hero-campaign.png"
-                    alt="Restore Aotearoa's Native Forest"
-                    fill
-                    sizes="(max-width: 768px) 100vw, 380px"
-                    style={{ objectFit: 'cover' }}
-                    priority
-                  />
-                </div>
-              </Card.Section>
-
-              <Box p="lg">
-                <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={4}>
-                  Restore Aotearoa&apos;s Native Forest
-                </Text>
-
-                <Group justify="space-between" mb={6}>
-                  <Text size="xs" c="dimmed">Progress</Text>
-                  <Text size="xs" fw={600} c="var(--bm-sage-dark)">72%</Text>
-                </Group>
-                <Progress value={72} color="sage" size="sm" radius="xl" mb={8} />
-
-                <Group justify="space-between" mb={16}>
-                  <Text size="sm" c="dimmed">$36,400 raised</Text>
-                  <Text size="sm" fw={700} c="var(--bm-text-dark)">$50,000</Text>
-                </Group>
-
-                <Button
-                  component={Link}
-                  href="/projects/restore-native-forest"
-                  color="terracotta"
-                  fullWidth
-                  radius="md"
-                  size="md"
-                  rightSection={<IconArrowRight size={18} />}
-                  className={classes.supportBtn}
-                >
-                  Support This Campaign
-                </Button>
-              </Box>
+              <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={16}>
+                Why give through DearGiver?
+              </Text>
+              <Stack gap={16}>
+                {PLATFORM_HIGHLIGHTS.map((item) => (
+                  <Group key={item.title} gap={12} wrap="nowrap" align="flex-start">
+                    <ThemeIcon size={38} radius="md" color={item.color} variant="light">
+                      <item.icon size={20} />
+                    </ThemeIcon>
+                    <Box>
+                      <Text size="sm" fw={700} c="var(--bm-text-dark)">
+                        {item.title}
+                      </Text>
+                      <Text size="xs" c="var(--bm-text-muted)" lh={1.6}>
+                        {item.description}
+                      </Text>
+                    </Box>
+                  </Group>
+                ))}
+              </Stack>
             </Card>
           </div>
         </div>

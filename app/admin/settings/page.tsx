@@ -28,7 +28,7 @@ const DEFAULT_SETTINGS: PlatformSettings = {
   platform_fee_rate: 0.025,
   min_donation_minor: 500,
   max_donation_minor: 5000000,
-  categories: ['Environment', 'Education', 'Health', 'Community', 'Animal Welfare', 'Arts & Culture', 'Emergency Relief', 'Children & Youth'],
+  categories: ['Environment', 'Education', 'Health & Wellbeing', 'Community', 'Animal Welfare', 'Arts & Culture', 'Emergency Relief', 'Children & Youth', 'Food & Housing', 'Disability', 'Māori, Pasifika & Ethnic Communities'],
   regions: ['Auckland', 'Wellington', 'Canterbury', 'Waikato', 'Bay of Plenty', 'Otago', 'Northland', 'Taranaki', 'Southland', 'Nationwide'],
   auto_approve_projects: false,
   require_stripe_onboarding: true,

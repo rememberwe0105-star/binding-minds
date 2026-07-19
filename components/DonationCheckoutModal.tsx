@@ -14,22 +14,23 @@ import {
   Stack,
   Checkbox,
   Switch,
-  ThemeIcon,
   SimpleGrid,
   Loader,
   Alert,
   Select,
+  SegmentedControl,
 } from '@mantine/core';
 import {
   IconHeart,
   IconShieldCheck,
   IconLock,
   IconArrowRight,
-  IconReceipt,
   IconAlertCircle,
   IconAlertTriangle,
   IconGift,
   IconRepeat,
+  IconBuilding,
+  IconEyeOff,
 } from '@tabler/icons-react';
 import type { Campaign } from '@/data/campaigns';
 import { createCheckoutSession } from '@/lib/api';
@@ -45,8 +46,8 @@ interface DonationCheckoutModalProps {
   frequency?: 'one-time' | 'monthly';
 }
 
-const PRESET_AMOUNTS = ['10', '20', '50', '100', '250'];
-const MIN_AMOUNT = 10; // 최소 기부금 $10 (NZD/AUD)
+const PRESET_AMOUNTS = ['5', '10', '20', '50', '100'];
+const MIN_AMOUNT = 5; // 최소 기부금 $5 — NZ 세액공제(donation tax credit) 최소 기준액에 맞춤
 const PLATFORM_TIP_AMOUNT = 2; // 자발적 플랫폼 팁 $2
 
 // 통화 옵션
@@ -66,13 +67,12 @@ function formatAmount(amount: number, currency: string): string {
   }).format(amount);
 }
 
-// 세액공제 계산 (NZD만 해당)
-function taxRefund(amount: number): number {
-  return Math.round(amount * 0.3333);
-}
-
 // ============================================================
 // 메인 모달 컴포넌트 — 2단계 간소화
+// 정책: 결제 시점에는 세액공제 예상액을 노출하지 않는다 (기부 의도 존중).
+//       세액공제 안내는 랜딩/기부완료/대시보드에서만 노출.
+// 정책: 기부자는 선택한 금액만 결제한다 — Stripe 수수료 커버 옵션 없음,
+//       플랫폼 수수료는 기부자가 아닌 단체 측 수수료로 처리 (백엔드).
 // ============================================================
 export function DonationCheckoutModal({ opened, onClose, campaign, frequency = 'one-time' }: DonationCheckoutModalProps) {
   // 단계: 0=금액선택, 1=확인, 2=성공(리다이렉트중)
@@ -82,8 +82,14 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   const [selectedPreset, setSelectedPreset] = useState('50');
   const [customAmount, setCustomAmount] = useState('');
   const [currency, setCurrency] = useState('NZD');
-  const [coverFee, setCoverFee] = useState(false); // Stripe 수수료 부담 여부
   const [tipPlatform, setTipPlatform] = useState(false); // 자발적 플랫폼 팁
+
+  // 기부자 유형 (개인 / 회사·단체)
+  const [donorType, setDonorType] = useState<'individual' | 'organization'>('individual');
+  const [organizationName, setOrganizationName] = useState('');
+
+  // 익명 기부
+  const [anonymous, setAnonymous] = useState(false);
 
   // 선물 기부
   const [isGift, setIsGift] = useState(false);
@@ -96,25 +102,26 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   const [apiError, setApiError] = useState<string | null>(null);
 
   const amount = selectedPreset === 'custom' ? Number(customAmount) || 0 : Number(selectedPreset);
-  const refund = currency === 'NZD' ? taxRefund(amount) : 0;
-  // DearGiver 플랫폼 수수료: MAX($0.50, 기부금의 1%)
-  const platformFee = Math.max(0.50, Math.round(amount * 0.01 * 100) / 100);
-  // Stripe 수수료: ~1.5% (Stripe NZ 요금 기준)
-  const stripeFee = coverFee ? Math.round((amount * 0.027 + 0.30) * 100) / 100 : 0;
-  // 자발적 플랫폼 팁
   const tipAmount = tipPlatform ? PLATFORM_TIP_AMOUNT : 0;
-  const totalCharge = amount + stripeFee + platformFee + tipAmount;
+  // 기부자는 선택한 금액(+선택적 팁)만 결제한다
+  const totalCharge = amount + tipAmount;
 
   const isNonNZD = currency !== 'NZD';
   const isAmountValid = amount >= MIN_AMOUNT;
+  const isOrgValid = donorType === 'individual' || organizationName.trim().length > 0;
+
+  // 유료 플랜 단체가 설정한 금액별 안내 티어 (없으면 undefined)
+  const tiers = campaign.donationTiers;
 
   const resetAndClose = useCallback(() => {
     setStep(0);
     setSelectedPreset('50');
     setCustomAmount('');
     setCurrency('NZD');
-    setCoverFee(false);
     setTipPlatform(false);
+    setDonorType('individual');
+    setOrganizationName('');
+    setAnonymous(false);
     setIsGift(false);
     setGiftRecipientName('');
     setGiftRecipientEmail('');
@@ -125,7 +132,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
 
   // Checkout Session 생성 → Stripe 리다이렉트
   const handleCheckout = async () => {
-    if (!isAmountValid) return;
+    if (!isAmountValid || !isOrgValid) return;
     setIsLoading(true);
     setApiError(null);
 
@@ -153,9 +160,11 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
         currency: currency as 'NZD' | 'AUD' | 'USD',
         charityAccountId,
         charityName: campaign.name,
-        coverStripeFee: coverFee,
         addSupport: tipPlatform,
         recurring: frequency === 'monthly',
+        anonymous,
+        donorType,
+        organizationName: donorType === 'organization' ? organizationName.trim() : undefined,
       });
 
       // Stripe Checkout 페이지로 리다이렉트
@@ -197,9 +206,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       {/* ── Step 0: 금액 선택 ── */}
       {step === 0 && (
         <div className={classes.stepContent}>
-          {/* 통화 선택 */}
-
-          {/* 월간 기부 혜택 배너 */}
+          {/* 월간 기부 혜택 배너 — 세액공제 예상액은 노출하지 않음 */}
           {frequency === 'monthly' && (
             <Alert
               icon={<IconRepeat size={16} />}
@@ -211,9 +218,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
               <Text size="sm" fw={600}>Monthly Giving Benefits</Text>
               <Text size="xs" mt={2} lh={1.5}>
                 {amount >= MIN_AMOUNT ? (
-                  <>Your <strong>{formatAmount(amount, currency)}/mo</strong> = <strong>{formatAmount(amount * 12, currency)}/year</strong> of sustained impact.
-                  {currency === 'NZD' && <> Est. annual tax credit: <strong>{formatAmount(taxRefund(amount * 12), 'NZD')}</strong>.</>}
-                  </>
+                  <>Your <strong>{formatAmount(amount, currency)}/mo</strong> = <strong>{formatAmount(amount * 12, currency)}/year</strong> of sustained impact — steady support charities can plan around.</>
                 ) : (
                   'Set a monthly amount to see your annual impact projection.'
                 )}
@@ -230,7 +235,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             mb={16}
           />
 
-          {/* NZD 아닌 경우 경고 */}
+          {/* NZD 아닌 경우 안내 */}
           {isNonNZD && (
             <Alert
               icon={<IconAlertTriangle size={16} />}
@@ -239,33 +244,110 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
               radius="md"
               mb={16}
             >
-              <Text size="sm" fw={600}>NZ Tax Credit Not Applicable</Text>
-              <Text size="xs" mt={2}>
-                Donations in {currency} do not qualify for the NZ 33.33% donation tax credit.
-                Switch to NZD for tax credit eligibility.
+              <Text size="xs">
+                Donations in {currency} do not qualify for the NZ donation tax credit.
               </Text>
             </Alert>
           )}
 
-          {/* 금액 프리셋 */}
-          <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={8}>
-            Select amount <Badge size="xs" color="orange" variant="light">Min. ${MIN_AMOUNT}</Badge>
+          {/* 기부자 유형 — 개인 / 회사·단체 */}
+          <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={6}>
+            Who is donating?
           </Text>
-          <SimpleGrid cols={5} spacing={8} mb={8}>
-            {PRESET_AMOUNTS.map((amt) => (
-              <Button
-                key={amt}
-                variant={selectedPreset === amt ? 'filled' : 'outline'}
-                color={selectedPreset === amt ? 'terracotta' : 'dark'}
+          <SegmentedControl
+            fullWidth
+            radius="md"
+            color="sage"
+            value={donorType}
+            onChange={(v) => setDonorType(v as 'individual' | 'organization')}
+            data={[
+              { label: 'Personal', value: 'individual' },
+              { label: 'As an Organisation', value: 'organization' },
+            ]}
+            mb={donorType === 'organization' ? 10 : 16}
+          />
+
+          {donorType === 'organization' && (
+            <Box mb={16}>
+              <TextInput
+                label="Organisation name"
+                placeholder="e.g. OSOPRO Ltd"
+                description="Your donation receipt will be issued in this legal name"
+                value={organizationName}
+                onChange={(e) => setOrganizationName(e.currentTarget.value)}
+                leftSection={<IconBuilding size={16} />}
                 radius="md"
                 size="sm"
-                onClick={() => { setSelectedPreset(amt); setCustomAmount(''); }}
-                className={selectedPreset === amt ? classes.amountBtnActive : classes.amountBtn}
+                required
+              />
+              <Alert
+                icon={<IconAlertCircle size={14} />}
+                color="blue"
+                variant="light"
+                radius="md"
+                mt={8}
               >
-                ${amt}
-              </Button>
-            ))}
-          </SimpleGrid>
+                <Text size="xs" lh={1.5}>
+                  Organisation donations are generally claimed as an <strong>income tax deduction</strong>,
+                  not the 33.33% personal donation tax credit. Please check with your accountant.
+                </Text>
+              </Alert>
+            </Box>
+          )}
+
+          {/* 금액 선택 — 티어가 설정된 캠페인이면 티어 카드, 아니면 프리셋 */}
+          <Group gap={8} mb={8}>
+            <Text size="sm" fw={600} c="var(--bm-text-dark)">Select amount</Text>
+            <Badge size="xs" color="orange" variant="light">Min. ${MIN_AMOUNT}</Badge>
+          </Group>
+
+          {tiers && tiers.length > 0 ? (
+            <Stack gap={8} mb={8}>
+              {tiers.map((tier) => {
+                const isActive = selectedPreset === String(tier.amount);
+                return (
+                  <Box
+                    key={tier.amount}
+                    onClick={() => { setSelectedPreset(String(tier.amount)); setCustomAmount(''); }}
+                    p={12}
+                    style={{
+                      cursor: 'pointer',
+                      borderRadius: 10,
+                      border: isActive
+                        ? '2px solid var(--bm-terracotta)'
+                        : '1px solid rgba(0,0,0,0.1)',
+                      background: isActive ? 'rgba(226,114,91,0.06)' : 'white',
+                      transition: 'all 0.15s ease',
+                    }}
+                  >
+                    <Group justify="space-between" mb={2}>
+                      <Text size="sm" fw={700} c={isActive ? 'var(--bm-terracotta)' : 'var(--bm-text-dark)'}>
+                        ${tier.amount}
+                      </Text>
+                      <Text size="sm" fw={600} c="var(--bm-text-dark)">{tier.title}</Text>
+                    </Group>
+                    <Text size="xs" c="var(--bm-text-muted)" lh={1.5}>{tier.description}</Text>
+                  </Box>
+                );
+              })}
+            </Stack>
+          ) : (
+            <SimpleGrid cols={5} spacing={8} mb={8}>
+              {PRESET_AMOUNTS.map((amt) => (
+                <Button
+                  key={amt}
+                  variant={selectedPreset === amt ? 'filled' : 'outline'}
+                  color={selectedPreset === amt ? 'terracotta' : 'dark'}
+                  radius="md"
+                  size="sm"
+                  onClick={() => { setSelectedPreset(amt); setCustomAmount(''); }}
+                  className={selectedPreset === amt ? classes.amountBtnActive : classes.amountBtn}
+                >
+                  ${amt}
+                </Button>
+              ))}
+            </SimpleGrid>
+          )}
 
           <Button
             variant={selectedPreset === 'custom' ? 'filled' : 'outline'}
@@ -297,38 +379,18 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             />
           )}
 
-          {/* 세액공제 미리보기 (NZD만) */}
-          {amount >= MIN_AMOUNT && currency === 'NZD' && (
-            <div className={classes.taxInfoBox} style={{ marginTop: 16 }}>
-              <Group gap={8}>
-                <ThemeIcon size={28} radius="xl" color="sage" variant="light">
-                  <IconReceipt size={14} />
-                </ThemeIcon>
-                <Box>
-                  <Text size="sm" fw={600} c="var(--bm-sage-dark)">
-                    Est. tax refund: {formatAmount(refund, 'NZD')}
-                  </Text>
-                  <Text size="xs" c="var(--bm-text-muted)">
-                    Your effective cost: {formatAmount(amount - refund, 'NZD')}
-                  </Text>
-                </Box>
-              </Group>
-            </div>
-          )}
-
-          {/* Stripe 수수료 체크박스 */}
+          {/* 익명 기부 */}
           <Checkbox
             mt={16}
             label={
-              <Text size="sm">
-                Cover the Stripe processing fee (~2.7% + $0.30)
-                {stripeFee > 0 ? ` (+${formatAmount(stripeFee, currency)})` : ''}
-                <Text size="xs" c="dimmed" mt={2}>International cards: ~3.5% + $0.30</Text>
-              </Text>
+              <Group gap={6}>
+                <IconEyeOff size={14} color="var(--bm-text-muted)" />
+                <Text size="sm">Donate anonymously</Text>
+              </Group>
             }
-            description="Helps more of your donation reach the charity directly"
-            checked={coverFee}
-            onChange={(e) => setCoverFee(e.currentTarget.checked)}
+            description="We won't display your name in any public feeds or supporter lists"
+            checked={anonymous}
+            onChange={(e) => setAnonymous(e.currentTarget.checked)}
             color="sage"
           />
 
@@ -340,7 +402,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
                 Add {formatAmount(PLATFORM_TIP_AMOUNT, currency)} to support DearGiver
               </Text>
             }
-            description="Help us keep DearGiver free for charities — 100% optional"
+            description="Help us keep DearGiver running — 100% optional"
             checked={tipPlatform}
             onChange={(e) => setTipPlatform(e.currentTarget.checked)}
             color="terracotta"
@@ -410,31 +472,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             )}
           </Box>
 
-          {/* 플랫폼 수수료 투명 표시 */}
-          {amount >= MIN_AMOUNT && (
-            <Box
-              mt={14}
-              p={12}
-              style={{
-                background: 'rgba(74,124,113,0.06)',
-                borderRadius: 10,
-                borderLeft: '3px solid var(--bm-sage)',
-              }}
-            >
-              <Group justify="space-between" mb={4}>
-                <Group gap={6}>
-                  <IconShieldCheck size={14} color="var(--bm-sage-dark)" />
-                  <Text size="xs" fw={600} c="var(--bm-sage-dark)">Platform fee (1%)</Text>
-                </Group>
-                <Text size="xs" fw={700} c="var(--bm-sage-dark)">{formatAmount(platformFee, currency)}</Text>
-              </Group>
-              <Text size="xs" c="var(--bm-text-muted)" lh={1.6}>
-                1% of your donation (min $0.50) keeps DearGiver running.
-                No hidden costs, ever.
-              </Text>
-            </Box>
-          )}
-
           <Divider my={20} />
 
           <Group justify="flex-end">
@@ -444,7 +481,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
               radius="xl"
               rightSection={<IconArrowRight size={16} />}
               onClick={() => setStep(1)}
-              disabled={!isAmountValid}
+              disabled={!isAmountValid || !isOrgValid}
               className={classes.nextBtn}
             >
               Continue — {formatAmount(totalCharge, currency)}
@@ -483,24 +520,29 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
                 <Text size="sm" c="var(--bm-text-muted)">Charity / Campaign</Text>
                 <Text size="sm" fw={600} ta="right" maw={200} lineClamp={1}>{campaign.name}</Text>
               </Group>
+              {donorType === 'organization' && (
+                <Group justify="space-between" mb={8}>
+                  <Group gap={6}>
+                    <IconBuilding size={14} color="var(--bm-sage-dark)" />
+                    <Text size="sm" c="var(--bm-text-muted)">Donating as</Text>
+                  </Group>
+                  <Text size="sm" fw={600} ta="right" maw={200} lineClamp={1}>{organizationName.trim()}</Text>
+                </Group>
+              )}
+              {anonymous && (
+                <Group justify="space-between" mb={8}>
+                  <Group gap={6}>
+                    <IconEyeOff size={14} color="var(--bm-sage-dark)" />
+                    <Text size="sm" c="var(--bm-text-muted)">Visibility</Text>
+                  </Group>
+                  <Badge size="sm" color="sage" variant="light">Anonymous</Badge>
+                </Group>
+              )}
               <Group justify="space-between" mb={8}>
                 <Text size="sm" c="var(--bm-text-muted)">
                   Donation amount {frequency === 'monthly' && <Badge size="xs" color="sage" variant="light" ml={4}>Monthly</Badge>}
                 </Text>
                 <Text size="sm" fw={600}>{formatAmount(amount, currency)}{frequency === 'monthly' ? '/mo' : ''}</Text>
-              </Group>
-              {coverFee && (
-                <Group justify="space-between" mb={8}>
-                  <Text size="sm" c="var(--bm-text-muted)">Stripe processing fee</Text>
-                  <Text size="sm" c="dimmed">+{formatAmount(stripeFee, currency)}</Text>
-                </Group>
-              )}
-              <Group justify="space-between" mb={8}>
-                <Group gap={6}>
-                  <IconShieldCheck size={14} color="var(--bm-sage)" />
-                  <Text size="sm" c="var(--bm-text-muted)">Platform fee (1%)</Text>
-                </Group>
-                <Text size="sm" c="var(--bm-sage-dark)">{formatAmount(platformFee, currency)}</Text>
               </Group>
               {tipPlatform && (
                 <Group justify="space-between" mb={8}>
@@ -512,23 +554,20 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
                 </Group>
               )}
               <Divider my={8} />
-              <Group justify="space-between" mb={8}>
+              <Group justify="space-between">
                 <Text size="sm" fw={700} c="var(--bm-text-dark)">Total charge</Text>
                 <Text size="md" fw={800} c="var(--bm-terracotta)">
                   {formatAmount(totalCharge, currency)}{frequency === 'monthly' ? '/mo' : ''}
                 </Text>
               </Group>
-              {currency === 'NZD' && refund > 0 && (
-                <Group justify="space-between">
-                  <Text size="sm" c="var(--bm-text-muted)">Est. NZ tax credit (33.33%)</Text>
-                  <Text size="sm" fw={600} c="var(--bm-sage-dark)">−{formatAmount(refund, 'NZD')}</Text>
-                </Group>
-              )}
             </div>
 
-            {isNonNZD && (
-              <Alert icon={<IconAlertTriangle size={14} />} color="orange" variant="light" radius="md" mt={12}>
-                <Text size="xs">Donations in {currency} do not qualify for NZ tax credits.</Text>
+            {donorType === 'organization' && (
+              <Alert icon={<IconAlertCircle size={14} />} color="blue" variant="light" radius="md" mt={12}>
+                <Text size="xs">
+                  Your receipt will be issued to <strong>{organizationName.trim()}</strong> for
+                  business tax deduction purposes.
+                </Text>
               </Alert>
             )}
           </Stack>

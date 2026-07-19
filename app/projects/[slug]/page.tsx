@@ -29,6 +29,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
+import { ShareButton } from '@/components/ShareButton';
 import {
   getCampaignBySlug,
   getRelatedCampaigns,
@@ -267,15 +268,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                 )}
 
                 {/* 세금 환급 힌트 */}
-                {actualAmount && Number(actualAmount) > 0 && (
-                  <Box className={classes.taxHint} mb={16}>
-                    <Text size="xs" c="var(--bm-sage-dark)">
-                      💰 You&apos;ll get <strong>${Math.round(Number(actualAmount) * 0.3333)}</strong> back as a tax refund
-                    </Text>
-                  </Box>
-                )}
-
-                {/* CTA 버튼 */}
+                {/* CTA 버튼 — 결제 시점에는 예상 세액공제 금액을 노출하지 않는다 */}
                 <Button
                   color="terracotta"
                   fullWidth
@@ -286,6 +279,10 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                 >
                   Donate {actualAmount ? `$${actualAmount}` : ''} {frequency === 'monthly' ? 'Monthly' : 'Now'}
                 </Button>
+
+                <Box mt={10}>
+                  <ShareButton fullWidth size="md" label="Share this campaign" />
+                </Box>
 
                 <Text ta="center" size="xs" c="dimmed" mt={8}>
                   🔒 Secure payment via Stripe

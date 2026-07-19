@@ -588,18 +588,28 @@ function ImpactTab() {
 // ===================== Donation History 탭 (API 연동) =====================
 function DonationHistoryTab() {
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [donorTypeFilter, setDonorTypeFilter] = useState<string | null>(null);
   const { items, total, page, pageSize, loading, error, setPage } = useApiDonations(20);
 
   // 클라이언트 사이드 상태 필터 (API에 status 필터가 없으므로)
   const filtered = useMemo(() => {
-    if (!statusFilter) return items;
-    return items.filter((d) => {
-      if (statusFilter === 'completed') return d.donation_status === 'succeeded';
-      if (statusFilter === 'pending') return d.donation_status === 'checkout_created';
-      if (statusFilter === 'refunded') return d.donation_status === 'refunded';
-      return true;
-    });
-  }, [items, statusFilter]);
+    let result = items;
+    if (statusFilter) {
+      result = result.filter((d) => {
+        if (statusFilter === 'completed') return d.donation_status === 'succeeded';
+        if (statusFilter === 'pending') return d.donation_status === 'checkout_created';
+        if (statusFilter === 'refunded') return d.donation_status === 'refunded';
+        return true;
+      });
+    }
+    // 개인/회사 기부 구분 (donor_type 필드 미제공 시 개인으로 간주)
+    if (donorTypeFilter) {
+      result = result.filter((d) =>
+        (d.donor_type ?? 'individual') === donorTypeFilter
+      );
+    }
+    return result;
+  }, [items, statusFilter, donorTypeFilter]);
 
   const totalPages = Math.ceil(total / pageSize);
 
@@ -619,6 +629,18 @@ function DonationHistoryTab() {
           clearable
           radius="md"
           w={180}
+        />
+        <Select
+          placeholder="Personal & Organisation"
+          data={[
+            { value: 'individual', label: '🙋 Personal' },
+            { value: 'organization', label: '🏢 Organisation' },
+          ]}
+          value={donorTypeFilter}
+          onChange={setDonorTypeFilter}
+          clearable
+          radius="md"
+          w={210}
         />
       </div>
 
@@ -660,6 +682,11 @@ function DonationHistoryTab() {
                           <Text size="sm" fw={500}>
                             {d.charity_display_name || '(단체 미연결)'}
                           </Text>
+                          {d.donor_type === 'organization' && (
+                            <Badge size="xs" variant="light" color="blue" mt={2}>
+                              🏢 {d.organization_name || 'Organisation'}
+                            </Badge>
+                          )}
                         </Table.Td>
                         <Table.Td>
                           <Text size="sm" fw={600}>
@@ -1573,10 +1600,10 @@ function DashboardContent() {
                 Receipt Vault
               </Tabs.Tab>
               <Tabs.Tab value="rewards" leftSection={<IconGift size={16} />}>
-                My Rewards
+                My Journey
               </Tabs.Tab>
               <Tabs.Tab value="causes" leftSection={<IconRoute size={16} />}>
-                My Causes & Journey
+                My Causes
               </Tabs.Tab>
             </Tabs.List>
 

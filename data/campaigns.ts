@@ -6,10 +6,14 @@
 export type Category =
   | 'Education'
   | 'Environment'
-  | 'Health'
+  | 'Health & Wellbeing'
   | 'Arts & Culture'
   | 'Community'
-  | 'Animal Welfare';
+  | 'Animal Welfare'
+  | 'Children & Youth'
+  | 'Food & Housing'
+  | 'Disability'
+  | 'Māori, Pasifika & Ethnic Communities';
 
 export type Region =
   | 'Auckland'
@@ -40,16 +44,32 @@ export interface Campaign {
   createdAt: string;
   /** Stripe Connected Account ID (acct_...). 없으면 기본 테스트 ID 사용 */
   stripeAccountId?: string;
+  /**
+   * 유료 플랜 단체가 설정하는 금액별 안내 티어.
+   * 설정 시 기부 모달의 프리셋 버튼 대신 티어 카드가 표시된다.
+   */
+  donationTiers?: DonationTier[];
+}
+
+/** 금액별 기부 안내 티어 (유료 플랜 기능) */
+export interface DonationTier {
+  amount: number;
+  title: string;
+  description: string;
 }
 
 // --- 카테고리 목록 ---
 export const CATEGORIES: Category[] = [
   'Education',
   'Environment',
-  'Health',
+  'Health & Wellbeing',
   'Arts & Culture',
   'Community',
   'Animal Welfare',
+  'Children & Youth',
+  'Food & Housing',
+  'Disability',
+  'Māori, Pasifika & Ethnic Communities',
 ];
 
 // --- 지역 목록 ---
@@ -113,6 +133,13 @@ Native forests are not just trees — they're water filters, carbon sinks, and h
     featured: true,
     trending: true,
     createdAt: '2026-03-15',
+    // 유료 플랜 데모: 금액별 안내 티어 (백엔드 API 연동 전 로컬 데이터)
+    donationTiers: [
+      { amount: 10, title: 'Plant 2 native seedlings', description: 'Two tōtara or rimu seedlings planted in a conservation site.' },
+      { amount: 25, title: 'Plant 5 native seedlings', description: 'Five natives — tōtara, rimu, kāhikatea — planted and tracked.' },
+      { amount: 50, title: 'Fund a volunteer planting day', description: 'Covers tools and transport for a 10-person volunteer day.' },
+      { amount: 100, title: 'Sponsor a conservation marker', description: 'A permanent marker at a restored site, with progress updates.' },
+    ],
   },
   {
     id: 'camp-002',
@@ -363,7 +390,7 @@ Our 200+ volunteers include professional chefs, students, retirees, and families
     id: 'camp-009',
     name: 'Wellness For Seniors',
     slug: 'wellness-for-seniors',
-    category: 'Health',
+    category: 'Health & Wellbeing',
     region: 'Wellington',
     description:
       'Engaging elderly people through wellness activities, social programmes, and health support for happier, healthier lives.',

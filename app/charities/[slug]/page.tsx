@@ -34,6 +34,7 @@ import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ClaimProfileBanner } from '@/components/ClaimProfileBanner';
+import { ShareButton } from '@/components/ShareButton';
 import { getOrganizationBySlug, ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
 import { campaigns, formatCurrency } from '@/data/campaigns';
 import type { Campaign } from '@/data/campaigns';
@@ -171,6 +172,7 @@ export default function OrganizationDetailPage({
                   Visit Website
                 </Button>
               )}
+              <ShareButton variant="outline" color="white" className={classes.websiteBtn} />
             </Group>
           </Container>
         </div>

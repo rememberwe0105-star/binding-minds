@@ -10,6 +10,10 @@ import {
   IconUsers,
   IconHeartPlus,
   IconPalette,
+  IconMoodKid,
+  IconHomeHeart,
+  IconWheelchair,
+  IconUsersGroup,
   type TablerIcon,
 } from '@tabler/icons-react';
 import type { Category } from '@/data/campaigns';
@@ -48,16 +52,40 @@ export const CATEGORY_META: Record<Category, CategoryMeta> = {
     hex: 'var(--bm-terracotta)',
     label: 'Community',
   },
-  'Health': {
+  'Health & Wellbeing': {
     icon: IconHeartPlus,
     color: 'red',
     hex: '#c0392b',
-    label: 'Health',
+    label: 'Health & Wellbeing',
   },
   'Arts & Culture': {
     icon: IconPalette,
     color: 'violet',
     hex: '#7b5ea7',
     label: 'Arts & Culture',
+  },
+  'Children & Youth': {
+    icon: IconMoodKid,
+    color: 'pink',
+    hex: '#c75d8a',
+    label: 'Children & Youth',
+  },
+  'Food & Housing': {
+    icon: IconHomeHeart,
+    color: 'yellow',
+    hex: '#b07d2b',
+    label: 'Food & Housing',
+  },
+  'Disability': {
+    icon: IconWheelchair,
+    color: 'cyan',
+    hex: '#2b7a8c',
+    label: 'Disability',
+  },
+  'Māori, Pasifika & Ethnic Communities': {
+    icon: IconUsersGroup,
+    color: 'grape',
+    hex: '#9c4d97',
+    label: 'Māori, Pasifika & Ethnic Communities',
   },
 };
