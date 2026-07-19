@@ -242,7 +242,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   value={donationAmount}
                   onChange={setDonationAmount}
                   data={[
-                    { value: '10', label: '$10' },
+                    { value: '5', label: '$5' },
                     { value: '20', label: '$20' },
                     { value: '50', label: '$50' },
                     { value: '100', label: '$100' },
@@ -256,14 +256,14 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
 
                 {donationAmount === 'custom' && (
                   <TextInput
-                    placeholder="Enter amount"
+                    placeholder="Enter amount (min $5)"
                     value={customAmount}
                     onChange={(e) => setCustomAmount(e.currentTarget.value)}
                     leftSection={<Text size="sm" fw={600}>$</Text>}
                     size="md"
                     mb={12}
                     type="number"
-                    min={10}
+                    min={5}
                   />
                 )}
 
