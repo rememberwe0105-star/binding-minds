@@ -141,7 +141,8 @@ export function UnifiedNotificationBell() {
 
   // Determine active role
   const activeRole: DemoRole = useMemo(() => {
-    if (demoRole) return demoRole;
+    // charity_paid 데모도 알림 구성은 charity와 동일하게 취급
+    if (demoRole) return demoRole === 'charity_paid' ? 'charity' : demoRole;
     if (userRole === 'platform_admin') return 'admin';
     if (userRole === 'charity_admin') return 'charity';
     if (userRole === 'donor') return 'donor';

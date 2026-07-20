@@ -49,7 +49,8 @@ function SettingsContent() {
   const [notifLoading, setNotifLoading] = useState(false);
 
   // Determine active role for notification settings
-  const activeNotifRole = demoRole ?? (userRole === 'platform_admin' ? 'admin' : userRole === 'charity_admin' ? 'charity' : 'donor');
+  const activeNotifRole = (demoRole === 'charity_paid' ? 'charity' : demoRole)
+    ?? (userRole === 'platform_admin' ? 'admin' : userRole === 'charity_admin' ? 'charity' : 'donor');
 
   // Load notification preferences from backend
   useEffect(() => {

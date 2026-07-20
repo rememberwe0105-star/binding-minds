@@ -107,6 +107,17 @@
 - 유지된 것: 대시보드 배지·탭의 IconGift 아이콘, "Avg Gift"(평균 기부액) 라벨 등
   선물 기부 기능과 무관한 표현
 
+## 추가 작업 (같은 날 3차) — 사용자 피드백 반영 (deargiver update.docx)
+
+| # | 피드백 | 적용 내용 |
+|---|--------|----------|
+| 1 | 데모 charity를 무료/프리미엄 플랜 따로 보기 | DemoRole에 `charity_paid` 추가, 로그인 페이지 데모 버튼 2종(Free/Premium), charity 대시보드에 플랜 배지 + 무료 플랜에서 Analytics·Donor Updates 탭 잠금(Premium 안내 패널, 30일 트라이얼 CTA) |
+| 2 | "$5 선택 후 세팅 바뀜" 확인 | 버그 확인·수정 — 상세 페이지에서 고른 금액이 모달에 전달되지 않던 문제. `initialAmount` prop 추가, 프리셋/티어에 없는 금액은 Custom으로 매핑 |
+| 3 | 로그인 없이 기부 (게스트 체크아웃) | FE: 비로그인 시 모달에 이름/이메일 입력, 게스트 API 클라이언트(`createGuestCheckoutSession`), success 페이지 계정 생성 유도 카드. BE: `POST /checkout/donations/guest` 요청서 v8.1에 추가 (엔드포인트 대기) |
+| 4 | 팁 옵션 론치 단계 생략 | 모달 $2 서포트 체크박스 제거, `addSupport` 미전송 (백엔드 하위 호환) |
+
+- 문서: 백엔드 요청서 v8.0 → **v8.1** 개정 (게스트 기부 P1 신규 + 팁 제거 공지), PDF 재생성
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

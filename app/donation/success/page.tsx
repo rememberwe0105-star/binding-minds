@@ -188,7 +188,7 @@ function SuccessContent() {
                     <Text size="xs" c="var(--bm-text-muted)">
                       {user?.email
                         ? <>A receipt and thank-you message will be sent to <strong>{user.email}</strong></>
-                        : 'Log in to receive receipt emails automatically'
+                        : 'Your receipt and thank-you message are on their way to the email you entered'
                       }
                     </Text>
                   </Box>
@@ -204,6 +204,40 @@ function SuccessContent() {
                 </Box>
               </Stack>
             </Card>
+
+            {/* 게스트 기부 → 완료 후 계정 생성 유도 (기부 시작 단계에선 로그인 강제 없음) */}
+            {!user && (
+              <Card
+                padding="lg"
+                radius="lg"
+                maw={480}
+                mx="auto"
+                mb={32}
+                style={{
+                  background: 'linear-gradient(135deg, rgba(74,124,113,0.08) 0%, rgba(196,114,74,0.06) 100%)',
+                  border: '1px solid rgba(74,124,113,0.2)',
+                }}
+              >
+                <Text size="sm" fw={700} c="var(--bm-text-dark)" mb={4}>
+                  Keep every receipt in one place ✨
+                </Text>
+                <Text size="xs" c="var(--bm-text-muted)" lh={1.6} mb={14}>
+                  Create a free account and we&apos;ll automatically store your donation
+                  receipts, calculate your 33.33% NZ tax credit, and track your giving
+                  journey — your email link also connects this donation to your new account.
+                </Text>
+                <Button
+                  component={Link}
+                  href="/auth"
+                  color="sage"
+                  radius="xl"
+                  size="sm"
+                  fullWidth
+                >
+                  Create a free account
+                </Button>
+              </Card>
+            )}
 
             {/* Primary Actions */}
             <Box style={{ display: 'flex', gap: 12, justifyContent: 'center', flexWrap: 'wrap' }} mb={40}>

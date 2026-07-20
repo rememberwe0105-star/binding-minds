@@ -1,4 +1,11 @@
-# DearGiver — Backend API 변경 요청서 (v8.0)
+# DearGiver — Backend API 변경 요청서 (v8.1)
+
+> **v8.1 개정 (2026-07-20)**: 사용자 피드백 반영
+> 1. **게스트(비로그인) 기부** 신규 요청 — `POST /api/v1/checkout/donations/guest` (인증 없음,
+>    `guestName`/`guestEmail`로 고객 기록 생성, 완료 이메일에 계정 연결 링크 포함,
+>    게스트 정기 기부는 초기 차단 권장)
+> 2. **플랫폼 팁(addSupport) 제거** — 론치 단계에서 노출하지 않음, 프론트 미전송 (무시 처리)
+> 3. 상세 내용은 `BACKEND_API_REQUEST_V8.pdf` (v8.1) 참조
 
 - **작성일**: 2026-07-20
 - **대상**: 백엔드 팀

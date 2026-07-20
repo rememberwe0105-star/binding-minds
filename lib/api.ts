@@ -770,23 +770,51 @@ export async function postRegistration(data: {
  * Stripe Checkout 세션 생성
  * @see deargiver_api_specification.md §2.2
  */
-export async function createCheckoutSession(data: {
+/** Checkout 공통 파라미터 (v8.1: addSupport 팁 옵션은 론치 단계에서 제거됨) */
+export interface CheckoutParams {
   amount: number;
   currency: 'NZD' | 'AUD' | 'USD';
   charityAccountId: string;
   charityName?: string;
-  addSupport?: boolean;
   recurring?: boolean;
   /** 익명 기부 — 공개 피드/서포터 목록에 이름 미노출 (백엔드 v8.0 요청) */
   anonymous?: boolean;
   /** 기부 주체 — 회사(organization) 기부 시 영수증을 회사 명의로 발급 (백엔드 v8.0 요청) */
   donorType?: 'individual' | 'organization';
   organizationName?: string;
-}): Promise<CheckoutSession> {
+}
+
+export async function createCheckoutSession(data: CheckoutParams): Promise<CheckoutSession> {
   return apiFetch<CheckoutSession>('/api/v1/checkout/donations', {
     method: 'POST',
     body: JSON.stringify(data),
   });
+}
+
+/**
+ * 게스트(비로그인) 기부 Checkout Session 생성 — 백엔드 v8.1 요청.
+ * 인증 헤더 없이 이름/이메일을 받아 고객 기록을 생성하고,
+ * 완료 이메일에 계정 연결 링크를 포함해 발송한다.
+ */
+export async function createGuestCheckoutSession(
+  data: CheckoutParams & { guestName: string; guestEmail: string },
+): Promise<CheckoutSession> {
+  const res = await fetch(`${API_BASE_URL}/api/v1/checkout/donations/guest`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data),
+  });
+  const text = await res.text();
+  let body: CheckoutSession & { error?: ApiError };
+  try {
+    body = text ? JSON.parse(text) : ({} as CheckoutSession);
+  } catch {
+    throw new Error(`게스트 결제 응답 파싱 실패 (HTTP ${res.status})`);
+  }
+  if (!res.ok) {
+    throw new Error(body.error?.message ?? `게스트 결제를 시작할 수 없습니다 (HTTP ${res.status})`);
+  }
+  return body;
 }
 
 /**

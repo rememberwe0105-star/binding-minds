@@ -101,13 +101,14 @@ export default function AuthPage() {
   };
 
   // ── Demo Role Simulation (no Firebase, no credentials) ──
-  const handleDemoRole = (role: 'donor' | 'charity' | 'admin') => {
+  const handleDemoRole = (role: 'donor' | 'charity' | 'charity_paid' | 'admin') => {
     setDemoRole(role);
     switch (role) {
       case 'donor':
         router.push('/dashboard');
         break;
       case 'charity':
+      case 'charity_paid':
         router.push('/charity/dashboard');
         break;
       case 'admin':
@@ -300,7 +301,7 @@ export default function AuthPage() {
                   Demo — Individual Donor
                 </Button>
 
-                {/* Charity Admin Demo */}
+                {/* Charity Admin Demo — 무료/프리미엄 플랜 각각 시연 */}
                 <Button
                   fullWidth
                   variant="light"
@@ -317,7 +318,26 @@ export default function AuthPage() {
                     },
                   }}
                 >
-                  Demo — Charity Organisation
+                  Demo — Charity (Free Plan)
+                </Button>
+
+                <Button
+                  fullWidth
+                  variant="light"
+                  color="terracotta"
+                  size="md"
+                  radius="xl"
+                  leftSection={<IconBuilding size={18} />}
+                  onClick={() => handleDemoRole('charity_paid')}
+                  mb={8}
+                  styles={{
+                    root: {
+                      border: '1px solid var(--bm-terracotta, #b07552)',
+                      background: 'rgba(176, 117, 82, 0.12)',
+                    },
+                  }}
+                >
+                  Demo — Charity (Premium Plan) ✨
                 </Button>
 
                 {/* Platform Admin Demo */}

@@ -307,7 +307,13 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
         </Container>
       </main>
       <Footer />
-      <DonationCheckoutModal opened={modalOpened} onClose={closeModal} campaign={campaign} frequency={frequency} />
+      <DonationCheckoutModal
+        opened={modalOpened}
+        onClose={closeModal}
+        campaign={campaign}
+        frequency={frequency}
+        initialAmount={actualAmount}
+      />
     </>
   );
 }

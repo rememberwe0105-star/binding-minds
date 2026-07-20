@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import {
   Modal,
   Text,
@@ -28,9 +28,11 @@ import {
   IconRepeat,
   IconBuilding,
   IconEyeOff,
+  IconMail,
 } from '@tabler/icons-react';
 import type { Campaign } from '@/data/campaigns';
-import { createCheckoutSession } from '@/lib/api';
+import { createCheckoutSession, createGuestCheckoutSession } from '@/lib/api';
+import { useAuth } from '@/contexts/AuthContext';
 import classes from './DonationCheckoutModal.module.css';
 
 // ============================================================
@@ -41,11 +43,12 @@ interface DonationCheckoutModalProps {
   onClose: () => void;
   campaign: Campaign;
   frequency?: 'one-time' | 'monthly';
+  /** 상세 페이지에서 미리 선택한 금액 — 모달이 열릴 때 동기화된다 */
+  initialAmount?: string;
 }
 
 const PRESET_AMOUNTS = ['5', '10', '20', '50', '100'];
 const MIN_AMOUNT = 5; // 최소 기부금 $5 — NZ 세액공제(donation tax credit) 최소 기준액에 맞춤
-const PLATFORM_TIP_AMOUNT = 2; // 자발적 플랫폼 팁 $2
 
 // 통화 옵션
 const CURRENCY_OPTIONS = [
@@ -70,8 +73,15 @@ function formatAmount(amount: number, currency: string): string {
 //       세액공제 안내는 랜딩/기부완료/대시보드에서만 노출.
 // 정책: 기부자는 선택한 금액만 결제한다 — Stripe 수수료 커버 옵션 없음,
 //       플랫폼 수수료는 기부자가 아닌 단체 측 수수료로 처리 (백엔드).
+//       론치 단계에서는 플랫폼 팁 옵션도 노출하지 않는다.
+// 정책: 로그인 없이도 기부 가능 (게스트 체크아웃) — 이름/이메일만 받고,
+//       완료 후 계정 생성을 유도한다.
 // ============================================================
-export function DonationCheckoutModal({ opened, onClose, campaign, frequency = 'one-time' }: DonationCheckoutModalProps) {
+export function DonationCheckoutModal({ opened, onClose, campaign, frequency = 'one-time', initialAmount }: DonationCheckoutModalProps) {
+  const { user } = useAuth();
+  // Firebase 로그인이 없으면 게스트 기부 흐름 (데모 모드 포함)
+  const isGuest = !user;
+
   // 단계: 0=금액선택, 1=확인, 2=성공(리다이렉트중)
   const [step, setStep] = useState(0);
 
@@ -79,7 +89,10 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   const [selectedPreset, setSelectedPreset] = useState('50');
   const [customAmount, setCustomAmount] = useState('');
   const [currency, setCurrency] = useState('NZD');
-  const [tipPlatform, setTipPlatform] = useState(false); // 자발적 플랫폼 팁
+
+  // 게스트 기부자 정보 (비로그인)
+  const [guestName, setGuestName] = useState('');
+  const [guestEmail, setGuestEmail] = useState('');
 
   // 기부자 유형 (개인 / 회사·단체)
   const [donorType, setDonorType] = useState<'individual' | 'organization'>('individual');
@@ -93,33 +106,54 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   const [apiError, setApiError] = useState<string | null>(null);
 
   const amount = selectedPreset === 'custom' ? Number(customAmount) || 0 : Number(selectedPreset);
-  const tipAmount = tipPlatform ? PLATFORM_TIP_AMOUNT : 0;
-  // 기부자는 선택한 금액(+선택적 팁)만 결제한다
-  const totalCharge = amount + tipAmount;
+  // 기부자는 선택한 금액만 결제한다 (팁/수수료 없음)
+  const totalCharge = amount;
 
   const isNonNZD = currency !== 'NZD';
   const isAmountValid = amount >= MIN_AMOUNT;
   const isOrgValid = donorType === 'individual' || organizationName.trim().length > 0;
+  const isGuestValid = !isGuest
+    || (guestName.trim().length > 0 && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(guestEmail.trim()));
 
   // 유료 플랜 단체가 설정한 금액별 안내 티어 (없으면 undefined)
   const tiers = campaign.donationTiers;
+
+  // 상세 페이지에서 고른 금액을 모달이 열릴 때 반영
+  // (프리셋/티어에 있으면 그대로 선택, 없으면 커스텀으로 매핑)
+  useEffect(() => {
+    if (!opened) return;
+    const amt = initialAmount?.trim();
+    if (!amt || !(Number(amt) > 0)) return;
+    const selectable = tiers && tiers.length > 0
+      ? tiers.map((t) => String(t.amount))
+      : PRESET_AMOUNTS;
+    if (selectable.includes(amt)) {
+      setSelectedPreset(amt);
+      setCustomAmount('');
+    } else {
+      setSelectedPreset('custom');
+      setCustomAmount(amt);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [opened, initialAmount]);
 
   const resetAndClose = useCallback(() => {
     setStep(0);
     setSelectedPreset('50');
     setCustomAmount('');
     setCurrency('NZD');
-    setTipPlatform(false);
     setDonorType('individual');
     setOrganizationName('');
     setAnonymous(false);
+    setGuestName('');
+    setGuestEmail('');
     setApiError(null);
     onClose();
   }, [onClose]);
 
   // Checkout Session 생성 → Stripe 리다이렉트
   const handleCheckout = async () => {
-    if (!isAmountValid || !isOrgValid) return;
+    if (!isAmountValid || !isOrgValid || !isGuestValid) return;
     setIsLoading(true);
     setApiError(null);
 
@@ -127,17 +161,25 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       // 백엔드 API: amount는 기부 원금(달러 단위, 소수점 가능). 수수료는 백엔드가 계산.
       const charityAccountId = campaign.stripeAccountId ?? 'acct_1TLekBRHr11OamkF';
 
-      const session = await createCheckoutSession({
+      const payload = {
         amount,
         currency: currency as 'NZD' | 'AUD' | 'USD',
         charityAccountId,
         charityName: campaign.name,
-        addSupport: tipPlatform,
         recurring: frequency === 'monthly',
         anonymous,
         donorType,
         organizationName: donorType === 'organization' ? organizationName.trim() : undefined,
-      });
+      };
+
+      // 로그인 여부에 따라 인증/게스트 엔드포인트 분기
+      const session = isGuest
+        ? await createGuestCheckoutSession({
+            ...payload,
+            guestName: guestName.trim(),
+            guestEmail: guestEmail.trim(),
+          })
+        : await createCheckoutSession(payload);
 
       // Stripe Checkout 페이지로 리다이렉트
       window.location.href = session.url;
@@ -220,6 +262,46 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
                 Donations in {currency} do not qualify for the NZ donation tax credit.
               </Text>
             </Alert>
+          )}
+
+          {/* 게스트 기부자 정보 — 로그인 없이 기부 (완료 후 계정 생성 유도) */}
+          {isGuest && (
+            <Box
+              mb={16}
+              p={14}
+              style={{
+                background: 'rgba(74,124,113,0.05)',
+                borderRadius: 12,
+                border: '1px solid rgba(74,124,113,0.15)',
+              }}
+            >
+              <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={8}>
+                Your details
+              </Text>
+              <Stack gap={10}>
+                <TextInput
+                  label="Full name"
+                  placeholder="e.g. Aroha Ngata"
+                  value={guestName}
+                  onChange={(e) => setGuestName(e.currentTarget.value)}
+                  radius="md"
+                  size="sm"
+                  required
+                />
+                <TextInput
+                  label="Email"
+                  placeholder="e.g. aroha@email.com"
+                  description="We'll email your donation receipt here — no account needed"
+                  value={guestEmail}
+                  onChange={(e) => setGuestEmail(e.currentTarget.value)}
+                  leftSection={<IconMail size={16} />}
+                  radius="md"
+                  size="sm"
+                  type="email"
+                  required
+                />
+              </Stack>
+            </Box>
           )}
 
           {/* 기부자 유형 — 개인 / 회사·단체 */}
@@ -366,20 +448,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
             color="sage"
           />
 
-          {/* 자발적 플랫폼 팁 체크박스 */}
-          <Checkbox
-            mt={12}
-            label={
-              <Text size="sm">
-                Add {formatAmount(PLATFORM_TIP_AMOUNT, currency)} to support DearGiver
-              </Text>
-            }
-            description="Help us keep DearGiver running — 100% optional"
-            checked={tipPlatform}
-            onChange={(e) => setTipPlatform(e.currentTarget.checked)}
-            color="terracotta"
-          />
-
           <Divider my={20} />
 
           <Group justify="flex-end">
@@ -389,7 +457,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
               radius="xl"
               rightSection={<IconArrowRight size={16} />}
               onClick={() => setStep(1)}
-              disabled={!isAmountValid || !isOrgValid}
+              disabled={!isAmountValid || !isOrgValid || !isGuestValid}
               className={classes.nextBtn}
             >
               Continue — {formatAmount(totalCharge, currency)}
@@ -431,13 +499,13 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
                 </Text>
                 <Text size="sm" fw={600}>{formatAmount(amount, currency)}{frequency === 'monthly' ? '/mo' : ''}</Text>
               </Group>
-              {tipPlatform && (
+              {isGuest && (
                 <Group justify="space-between" mb={8}>
                   <Group gap={6}>
-                    <IconHeart size={14} color="var(--bm-terracotta)" />
-                    <Text size="sm" c="var(--bm-text-muted)">Voluntary platform tip</Text>
+                    <IconMail size={14} color="var(--bm-sage-dark)" />
+                    <Text size="sm" c="var(--bm-text-muted)">Receipt to</Text>
                   </Group>
-                  <Text size="sm" c="var(--bm-terracotta)">{formatAmount(tipAmount, currency)}</Text>
+                  <Text size="sm" fw={600} ta="right" maw={200} lineClamp={1}>{guestEmail.trim()}</Text>
                 </Group>
               )}
               <Divider my={8} />

@@ -16,8 +16,9 @@ import {
   IconCheck, IconDeviceFloppy, IconWorld, IconMail,
   IconPhone, IconMapPin, IconTrendingUp,
   IconUsersGroup, IconX, IconTrash, IconMoodEmpty,
-  IconReceipt, IconSend,
+  IconReceipt, IconSend, IconLock, IconSparkles,
 } from '@tabler/icons-react';
+import Link from 'next/link';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -26,7 +27,7 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAuth, demoCharityPlan } from '@/contexts/AuthContext';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
 import {
@@ -1256,6 +1257,34 @@ function DonorUpdatesTab() {
   );
 }
 
+// ===================== Premium 잠금 패널 (무료 플랜 데모) =====================
+function PlanLockedPanel({ feature }: { feature: string }) {
+  return (
+    <Card withBorder radius="lg" padding={48} mt={20} style={{ textAlign: 'center' }}>
+      <ThemeIcon size={56} radius="xl" color="gray" variant="light" mx="auto" mb={16}>
+        <IconLock size={28} />
+      </ThemeIcon>
+      <Title order={4} mb={8}>{feature} is a Premium feature</Title>
+      <Text size="sm" c="dimmed" maw={440} mx="auto" mb={20} lh={1.7}>
+        Upgrade to Premium to unlock {feature.toLowerCase()}, donor segments with
+        scheduled follow-up emails, custom donation tiers with photos, and 3 team seats.
+      </Text>
+      <Button
+        component={Link}
+        href="/charity/apply"
+        color="terracotta"
+        radius="xl"
+        leftSection={<IconSparkles size={16} />}
+      >
+        Try Premium free for 30 days
+      </Button>
+      <Text size="xs" c="dimmed" mt={12}>
+        NZ$119–129/month (GST incl.) + 2.0% per donation · cancel anytime
+      </Text>
+    </Card>
+  );
+}
+
 // ===================== Main Dashboard =====================
 function CharityDashboardContent() {
   const { displayName, serviceUser, userRole, demoRole } = useAuth();
@@ -1264,7 +1293,12 @@ function CharityDashboardContent() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const charityId = (serviceUser as any)?.charity_id as number ?? DEMO_CHARITY_ID;
 
-  const isCharityRole = userRole === 'charity_admin' || demoRole === 'charity';
+  const isCharityRole = userRole === 'charity_admin' || demoRole === 'charity' || demoRole === 'charity_paid';
+
+  // 데모에서만 플랜 구분 — 실제 유저는 백엔드 plan 필드 연동 전까지 전체 기능 유지
+  const plan = demoCharityPlan(demoRole) ?? 'paid';
+  const isFreePlan = plan === 'free';
+  const lockIcon = <IconLock size={12} />;
 
   return (
     <>
@@ -1286,6 +1320,16 @@ function CharityDashboardContent() {
                 >
                   Charity Admin
                 </Badge>
+                {demoCharityPlan(demoRole) && (
+                  <Badge
+                    size="sm"
+                    variant={isFreePlan ? 'light' : 'filled'}
+                    color={isFreePlan ? 'gray' : 'terracotta'}
+                    leftSection={isFreePlan ? undefined : <IconSparkles size={10} />}
+                  >
+                    {isFreePlan ? 'Free Plan' : 'Premium Plan'}
+                  </Badge>
+                )}
                 {!isCharityRole && (
                   <Badge size="sm" variant="light" color="orange">Demo Mode</Badge>
                 )}
@@ -1298,17 +1342,33 @@ function CharityDashboardContent() {
             <Tabs.List className={classes.tabList}>
               <Tabs.Tab value="overview" leftSection={<IconChartBar size={16} />}>Overview</Tabs.Tab>
               <Tabs.Tab value="donations" leftSection={<IconCoin size={16} />}>Donations</Tabs.Tab>
-              <Tabs.Tab value="analytics" leftSection={<IconTrendingUp size={16} />}>Analytics</Tabs.Tab>
+              <Tabs.Tab
+                value="analytics"
+                leftSection={<IconTrendingUp size={16} />}
+                rightSection={isFreePlan ? lockIcon : undefined}
+              >
+                Analytics
+              </Tabs.Tab>
               <Tabs.Tab value="projects" leftSection={<IconClipboardList size={16} />}>Projects</Tabs.Tab>
-              <Tabs.Tab value="updates" leftSection={<IconMail size={16} />}>Donor Updates</Tabs.Tab>
+              <Tabs.Tab
+                value="updates"
+                leftSection={<IconMail size={16} />}
+                rightSection={isFreePlan ? lockIcon : undefined}
+              >
+                Donor Updates
+              </Tabs.Tab>
               <Tabs.Tab value="profile" leftSection={<IconSettings size={16} />}>Profile</Tabs.Tab>
             </Tabs.List>
 
             <Tabs.Panel value="overview"><OverviewTab charityId={charityId} /></Tabs.Panel>
             <Tabs.Panel value="donations"><DonationsTab charityId={charityId} /></Tabs.Panel>
-            <Tabs.Panel value="analytics"><AnalyticsTab /></Tabs.Panel>
+            <Tabs.Panel value="analytics">
+              {isFreePlan ? <PlanLockedPanel feature="Analytics & Reporting" /> : <AnalyticsTab />}
+            </Tabs.Panel>
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
-            <Tabs.Panel value="updates"><DonorUpdatesTab /></Tabs.Panel>
+            <Tabs.Panel value="updates">
+              {isFreePlan ? <PlanLockedPanel feature="Donor Updates" /> : <DonorUpdatesTab />}
+            </Tabs.Panel>
             <Tabs.Panel value="profile"><ProfileTab charityId={charityId} /></Tabs.Panel>
           </Tabs>
         </Container>

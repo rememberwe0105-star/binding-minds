@@ -19,8 +19,11 @@ import {
 // Demo Role System — 환경변수로 제어되는 순수 프론트엔드 역할 시뮬레이션
 // ---------------------------------------------------------------------------
 
-/** 데모 역할 타입 */
-export type DemoRole = 'donor' | 'charity' | 'admin' | null;
+/** 데모 역할 타입 — charity는 무료 플랜, charity_paid는 프리미엄 플랜 시연용 */
+export type DemoRole = 'donor' | 'charity' | 'charity_paid' | 'admin' | null;
+
+/** 단체 요금제 (데모 시연용 구분) */
+export type CharityPlan = 'free' | 'paid';
 
 /** 사용자 역할 (API 기반) */
 export type UserRole = 'donor' | 'charity_admin' | 'platform_admin' | null;
@@ -37,7 +40,11 @@ const DEMO_PROFILES: Record<Exclude<DemoRole, null>, { name: string; email: stri
     email: 'aroha@demo.deargiver.co.nz',
   },
   charity: {
-    name: 'Sarah Thompson (Charity Admin)',
+    name: 'Sarah Thompson (Charity — Free Plan)',
+    email: 'sarah@acmission.org.nz',
+  },
+  charity_paid: {
+    name: 'Sarah Thompson (Charity — Premium)',
     email: 'sarah@acmission.org.nz',
   },
   admin: {
@@ -50,8 +57,19 @@ const DEMO_PROFILES: Record<Exclude<DemoRole, null>, { name: string; email: stri
 const DEMO_ROLE_MAP: Record<Exclude<DemoRole, null>, UserRole> = {
   donor: 'donor',
   charity: 'charity_admin',
+  charity_paid: 'charity_admin',
   admin: 'platform_admin',
 };
+
+/**
+ * 데모 역할 기준 단체 요금제.
+ * 데모가 아니거나 단체 역할이 아니면 null — 실제 유저의 플랜은 백엔드 연동 후 serviceUser에서 결정.
+ */
+export function demoCharityPlan(demoRole: DemoRole): CharityPlan | null {
+  if (demoRole === 'charity') return 'free';
+  if (demoRole === 'charity_paid') return 'paid';
+  return null;
+}
 
 // --- 인터페이스 ---
 interface AuthContextType {

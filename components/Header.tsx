@@ -123,7 +123,7 @@ export function Header() {
                       <Avatar
                         size={32}
                         radius="xl"
-                        color={demoRole === 'admin' ? 'blue' : demoRole === 'charity' ? 'terracotta' : 'sage'}
+                        color={demoRole === 'admin' ? 'blue' : demoRole?.startsWith('charity') ? 'terracotta' : 'sage'}
                       >
                         {getInitials(authDisplayName)}
                       </Avatar>
@@ -191,7 +191,7 @@ export function Header() {
                     <Menu.Divider />
                   </>
                 )}
-                <Menu.Label>{authDisplayEmail}{demoRole ? ` (${demoRole} demo)` : ''}</Menu.Label>
+                <Menu.Label>{authDisplayEmail}{demoRole ? ` (${demoRole.replace('_', ' ')} demo)` : ''}</Menu.Label>
 
                 {/* 역할별 메뉴 항목 */}
                 {(!demoRole || demoRole === 'donor') && (
@@ -203,7 +203,7 @@ export function Header() {
                     My Dashboard
                   </Menu.Item>
                 )}
-                {(!demoRole || demoRole === 'charity') && (
+                {(!demoRole || demoRole.startsWith('charity')) && (
                   <Menu.Item
                     leftSection={<IconBuilding size={16} />}
                     component={Link}
