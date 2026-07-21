@@ -318,7 +318,7 @@ export default function AuthPage() {
                     },
                   }}
                 >
-                  Demo — Charity (Free Plan)
+                  Demo — Charity (Community Plan)
                 </Button>
 
                 <Button
@@ -337,7 +337,7 @@ export default function AuthPage() {
                     },
                   }}
                 >
-                  Demo — Charity (Premium Plan) ✨
+                  Demo — Charity (Growth Plan) ✨
                 </Button>
 
                 {/* Platform Admin Demo */}

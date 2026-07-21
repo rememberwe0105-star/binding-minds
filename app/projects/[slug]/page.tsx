@@ -30,6 +30,7 @@ import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ShareButton } from '@/components/ShareButton';
+import { ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
 import {
   getCampaignBySlug,
   getRelatedCampaigns,
@@ -132,7 +133,26 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                     <IconMapPin size={14} color="var(--bm-text-muted)" />
                     <Text size="sm" c="var(--bm-text-muted)">{campaign.region}</Text>
                   </Group>
-                  <Text size="sm" c="dimmed">by <strong>{campaign.organizer}</strong></Text>
+                  {/* 주관 기관 프로필로 이동 — 플랫폼 안에서 기관 탐색 유도 */}
+                  {ORGANIZER_TO_ORG_SLUG[campaign.organizer] ? (
+                    <Text size="sm" c="dimmed">
+                      by{' '}
+                      <Link
+                        href={`/charities/${ORGANIZER_TO_ORG_SLUG[campaign.organizer]}`}
+                        style={{
+                          color: 'var(--bm-sage-dark)',
+                          fontWeight: 700,
+                          textDecoration: 'underline',
+                          textUnderlineOffset: 3,
+                        }}
+                        title={`Visit ${campaign.organizer}'s page on DearGiver`}
+                      >
+                        {campaign.organizer} ↗
+                      </Link>
+                    </Text>
+                  ) : (
+                    <Text size="sm" c="dimmed">by <strong>{campaign.organizer}</strong></Text>
+                  )}
                 </Group>
               </Box>
 

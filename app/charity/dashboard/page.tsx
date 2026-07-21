@@ -18,7 +18,6 @@ import {
   IconUsersGroup, IconX, IconTrash, IconMoodEmpty,
   IconReceipt, IconSend, IconLock, IconSparkles,
 } from '@tabler/icons-react';
-import Link from 'next/link';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
   PieChart, Pie, Cell, Legend
@@ -27,7 +26,8 @@ import {
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
-import { useAuth, demoCharityPlan } from '@/contexts/AuthContext';
+import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthContext';
+import { campaigns } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
 import {
@@ -873,6 +873,10 @@ function ProfileTab({ charityId }: { charityId: number }) {
 }
 
 // ===================== Donor Updates Tab =====================
+// Growth 플랜 관심 등록 — 출시 전이므로 메일로 접수 (백엔드 불필요)
+const GROWTH_INTEREST_MAILTO =
+  'mailto:hello@deargiver.co.nz?subject=Growth%20plan%20%E2%80%94%20Register%20interest';
+
 const TEMPLATE_STORAGE_KEY = 'dg-thankyou-templates';
 
 interface ThankYouTemplate {
@@ -881,6 +885,8 @@ interface ThankYouTemplate {
   body: string;
   active: boolean;
   createdAt: string;
+  /** Growth 플랜: 템플릿 적용 대상 — 'general'(기관 직접 기부) 또는 프로젝트 이름 */
+  appliesTo?: string;
 }
 
 const DEFAULT_TEMPLATES: ThankYouTemplate[] = [
@@ -939,7 +945,10 @@ function saveEmailSettings(settings: EmailSettings): void {
   try { localStorage.setItem(EMAIL_SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
 }
 
-function DonorUpdatesTab() {
+function DonorUpdatesTab({ plan }: { plan: CharityPlan }) {
+  // Community(무료): 템플릿 1개 제한 / Growth(유료): 다중 템플릿 + 프로젝트별 연결
+  const isGrowth = plan === 'paid';
+
   const [templates, setTemplates] = useState<ThankYouTemplate[]>(() => loadTemplates());
   const [createOpened, setCreateOpened] = useState(false);
   const [editId, setEditId] = useState<string | null>(null);
@@ -947,6 +956,17 @@ function DonorUpdatesTab() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [formTitle, setFormTitle] = useState('');
   const [formBody, setFormBody] = useState('');
+  const [formAppliesTo, setFormAppliesTo] = useState('general');
+
+  // 데모 기관(Forest & Bird NZ)의 프로젝트 — 템플릿 적용 대상 선택지
+  const projectOptions = useMemo(() => [
+    { value: 'general', label: '🏛️ General — direct donations to your charity' },
+    ...campaigns
+      .filter((c) => c.organizer === 'Forest & Bird NZ')
+      .map((c) => ({ value: c.name, label: `📌 ${c.name}` })),
+  ], []);
+
+  const communityLimitReached = !isGrowth && templates.length >= 1;
   const [emailSettings, setEmailSettings] = useState<EmailSettings>(() => loadEmailSettings());
   const [settingsSaved, setSettingsSaved] = useState(false);
 
@@ -955,23 +975,27 @@ function DonorUpdatesTab() {
 
   const handleCreate = () => {
     if (!formTitle.trim() || !formBody.trim()) return;
+    if (communityLimitReached) return; // Community 플랜은 템플릿 1개까지
     setTemplates(prev => [...prev, {
       id: `tmpl-${Date.now()}`,
       title: formTitle,
       body: formBody,
       active: false,
       createdAt: new Date().toISOString(),
+      appliesTo: isGrowth ? formAppliesTo : 'general',
     }]);
-    setFormTitle(''); setFormBody('');
+    setFormTitle(''); setFormBody(''); setFormAppliesTo('general');
     setCreateOpened(false);
   };
 
   const handleEdit = () => {
     if (!editId || !formTitle.trim() || !formBody.trim()) return;
     setTemplates(prev => prev.map(t =>
-      t.id === editId ? { ...t, title: formTitle, body: formBody } : t
+      t.id === editId
+        ? { ...t, title: formTitle, body: formBody, appliesTo: isGrowth ? formAppliesTo : t.appliesTo }
+        : t
     ));
-    setEditId(null); setFormTitle(''); setFormBody('');
+    setEditId(null); setFormTitle(''); setFormBody(''); setFormAppliesTo('general');
   };
 
   const handleDelete = () => {
@@ -989,6 +1013,7 @@ function DonorUpdatesTab() {
   const openEdit = (template: ThankYouTemplate) => {
     setFormTitle(template.title);
     setFormBody(template.body);
+    setFormAppliesTo(template.appliesTo ?? 'general');
     setEditId(template.id);
   };
 
@@ -1107,12 +1132,20 @@ function DonorUpdatesTab() {
         <Box>
           <Text fw={700} size="md" c="var(--bm-text-dark)">Auto Thank-You Messages</Text>
           <Text size="sm" c="var(--bm-text-muted)">
-            Create message templates that are automatically sent to donors after a donation.
+            {isGrowth
+              ? 'Create templates per project — donors get the right message for what they supported.'
+              : 'Set up one thank-you message that is automatically sent to donors after a donation.'}
           </Text>
         </Box>
-        <Button color="terracotta" radius="xl" leftSection={<IconPlus size={16} />} onClick={openCreate}>
-          New Template
-        </Button>
+        {communityLimitReached ? (
+          <Badge size="lg" variant="light" color="gray" leftSection={<IconLock size={12} />}>
+            1 of 1 template (Community)
+          </Badge>
+        ) : (
+          <Button color="terracotta" radius="xl" leftSection={<IconPlus size={16} />} onClick={openCreate}>
+            New Template
+          </Button>
+        )}
       </Group>
 
       {/* Templates list */}
@@ -1136,6 +1169,11 @@ function DonorUpdatesTab() {
                   <Badge size="sm" variant="light" color={template.active ? 'green' : 'gray'}>
                     {template.active ? 'Active' : 'Inactive'}
                   </Badge>
+                  {isGrowth && (
+                    <Badge size="sm" variant="outline" color="sage">
+                      {template.appliesTo && template.appliesTo !== 'general' ? `📌 ${template.appliesTo}` : '🏛️ General'}
+                    </Badge>
+                  )}
                   <Text size="sm" fw={700} c="var(--bm-text-dark)">{template.title}</Text>
                 </Group>
                 <Switch
@@ -1185,12 +1223,50 @@ function DonorUpdatesTab() {
         </SimpleGrid>
       </Card>
 
+      {/* Community 플랜 업그레이드 유도 — 탭은 열려 있되 확장 기능은 Growth 안내 */}
+      {!isGrowth && (
+        <Card withBorder radius="lg" padding="xl" style={{ textAlign: 'center', borderStyle: 'dashed' }}>
+          <ThemeIcon size={44} radius="xl" color="gray" variant="light" mx="auto" mb={12}>
+            <IconLock size={22} />
+          </ThemeIcon>
+          <Text fw={700} size="sm" c="var(--bm-text-dark)" mb={4}>
+            Want different messages for each project?
+          </Text>
+          <Text size="xs" c="var(--bm-text-muted)" maw={420} mx="auto" mb={14} lh={1.7}>
+            Growth unlocks multiple templates with per-project targeting — donors to
+            each campaign get a message written just for them, plus analytics and
+            custom donation tiers.
+          </Text>
+          <Button
+            component="a"
+            href={GROWTH_INTEREST_MAILTO}
+            color="terracotta"
+            variant="light"
+            radius="xl"
+            size="sm"
+            leftSection={<IconSparkles size={14} />}
+          >
+            Register interest — Growth is coming soon
+          </Button>
+        </Card>
+      )}
+
       {/* Create Modal */}
       <Modal opened={createOpened} onClose={() => setCreateOpened(false)} size="lg" radius="lg" title={
         <Group gap={8}><IconPlus size={18} color="var(--bm-sage-dark)" /><Text fw={700}>New Thank-You Template</Text></Group>
       }>
         <Stack gap={16}>
           <TextInput label="Template Title" placeholder="e.g. Thank You for Your Generosity" radius="md" value={formTitle} onChange={e => setFormTitle(e.currentTarget.value)} />
+          {isGrowth && (
+            <Select
+              label="Applies to"
+              description="Send this template to donors of a specific project, or for direct donations"
+              data={projectOptions}
+              value={formAppliesTo}
+              onChange={(v) => setFormAppliesTo(v ?? 'general')}
+              radius="md"
+            />
+          )}
           <Textarea label="Message Body" placeholder={'Dear {donor_name},\n\nThank you for your donation of {amount}...'} radius="md" autosize minRows={6} value={formBody} onChange={e => setFormBody(e.currentTarget.value)} />
           <Alert icon={<IconInfoCircle size={14} />} color="sage" variant="light" radius="md">
             <Text size="xs">Use placeholders like <strong>{'{donor_name}'}</strong>, <strong>{'{amount}'}</strong>, <strong>{'{project_name}'}</strong> to personalise each message.</Text>
@@ -1211,6 +1287,15 @@ function DonorUpdatesTab() {
       }>
         <Stack gap={16}>
           <TextInput label="Template Title" radius="md" value={formTitle} onChange={e => setFormTitle(e.currentTarget.value)} />
+          {isGrowth && (
+            <Select
+              label="Applies to"
+              data={projectOptions}
+              value={formAppliesTo}
+              onChange={(v) => setFormAppliesTo(v ?? 'general')}
+              radius="md"
+            />
+          )}
           <Textarea label="Message Body" radius="md" autosize minRows={6} value={formBody} onChange={e => setFormBody(e.currentTarget.value)} />
           <Divider />
           <Group justify="flex-end">
@@ -1257,29 +1342,154 @@ function DonorUpdatesTab() {
   );
 }
 
-// ===================== Premium 잠금 패널 (무료 플랜 데모) =====================
+// ===================== Growth 잠금 패널 (Community 플랜 데모) =====================
 function PlanLockedPanel({ feature }: { feature: string }) {
   return (
     <Card withBorder radius="lg" padding={48} mt={20} style={{ textAlign: 'center' }}>
       <ThemeIcon size={56} radius="xl" color="gray" variant="light" mx="auto" mb={16}>
         <IconLock size={28} />
       </ThemeIcon>
-      <Title order={4} mb={8}>{feature} is a Premium feature</Title>
+      <Title order={4} mb={8}>{feature} is a Growth feature</Title>
       <Text size="sm" c="dimmed" maw={440} mx="auto" mb={20} lh={1.7}>
-        Upgrade to Premium to unlock {feature.toLowerCase()}, donor segments with
-        scheduled follow-up emails, custom donation tiers with photos, and 3 team seats.
+        Growth unlocks {feature.toLowerCase()}, donor segments with scheduled
+        follow-up emails, custom donation tiers, and more team seats.
       </Text>
       <Button
-        component={Link}
-        href="/charity/apply"
+        component="a"
+        href={GROWTH_INTEREST_MAILTO}
         color="terracotta"
         radius="xl"
         leftSection={<IconSparkles size={16} />}
       >
-        Try Premium free for 30 days
+        Register interest
       </Button>
       <Text size="xs" c="dimmed" mt={12}>
-        NZ$119–129/month (GST incl.) + 2.0% per donation · cancel anytime
+        Growth plan is coming soon — we&apos;ll let you know as soon as it launches
+      </Text>
+    </Card>
+  );
+}
+
+// ===================== 금액 티어 편집 (Growth · Profile 탭 하단) =====================
+const TIERS_STORAGE_KEY = 'dg-donation-tiers';
+const TIER_DESC_LIMIT = 90;
+
+interface EditableTier {
+  id: string;
+  amount: number;
+  description: string;
+}
+
+function loadTiers(): EditableTier[] {
+  if (typeof window === 'undefined') return [];
+  try {
+    const raw = localStorage.getItem(TIERS_STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function DonationTiersSection({ plan }: { plan: CharityPlan }) {
+  const [tiers, setTiers] = useState<EditableTier[]>(() => loadTiers());
+  const [newAmount, setNewAmount] = useState('');
+  const [newDesc, setNewDesc] = useState('');
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    try { localStorage.setItem(TIERS_STORAGE_KEY, JSON.stringify(tiers)); } catch { /* ignore */ }
+  }, [tiers]);
+
+  if (plan !== 'paid') {
+    return (
+      <Card withBorder radius="lg" padding="lg" mt={20} style={{ borderStyle: 'dashed' }}>
+        <Group gap={10}>
+          <ThemeIcon size={32} radius="md" color="gray" variant="light"><IconLock size={16} /></ThemeIcon>
+          <Box style={{ flex: 1 }}>
+            <Text fw={700} size="sm" c="var(--bm-text-dark)">Custom Donation Tiers</Text>
+            <Text size="xs" c="var(--bm-text-muted)">
+              Show donors what each amount achieves (e.g. &ldquo;$25 — Plants 5 seedlings&rdquo;) — a Growth feature, coming soon.
+            </Text>
+          </Box>
+          <Button component="a" href={GROWTH_INTEREST_MAILTO} variant="light" color="terracotta" size="xs" radius="xl">
+            Register interest
+          </Button>
+        </Group>
+      </Card>
+    );
+  }
+
+  const amountNum = Number(newAmount);
+  const canAdd = amountNum >= 5 && newDesc.trim().length > 0 && tiers.length < 5;
+
+  const addTier = () => {
+    if (!canAdd) return;
+    setTiers(prev => [...prev, {
+      id: `tier-${Date.now()}`,
+      amount: amountNum,
+      description: newDesc.trim(),
+    }].sort((a, b) => a.amount - b.amount));
+    setNewAmount(''); setNewDesc('');
+  };
+
+  return (
+    <Card withBorder radius="lg" padding="lg" mt={20}>
+      <Group gap={10} mb={4}>
+        <ThemeIcon size={32} radius="md" color="terracotta" variant="light"><IconCoin size={16} /></ThemeIcon>
+        <Box>
+          <Text fw={700} size="sm" c="var(--bm-text-dark)">Custom Donation Tiers</Text>
+          <Text size="xs" c="var(--bm-text-muted)">
+            Tell donors what each amount achieves — shown as options in your donation checkout (max 5)
+          </Text>
+        </Box>
+      </Group>
+
+      {tiers.length > 0 && (
+        <Stack gap={8} mt={12}>
+          {tiers.map(tier => (
+            <Group key={tier.id} justify="space-between" p={10} style={{ background: 'rgba(74,124,113,0.04)', borderRadius: 8 }}>
+              <Group gap={10}>
+                <Badge size="lg" variant="light" color="terracotta">${tier.amount}</Badge>
+                <Text size="sm" c="var(--bm-text-dark)">{tier.description}</Text>
+              </Group>
+              <ActionIcon variant="subtle" color="red" onClick={() => setTiers(prev => prev.filter(t => t.id !== tier.id))}>
+                <IconTrash size={16} />
+              </ActionIcon>
+            </Group>
+          ))}
+        </Stack>
+      )}
+
+      {tiers.length < 5 && (
+        <Group mt={12} align="flex-end" gap={8} wrap="nowrap">
+          <TextInput
+            label="Amount"
+            placeholder="25"
+            leftSection={<Text size="sm" fw={600}>$</Text>}
+            type="number"
+            min={5}
+            w={110}
+            radius="md"
+            size="sm"
+            value={newAmount}
+            onChange={e => setNewAmount(e.currentTarget.value)}
+          />
+          <TextInput
+            label={`Description (${newDesc.length}/${TIER_DESC_LIMIT})`}
+            placeholder="e.g. Plants 5 native seedlings"
+            style={{ flex: 1 }}
+            radius="md"
+            size="sm"
+            maxLength={TIER_DESC_LIMIT}
+            value={newDesc}
+            onChange={e => setNewDesc(e.currentTarget.value)}
+          />
+          <Button color="terracotta" radius="xl" size="sm" leftSection={<IconPlus size={14} />} onClick={addTier} disabled={!canAdd}>
+            Add
+          </Button>
+        </Group>
+      )}
+
+      <Text size="xs" c="dimmed" mt={12}>
+        Saved locally for preview — tiers go live on your public checkout once the tier API is connected.
       </Text>
     </Card>
   );
@@ -1327,7 +1537,7 @@ function CharityDashboardContent() {
                     color={isFreePlan ? 'gray' : 'terracotta'}
                     leftSection={isFreePlan ? undefined : <IconSparkles size={10} />}
                   >
-                    {isFreePlan ? 'Free Plan' : 'Premium Plan'}
+                    {isFreePlan ? 'Community Plan' : 'Growth Plan'}
                   </Badge>
                 )}
                 {!isCharityRole && (
@@ -1350,13 +1560,7 @@ function CharityDashboardContent() {
                 Analytics
               </Tabs.Tab>
               <Tabs.Tab value="projects" leftSection={<IconClipboardList size={16} />}>Projects</Tabs.Tab>
-              <Tabs.Tab
-                value="updates"
-                leftSection={<IconMail size={16} />}
-                rightSection={isFreePlan ? lockIcon : undefined}
-              >
-                Donor Updates
-              </Tabs.Tab>
+              <Tabs.Tab value="updates" leftSection={<IconMail size={16} />}>Donor Updates</Tabs.Tab>
               <Tabs.Tab value="profile" leftSection={<IconSettings size={16} />}>Profile</Tabs.Tab>
             </Tabs.List>
 
@@ -1366,10 +1570,12 @@ function CharityDashboardContent() {
               {isFreePlan ? <PlanLockedPanel feature="Analytics & Reporting" /> : <AnalyticsTab />}
             </Tabs.Panel>
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
-            <Tabs.Panel value="updates">
-              {isFreePlan ? <PlanLockedPanel feature="Donor Updates" /> : <DonorUpdatesTab />}
+            {/* Community 플랜도 Donor Updates 접근 가능 — 템플릿 1개 제한 모드 */}
+            <Tabs.Panel value="updates"><DonorUpdatesTab plan={plan} /></Tabs.Panel>
+            <Tabs.Panel value="profile">
+              <ProfileTab charityId={charityId} />
+              <DonationTiersSection plan={plan} />
             </Tabs.Panel>
-            <Tabs.Panel value="profile"><ProfileTab charityId={charityId} /></Tabs.Panel>
           </Tabs>
         </Container>
       </main>

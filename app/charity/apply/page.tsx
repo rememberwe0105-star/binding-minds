@@ -4,7 +4,7 @@ import { useState } from 'react';
 import {
   Container, Title, Text, Box, Group, Button, TextInput,
   Textarea, Select, Stepper, Card, ThemeIcon, SimpleGrid,
-  Badge, Divider, Alert, Checkbox, Timeline
+  Badge, Divider, Alert, Checkbox, Timeline, Accordion
 } from '@mantine/core';
 import {
   IconBuilding, IconFileText, IconCheck,
@@ -614,9 +614,79 @@ export default function CharityApplyPage() {
             </Group>
           </Card>
 
-          {/* 요금제 안내 — 서비스 비용은 메인 페이지가 아닌 기관 가입 페이지에서만 상세 설명한다 */}
+          {/* 자주 묻는 질문 — 접이식 FAQ (Plan 섹션 위) */}
           <Card shadow="sm" radius="md" p={{ base: 20, sm: 40 }} withBorder mt={32}>
-            <Title order={3} mb={8} c="var(--bm-text-dark)">Plans & Pricing</Title>
+            <Title order={4} mb={4} c="var(--bm-text-dark)">Frequently Asked Questions</Title>
+            <Text c="var(--bm-text-muted)" size="sm" mb={16}>
+              Quick answers about how profiles work on DearGiver.
+            </Text>
+            <Accordion variant="separated" radius="md" chevronPosition="right">
+              <Accordion.Item value="why-appear">
+                <Accordion.Control>
+                  <Text size="sm" fw={600}>Why does my organisation appear on DearGiver?</Text>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    Some profiles may be based on publicly available information so supporters
+                    can find organisations they may wish to support. Some profile details may be
+                    incomplete or out of date. Claim your profile to review your details and
+                    manage updates.
+                  </Text>
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="endorsement">
+                <Accordion.Control>
+                  <Text size="sm" fw={600}>Does appearing on DearGiver mean we have endorsed the platform?</Text>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    No. An unclaimed profile does not mean your organisation has endorsed
+                    DearGiver. Claimed profiles will be clearly marked once an authorised
+                    representative has access.
+                  </Text>
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="what-happens">
+                <Accordion.Control>
+                  <Text size="sm" fw={600}>What happens when we claim our profile?</Text>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    Claiming your profile lets your organisation review details, manage updates,
+                    add your own information, and guide supporters to your approved giving options.
+                  </Text>
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="who-can-claim">
+                <Accordion.Control>
+                  <Text size="sm" fw={600}>Who can claim a profile?</Text>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    A profile should be claimed by someone authorised to act on behalf of the
+                    organisation. We may ask for details to help confirm your role.
+                  </Text>
+                </Accordion.Panel>
+              </Accordion.Item>
+              <Accordion.Item value="monthly-cost">
+                <Accordion.Control>
+                  <Text size="sm" fw={600}>Is there a monthly cost to claim a profile?</Text>
+                </Accordion.Control>
+                <Accordion.Panel>
+                  <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
+                    Community profiles can be claimed with no monthly subscription. Growth tools
+                    may be offered separately when available, and no paid subscription starts
+                    unless your organisation chooses to upgrade.
+                  </Text>
+                </Accordion.Panel>
+              </Accordion.Item>
+            </Accordion>
+          </Card>
+
+          {/* 요금제 안내 — 서비스 비용은 메인 페이지가 아닌 기관 가입 페이지에서만 상세 설명한다.
+              Growth는 출시 전이므로 구체 가격 대신 Coming soon + 관심 등록으로 안내 */}
+          <Card shadow="sm" radius="md" p={{ base: 20, sm: 40 }} withBorder mt={32}>
+            <Title order={3} mb={8} c="var(--bm-text-dark)">Plans</Title>
             <Text c="var(--bm-text-muted)" size="sm" mb={24}>
               Simple, honest pricing. Donors always pay exactly what they choose to give —
               our service cost comes from the charity side, never added at checkout.
@@ -625,7 +695,7 @@ export default function CharityApplyPage() {
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb={20}>
               <Card withBorder radius="md" p="lg">
                 <Text size="xs" fw={600} tt="uppercase" c="var(--bm-sage-dark)" mb={8} style={{ letterSpacing: '1px' }}>
-                  Free Plan
+                  Community
                 </Text>
                 <Text size="xl" fw={900} c="var(--bm-text-dark)">NZ$0<Text span size="sm" fw={500} c="dimmed">/month</Text></Text>
                 <Text size="sm" fw={600} c="var(--bm-terracotta)" mb={12}>+ 2.5% per donation</Text>
@@ -636,25 +706,39 @@ export default function CharityApplyPage() {
                 </Text>
               </Card>
               <Card withBorder radius="md" p="lg" style={{ borderColor: 'var(--bm-sage)', borderWidth: 2 }}>
-                <Text size="xs" fw={600} tt="uppercase" c="var(--bm-sage-dark)" mb={8} style={{ letterSpacing: '1px' }}>
-                  Paid Plan
-                </Text>
-                <Text size="xl" fw={900} c="var(--bm-text-dark)">NZ$119–129<Text span size="sm" fw={500} c="dimmed">/month</Text></Text>
-                <Text size="sm" fw={600} c="var(--bm-terracotta)" mb={12}>+ 2.0% per donation · or NZ$1,119–1,290/year</Text>
-                <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-                  Everything in Free, plus campaign & supporter management, analytics
+                <Group justify="space-between" mb={8}>
+                  <Text size="xs" fw={600} tt="uppercase" c="var(--bm-sage-dark)" style={{ letterSpacing: '1px' }}>
+                    Growth
+                  </Text>
+                  <Badge size="sm" variant="light" color="terracotta">Coming soon</Badge>
+                </Group>
+                <Text size="xl" fw={900} c="var(--bm-text-dark)">Coming soon</Text>
+                <Text size="sm" fw={600} c="var(--bm-text-muted)" mb={12}>Pricing announced at launch</Text>
+                <Text size="sm" c="var(--bm-text-muted)" lh={1.7} mb={16}>
+                  Everything in Community, plus campaign & supporter management, analytics
                   and reporting, donor segments with scheduled follow-up emails,
-                  customisable donation tiers with photos, and 3 team members.
+                  customisable donation tiers, and more team seats.
                 </Text>
+                <Button
+                  component="a"
+                  href={`mailto:hello@deargiver.nz?subject=${encodeURIComponent('Growth plan — Register interest')}&body=${encodeURIComponent('Hi DearGiver Team,\n\nWe would like to register interest in the Growth plan.\n\nOrganisation Name: \nCC Number: \nContact Name: \nContact Email: \n\nKind regards')}`}
+                  color="terracotta"
+                  variant="light"
+                  radius="xl"
+                  size="sm"
+                  fullWidth
+                >
+                  Register interest
+                </Button>
               </Card>
             </SimpleGrid>
 
             <Alert color="sage" variant="light" radius="md" icon={<IconInfoCircle size={16} />}>
               <Text size="sm" lh={1.7}>
-                <strong>All pricing is GST inclusive (15%).</strong> Any charity can try the paid
-                plan free for 30 days (one trial per organisation — only the per-donation
-                service cost applies during the trial). Early Access charities have the
-                platform service fee waived on their first NZ$5,000 processed.
+                <strong>All pricing is GST inclusive (15%).</strong> Growth tools are still in
+                the works — register your interest and we&apos;ll be in touch before launch.
+                Early Access charities have the platform service fee waived on their first
+                NZ$5,000 processed.
               </Text>
             </Alert>
           </Card>

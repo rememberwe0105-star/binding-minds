@@ -40,11 +40,11 @@ const DEMO_PROFILES: Record<Exclude<DemoRole, null>, { name: string; email: stri
     email: 'aroha@demo.deargiver.co.nz',
   },
   charity: {
-    name: 'Sarah Thompson (Charity — Free Plan)',
+    name: 'Sarah Thompson (Charity — Community)',
     email: 'sarah@acmission.org.nz',
   },
   charity_paid: {
-    name: 'Sarah Thompson (Charity — Premium)',
+    name: 'Sarah Thompson (Charity — Growth)',
     email: 'sarah@acmission.org.nz',
   },
   admin: {

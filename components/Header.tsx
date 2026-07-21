@@ -260,7 +260,7 @@ export function Header() {
               >
                 Log in
               </Button>
-              <Button component={Link} href="/projects" color="terracotta" size="sm" radius="xl">
+              <Button component={Link} href="/projects" color="sage" size="sm" radius="xl">
                 Give Today
               </Button>
             </>
@@ -323,7 +323,7 @@ export function Header() {
               >
                 Log in
               </Button>
-              <Button component={Link} href="/projects" color="terracotta" fullWidth radius="xl" onClick={close}>
+              <Button component={Link} href="/projects" color="sage" fullWidth radius="xl" onClick={close}>
                 Give Today
               </Button>
             </>

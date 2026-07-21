@@ -33,9 +33,9 @@ const promises = [
 ];
 
 const charityPerks = [
-  { icon: IconRosetteDiscountCheck, text: 'Zero listing cost — 1% fee only when you receive' },
-  { icon: IconUsers, text: 'Reach thousands of Kiwi supporters' },
-  { icon: IconBuilding, text: 'We handle receipts so you don\'t have to' },
+  { icon: IconRosetteDiscountCheck, text: 'Start growing with no monthly fees' },
+  { icon: IconUsers, text: 'Connect with Kiwi supporters where generosity begins' },
+  { icon: IconBuilding, text: 'Spend less time on admin, more time creating impact' },
 ];
 
 export function TrustSection() {
@@ -97,8 +97,9 @@ export function TrustSection() {
 
             <Box style={{ position: 'relative', zIndex: 1 }}>
               <Group gap={8} mb={12}>
-                <IconBuilding size={18} color="var(--bm-sage)" />
-                <Text size="xs" fw={700} tt="uppercase" c="var(--bm-sage)" style={{ letterSpacing: '1px' }}>
+                <IconBuilding size={18} color="#b9dcc9" />
+                {/* 어두운 카드 배경 대비 가독성을 위해 밝은 민트 톤 사용 */}
+                <Text size="xs" fw={700} tt="uppercase" c="#b9dcc9" style={{ letterSpacing: '1px' }}>
                   For Charities
                 </Text>
               </Group>
@@ -108,9 +109,9 @@ export function TrustSection() {
               </Title>
 
               <Text size="sm" c="rgba(255,255,255,0.75)" lh={1.7} mt={10} mb={20}>
-                We pre-list registered NZ charities so donors can find you.
-                Claim your page to add your story, update details, and
-                start receiving donations directly.
+                Your organisation may already appear on DearGiver to help supporters
+                find your work. Claim your profile to manage your details, share your
+                story, and make it easier for them to give directly.
               </Text>
 
               <div className={classes.benefitsList}>

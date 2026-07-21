@@ -38,8 +38,9 @@
 
 .link {
   font-size: 0.95rem;
-  font-weight: 500;
-  color: var(--bm-text-muted);
+  /* 네비 탭 가독성 강화 — 더 굵고 어두운 톤 */
+  font-weight: 600;
+  color: #43403a;
   text-decoration: none;
   padding: 6px 0;
   position: relative;
