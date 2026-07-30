@@ -135,6 +135,27 @@
 | 9 | Growth 프로젝트별 템플릿 | 템플릿에 "Applies to" 선택(기관 직접 기부/프로젝트별) + 목록에 대상 배지 표시 |
 | 10 | Growth 금액 티어 커스터마이즈 | Profile 탭 하단에 티어 편집 섹션(금액+설명 90자 제한, 최대 5개, 로컬 저장) — Community에선 잠금 안내. 실저장은 기요청된 v8.0 P3-1 티어 API 연동 시 전환 |
 
+## 추가 작업 (7/30) — 업데이트 3 (deargiver update 3.docx)
+
+### A. 디자인/카피 리뉴얼 (7/27 요청분 — 전부 FE)
+- 워드마크 "Dear Giver" 두 단어 + 어두운 단일색 (헤더/푸터)
+- 히어로: 저채도 딥 틸 배경(`--dg-hero-grad`) + 이미지, 신규 카피 3종
+  (배지/헤드라인/서브카피), "Why give" 카드 4개를 히어로 아래 오버랩 카드 행으로 재배치
+- About: "Helping generosity find its way" + 소개/What We Stand For 신규 카피, 라벨 강조
+- Projects/Charities: EXPLORE 강조, 타이틀 축소, 신규 서브카피,
+  페이지 헤더를 히어로와 같은 딥 틸 라운드 밴드로 통일
+- 배경색은 CSS 변수로 분리 — 마음에 안 들면 globals.css에서 즉시 롤백 가능
+
+### B. Accounting & Xero (7/21 요청분)
+- FE: Growth 전용 **Accounting 탭** 신설 (`components/AccountingTab.tsx`) —
+  Xero 연결 카드, 계정 매핑(mock COA), payout summary 테이블(기부/카드수수료/
+  플랫폼수수료/환불조정/입금액), Send to Xero + sync history. Community는 잠금 패널
+- 방식 검토: **Option 2 (Xero API 직접 단방향 sync) 채택** — Zapier는 payout summary
+  로직이 어차피 내부에 필요 + 기관별 유료 계정 요구로 부적합
+- 환불/chargeback: 플랫폼 환불 기능 미제공(기관이 Stripe에서 직접), webhook 기록만
+- BE: **요청서 v8.2** 신규 (`BACKEND_API_REQUEST_V8_2.md/.pdf`) — payout 집계,
+  환불 webhook 기록, Xero OAuth/COA/전송/이력. **v8.0/v8.1 불변** 명시
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

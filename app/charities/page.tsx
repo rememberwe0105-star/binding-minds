@@ -80,14 +80,14 @@ export default function CharitiesPage() {
         <Container size="xl">
           {/* 페이지 헤더 */}
           <Box className={classes.pageHeader}>
-            <Text size="sm" fw={600} tt="uppercase" c="var(--bm-terracotta)" mb={8}>
+            <Text size="md" fw={800} tt="uppercase" c="#eba98c" mb={8} style={{ letterSpacing: '1.5px' }}>
               Explore
             </Text>
             <Title order={1} className={classes.pageTitle}>
               Browse Charities
             </Title>
-            <Text size="lg" c="var(--bm-text-muted)" maw={640} mt={8} mx="auto">
-              Explore registered charities across Aotearoa.
+            <Text fz={19} c="var(--dg-hero-muted)" maw={640} mt={10} mx="auto" lh={1.7}>
+              Explore registered charities across Aotearoa New Zealand.
               Data sourced from NZ Charities Services.
             </Text>
             <div className={classes.searchWrap}>

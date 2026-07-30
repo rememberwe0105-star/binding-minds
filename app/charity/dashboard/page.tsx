@@ -16,7 +16,7 @@ import {
   IconCheck, IconDeviceFloppy, IconWorld, IconMail,
   IconPhone, IconMapPin, IconTrendingUp,
   IconUsersGroup, IconX, IconTrash, IconMoodEmpty,
-  IconReceipt, IconSend, IconLock, IconSparkles,
+  IconReceipt, IconSend, IconLock, IconSparkles, IconReportMoney,
 } from '@tabler/icons-react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip as RechartsTooltip, ResponsiveContainer,
@@ -27,6 +27,7 @@ import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthContext';
+import { AccountingTab } from '@/components/AccountingTab';
 import { campaigns } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
@@ -1561,6 +1562,13 @@ function CharityDashboardContent() {
               </Tabs.Tab>
               <Tabs.Tab value="projects" leftSection={<IconClipboardList size={16} />}>Projects</Tabs.Tab>
               <Tabs.Tab value="updates" leftSection={<IconMail size={16} />}>Donor Updates</Tabs.Tab>
+              <Tabs.Tab
+                value="accounting"
+                leftSection={<IconReportMoney size={16} />}
+                rightSection={isFreePlan ? lockIcon : undefined}
+              >
+                Accounting
+              </Tabs.Tab>
               <Tabs.Tab value="profile" leftSection={<IconSettings size={16} />}>Profile</Tabs.Tab>
             </Tabs.List>
 
@@ -1572,6 +1580,9 @@ function CharityDashboardContent() {
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
             {/* Community 플랜도 Donor Updates 접근 가능 — 템플릿 1개 제한 모드 */}
             <Tabs.Panel value="updates"><DonorUpdatesTab plan={plan} /></Tabs.Panel>
+            <Tabs.Panel value="accounting">
+              {isFreePlan ? <PlanLockedPanel feature="Accounting & Xero Sync" /> : <AccountingTab />}
+            </Tabs.Panel>
             <Tabs.Panel value="profile">
               <ProfileTab charityId={charityId} />
               <DonationTiersSection plan={plan} />

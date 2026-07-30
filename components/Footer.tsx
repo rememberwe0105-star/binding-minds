@@ -37,7 +37,7 @@ export function Footer() {
                 style={{ objectFit: 'contain' }}
               />
               <Text fw={700} size="lg" c="white">
-                DearGiver
+                Dear Giver
               </Text>
             </Group>
             <Text size="sm" c="rgba(255,255,255,0.6)" lh={1.7} maw={280}>

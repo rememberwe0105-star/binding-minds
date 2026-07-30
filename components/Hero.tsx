@@ -1,6 +1,6 @@
 'use client';
 
-import { Container, Title, Text, Button, Group, Box, Card, Badge, Stack, ThemeIcon } from '@mantine/core';
+import { Container, Title, Text, Button, Group, Box, Card, Badge, ThemeIcon, SimpleGrid } from '@mantine/core';
 import {
   IconSearch,
   IconShieldCheck,
@@ -8,6 +8,7 @@ import {
   IconReceipt,
   IconBuildingCommunity,
 } from '@tabler/icons-react';
+import NextImage from 'next/image';
 import Link from 'next/link';
 import classes from './Hero.module.css';
 
@@ -41,93 +42,103 @@ const PLATFORM_HIGHLIGHTS = [
 
 export function Hero() {
   return (
-    <section className={classes.hero}>
-      {/* 유기적 배경 블롭 장식 */}
-      <div className={classes.blobTopRight} />
-      <div className={classes.blobBottomLeft} />
+    <>
+      {/* ── 다크 틸 히어로 (저채도 청록 배경 + 이미지) ── */}
+      <section className={classes.hero}>
+        <div className={classes.blobTopRight} />
+        <div className={classes.blobBottomLeft} />
 
-      <Container size="xl" className={classes.container}>
-        <div className={classes.content}>
-          {/* 왼쪽: 텍스트 블록 */}
-          <Box className={classes.textBlock}>
-            <Badge
-              color="sage"
-              variant="light"
-              size="lg"
-              radius="sm"
-              className={classes.spotlightBadge}
-            >
-              Aotearoa&apos;s transparent giving platform
-            </Badge>
-
-            <Title order={1} className={classes.title}>
-              Together, We Make a{' '}
-              <span className={classes.highlight}>World</span> of Difference.
-            </Title>
-
-            <Text className={classes.subtitle} size="lg" c="var(--bm-text-muted)" maw={480}>
-              Empower change across Aotearoa through community-driven initiatives.
-              Find your cause and donate today.
-            </Text>
-
-            <Group gap="md" mt={32} className={classes.ctaGroup}>
-              <Button
-                component={Link}
-                href="/projects"
+        <Container size="xl" className={classes.container}>
+          <div className={classes.content}>
+            {/* 왼쪽: 텍스트 블록 */}
+            <Box className={classes.textBlock}>
+              <Badge
+                variant="light"
                 size="lg"
-                radius="xl"
-                color="terracotta"
-                leftSection={<IconSearch size={20} />}
-                className={classes.ctaPrimary}
+                radius="sm"
+                className={classes.spotlightBadge}
+                color="gray"
+                styles={{
+                  root: {
+                    background: 'rgba(255,255,255,0.12)',
+                    color: 'rgba(255,255,255,0.85)',
+                  },
+                }}
               >
-                Find a Cause
-              </Button>
-              <Button
-                component={Link}
-                href="/about"
-                size="lg"
-                radius="xl"
-                variant="outline"
-                color="dark"
-                className={classes.ctaSecondary}
-              >
-                Learn More
-              </Button>
-            </Group>
-          </Box>
+                Thoughtful giving platform for Aotearoa
+              </Badge>
 
-          {/* 오른쪽: 플랫폼 가치 카드 (특정 기관 노출 없음) */}
-          <div className={classes.campaignBlock}>
-            <Card
-              shadow="xl"
-              radius="lg"
-              padding="xl"
-              className={classes.campaignCard}
-            >
-              <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={16}>
-                Why give through DearGiver?
+              <Title order={1} className={classes.title}>
+                Where <span className={classes.highlight}>generosity</span> meets good work
+              </Title>
+
+              <Text className={classes.subtitle} fz={19} maw={520}>
+                Discover organisations across New Zealand, understand their work,
+                and support the causes you care about with more confidence.
               </Text>
-              <Stack gap={16}>
-                {PLATFORM_HIGHLIGHTS.map((item) => (
-                  <Group key={item.title} gap={12} wrap="nowrap" align="flex-start">
-                    <ThemeIcon size={38} radius="md" color={item.color} variant="light">
-                      <item.icon size={20} />
-                    </ThemeIcon>
-                    <Box>
-                      <Text size="sm" fw={700} c="var(--bm-text-dark)">
-                        {item.title}
-                      </Text>
-                      <Text size="xs" c="var(--bm-text-muted)" lh={1.6}>
-                        {item.description}
-                      </Text>
-                    </Box>
-                  </Group>
-                ))}
-              </Stack>
-            </Card>
+
+              <Group gap="md" mt={32} className={classes.ctaGroup}>
+                <Button
+                  component={Link}
+                  href="/projects"
+                  size="lg"
+                  radius="xl"
+                  color="terracotta"
+                  leftSection={<IconSearch size={20} />}
+                  className={classes.ctaPrimary}
+                >
+                  Find a Cause
+                </Button>
+                <Button
+                  component={Link}
+                  href="/about"
+                  size="lg"
+                  radius="xl"
+                  variant="outline"
+                  className={classes.ctaSecondaryLight}
+                >
+                  Learn More
+                </Button>
+              </Group>
+            </Box>
+
+            {/* 오른쪽: 일러스트 이미지 */}
+            <div className={classes.campaignBlock}>
+              <div className={classes.heroImageWrapper}>
+                <NextImage
+                  src="/images/hero-campaign.png"
+                  alt="Native forest of Aotearoa — watercolour illustration"
+                  fill
+                  sizes="(max-width: 768px) 100vw, 380px"
+                  style={{ objectFit: 'cover' }}
+                  priority
+                />
+              </div>
+            </div>
           </div>
-        </div>
-      </Container>
-    </section>
+        </Container>
+      </section>
+
+      {/* ── Why give through DearGiver — 히어로 바로 아래 카드 행 ── */}
+      <section className={classes.highlightsSection}>
+        <Container size="xl">
+          <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing={16} className={classes.highlightsRow}>
+            {PLATFORM_HIGHLIGHTS.map((item) => (
+              <Card key={item.title} padding="lg" radius="lg" className={classes.highlightCard}>
+                <ThemeIcon size={40} radius="md" color={item.color} variant="light" mb={10}>
+                  <item.icon size={22} />
+                </ThemeIcon>
+                <Text size="sm" fw={700} c="var(--bm-text-dark)" mb={4}>
+                  {item.title}
+                </Text>
+                <Text size="xs" c="var(--bm-text-muted)" lh={1.6}>
+                  {item.description}
+                </Text>
+              </Card>
+            ))}
+          </SimpleGrid>
+        </Container>
+      </section>
+    </>
   );
 }

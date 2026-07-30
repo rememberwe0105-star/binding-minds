@@ -117,18 +117,19 @@ export default function AboutPage() {
         <section className={classes.heroSection}>
           <Container size="lg">
             <Group gap={8} mb={12}>
-              <IconLeaf size={22} color="var(--bm-terracotta)" />
-              <Text size="sm" fw={600} tt="uppercase" c="var(--bm-terracotta)" style={{ letterSpacing: '1.5px' }}>
+              <IconLeaf size={24} color="var(--bm-terracotta)" />
+              <Text size="md" fw={800} tt="uppercase" c="var(--bm-terracotta)" style={{ letterSpacing: '1.5px' }}>
                 About Us
               </Text>
             </Group>
             <Title order={1} className={classes.heroTitle}>
-              Connecting Hearts,<br />Changing the World
+              Helping generosity<br />find its way
             </Title>
-            <Text size="lg" c="var(--bm-text-muted)" maw={600} lh={1.8} mt={16}>
-              DearGiver is a New Zealand-based giving platform that makes generosity effortless.
-              We connect donors with verified charities, automate tax credits, and turn every
-              donation into a meaningful journey — with impact milestones, donor journeys, and more.
+            <Text fz={19} c="var(--bm-text-muted)" maw={640} lh={1.8} mt={16}>
+              Dear Giver is a New Zealand-based social-impact platform designed for both
+              sides of giving — donors and organisations. We help people give with confidence
+              and keep their giving records organised, while helping organisations share
+              their work, simplify donation admin, and build stronger supporter relationships.
             </Text>
           </Container>
         </section>
@@ -139,8 +140,9 @@ export default function AboutPage() {
             <Title order={2} className={classes.sectionTitle} mb={8}>
               What We Stand For
             </Title>
-            <Text size="md" c="var(--bm-text-muted)" mb={40} maw={500}>
-              Our platform is built on core principles that guide everything we do.
+            <Text fz={17} c="var(--bm-text-muted)" mb={40} maw={620} lh={1.8}>
+              Good intentions deserve a clearer path — one that helps people give with
+              understanding and helps organisations be seen and supported with care.
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={24}>

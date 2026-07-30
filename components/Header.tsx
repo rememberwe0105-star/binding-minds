@@ -87,11 +87,11 @@ export function Header() {
             <Text
               fw={700}
               size="xl"
+              c="var(--dg-text-dark)"
               className={fraunces.className}
               style={{ letterSpacing: '-0.02em' }}
             >
-              <Text span inherit fs="italic" c="var(--bm-terracotta)">Dear</Text>
-              <Text span inherit c="var(--dg-teal-dark)">Giver</Text>
+              Dear Giver
             </Text>
           </Group>
         </Link>

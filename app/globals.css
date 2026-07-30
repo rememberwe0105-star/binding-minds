@@ -12,6 +12,14 @@
   --dg-ease-out: cubic-bezier(0.22, 1, 0.36, 1);
   --dg-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
 
+  /* 업데이트 3 (7/27): 저채도 딥 틸 히어로 배경 — Projects/Charities 헤더와 공유 */
+  --dg-deep-1: #33504a;
+  --dg-deep-2: #3d5c53;
+  --dg-deep-3: #47665c;
+  --dg-hero-grad: linear-gradient(150deg, var(--dg-deep-1) 0%, var(--dg-deep-2) 55%, var(--dg-deep-3) 100%);
+  --dg-hero-text: #f7f3ec;
+  --dg-hero-muted: rgba(247, 243, 236, 0.8);
+
   /* Legacy aliases — CSS 모듈 호환 */
   --bm-bg-warm: var(--dg-mist);
   --bm-bg-cream: var(--dg-sand);

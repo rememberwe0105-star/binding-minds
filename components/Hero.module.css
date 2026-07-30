@@ -1,10 +1,11 @@
 .hero {
   position: relative;
   overflow: hidden;
-  min-height: 580px;
+  min-height: 540px;
   display: flex;
   align-items: center;
-  padding: 60px 0 50px;
+  padding: 60px 0 88px;
+  background: var(--dg-hero-grad);
 }
 
 /* 유기적 블롭 배경 */
@@ -15,7 +16,7 @@
   width: 500px;
   height: 500px;
   border-radius: 60% 40% 55% 45% / 50% 60% 40% 50%;
-  background: linear-gradient(135deg, rgba(143, 151, 121, 0.12), rgba(197, 205, 183, 0.18));
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(127, 188, 173, 0.08));
   animation: morphBlob 14s ease-in-out infinite;
   z-index: 0;
 }
@@ -27,7 +28,7 @@
   width: 380px;
   height: 380px;
   border-radius: 45% 55% 60% 40% / 55% 45% 55% 45%;
-  background: linear-gradient(135deg, rgba(226, 114, 91, 0.06), rgba(245, 240, 232, 0.25));
+  background: linear-gradient(135deg, rgba(226, 114, 91, 0.08), rgba(255, 255, 255, 0.04));
   animation: morphBlob 18s ease-in-out infinite reverse;
   z-index: 0;
 }
@@ -66,12 +67,12 @@
 .title {
   font-size: 3rem;
   line-height: 1.12;
-  color: var(--bm-text-dark);
+  color: var(--dg-hero-text);
   margin-bottom: 18px;
 }
 
 .highlight {
-  color: var(--bm-terracotta);
+  color: #eba98c;
   position: relative;
 }
 
@@ -82,12 +83,15 @@
   left: 0;
   width: 100%;
   height: 8px;
-  background: rgba(226, 114, 91, 0.18);
+  background: rgba(235, 169, 140, 0.22);
   border-radius: 4px;
   z-index: -1;
 }
 
-.subtitle { line-height: 1.7; }
+.subtitle {
+  line-height: 1.7;
+  color: var(--dg-hero-muted);
+}
 
 .ctaGroup { flex-wrap: wrap; }
 
@@ -107,6 +111,53 @@
   transition: transform 0.25s var(--bm-ease-out);
 }
 .ctaSecondary:hover { transform: translateY(-2px); }
+
+/* 다크 배경용 보조 CTA */
+.ctaSecondaryLight {
+  font-weight: 600;
+  color: var(--dg-hero-text);
+  border-color: rgba(247, 243, 236, 0.45);
+  transition: transform 0.25s var(--bm-ease-out), background 0.25s var(--bm-ease-out);
+}
+.ctaSecondaryLight:hover {
+  transform: translateY(-2px);
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--dg-hero-text);
+}
+
+/* 히어로 이미지 */
+.heroImageWrapper {
+  position: relative;
+  height: 340px;
+  width: 100%;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(247, 243, 236, 0.2);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+}
+
+/* 히어로 아래 하이라이트 카드 행 */
+.highlightsSection {
+  background: var(--bm-bg-warm);
+  padding: 0 0 36px;
+}
+
+.highlightsRow {
+  position: relative;
+  z-index: 2;
+  margin-top: -52px;
+}
+
+.highlightCard {
+  background: white;
+  border: 1px solid rgba(143, 151, 121, 0.14);
+  box-shadow: 0 10px 30px rgba(26, 46, 53, 0.1);
+  transition: transform 0.3s var(--bm-ease-out), box-shadow 0.3s var(--bm-ease-out);
+}
+.highlightCard:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 16px 40px rgba(26, 46, 53, 0.14);
+}
 
 /* 캠페인 카드 영역 */
 .campaignBlock {
@@ -161,9 +212,10 @@
 }
 
 @media (max-width: 36em) {
-  .hero { min-height: auto; padding: 36px 0; }
+  .hero { min-height: auto; padding: 36px 0 72px; }
   .title { font-size: 1.8rem; }
   .campaignBlock { max-width: 100%; }
   .campaignImageWrapper { height: 220px; }
-  .ctaPrimary, .ctaSecondary { width: 100%; }
+  .heroImageWrapper { height: 220px; }
+  .ctaPrimary, .ctaSecondary, .ctaSecondaryLight { width: 100%; }
 }

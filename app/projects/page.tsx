@@ -92,15 +92,15 @@ export default function ProjectsPage() {
         <Container size="xl">
           {/* 페이지 헤더 */}
           <Box className={classes.pageHeader}>
-            <Text size="sm" fw={600} tt="uppercase" c="var(--bm-terracotta)" mb={8}>
+            <Text size="md" fw={800} tt="uppercase" c="#eba98c" mb={8} style={{ letterSpacing: '1.5px' }}>
               Explore
             </Text>
             <Title order={1} className={classes.pageTitle}>
               Browse Projects
             </Title>
-            <Text size="lg" c="var(--bm-text-muted)" maw={640} mt={8} mx="auto">
-              Discover verified fundraising projects across Aotearoa.
-              Every donation earns you a 33.33% tax credit.
+            <Text fz={19} c="var(--dg-hero-muted)" maw={640} mt={10} mx="auto" lh={1.7}>
+              See the work organisations are sharing, understand what&apos;s needed,
+              and learn how you can help.
             </Text>
             <div className={classes.searchWrap}>
               <RichSearchInput
