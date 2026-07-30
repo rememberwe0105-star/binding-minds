@@ -1,7 +1,11 @@
 'use client';
 
 import { useState, useMemo } from 'react';
+import { Fraunces } from 'next/font/google';
 import { Container, Title, Text, SimpleGrid, Button, Box } from '@mantine/core';
+
+// 히어로/워드마크와 통일된 디스플레이 세리프
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['600'], style: ['normal'] });
 import { IconArrowDown } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -95,7 +99,7 @@ export default function ProjectsPage() {
             <Text size="md" fw={800} tt="uppercase" c="#eba98c" mb={8} style={{ letterSpacing: '1.5px' }}>
               Explore
             </Text>
-            <Title order={1} className={classes.pageTitle}>
+            <Title order={1} className={`${classes.pageTitle} ${fraunces.className}`}>
               Browse Projects
             </Title>
             <Text fz={19} c="var(--dg-hero-muted)" maw={640} mt={10} mx="auto" lh={1.7}>

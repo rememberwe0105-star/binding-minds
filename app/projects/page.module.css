@@ -5,11 +5,29 @@
 }
 
 .pageHeader {
+  position: relative;
+  overflow: hidden;
   text-align: center;
   padding: 44px 24px 48px;
   margin-bottom: 40px;
-  background: var(--dg-hero-grad);
+  background:
+    radial-gradient(480px 300px at 84% 8%, rgba(127, 188, 173, 0.16), transparent 68%),
+    radial-gradient(420px 280px at 8% 96%, rgba(226, 114, 91, 0.11), transparent 70%),
+    var(--dg-hero-grad);
   border-radius: 20px;
+}
+
+.pageHeader::after {
+  content: '';
+  position: absolute;
+  top: -140px;
+  right: -110px;
+  width: 380px;
+  height: 380px;
+  border: 1.5px solid rgba(247, 243, 236, 0.1);
+  border-radius: 50%;
+  box-shadow: 0 0 0 70px rgba(247, 243, 236, 0.035);
+  pointer-events: none;
 }
 
 .pageTitle {

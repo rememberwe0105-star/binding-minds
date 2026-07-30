@@ -10,7 +10,11 @@ import {
 } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
+import { Fraunces } from 'next/font/google';
 import classes from './Hero.module.css';
+
+// 워드마크와 같은 디스플레이 세리프 — 히어로 타이포에 유려함을 더한다
+const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'] });
 
 // 히어로는 특정 기관/캠페인을 노출하지 않는다 — 플랫폼 자체의 가치만 중립적으로 전달
 const PLATFORM_HIGHLIGHTS = [
@@ -68,8 +72,8 @@ export function Hero() {
                 Thoughtful giving platform for Aotearoa
               </Badge>
 
-              <Title order={1} className={classes.title}>
-                Where <span className={classes.highlight}>generosity</span> meets good work
+              <Title order={1} className={`${classes.title} ${fraunces.className}`}>
+                Where <span className={classes.highlight}>generosity</span><br />meets good work
               </Title>
 
               <Text className={classes.subtitle} fz={19} maw={520}>
@@ -102,17 +106,24 @@ export function Hero() {
               </Group>
             </Box>
 
-            {/* 오른쪽: 일러스트 이미지 */}
+            {/* 오른쪽: 아치형 이미지 + 오프셋 프레임 + 플로팅 칩 */}
             <div className={classes.campaignBlock}>
-              <div className={classes.heroImageWrapper}>
-                <NextImage
-                  src="/images/hero-campaign.png"
-                  alt="Native forest of Aotearoa — watercolour illustration"
-                  fill
-                  sizes="(max-width: 768px) 100vw, 380px"
-                  style={{ objectFit: 'cover' }}
-                  priority
-                />
+              <div className={classes.heroImageOuter}>
+                <div className={classes.heroImageFrame} />
+                <div className={classes.heroImageWrapper}>
+                  <NextImage
+                    src="/images/hero-campaign.png"
+                    alt="Native forest of Aotearoa — watercolour illustration"
+                    fill
+                    sizes="(max-width: 768px) 100vw, 380px"
+                    style={{ objectFit: 'cover' }}
+                    priority
+                  />
+                </div>
+                <div className={classes.floatingChip}>
+                  <span className={classes.floatingChipDot} />
+                  100% goes to the charity
+                </div>
               </div>
             </div>
           </div>
