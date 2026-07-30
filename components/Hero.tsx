@@ -11,6 +11,7 @@ import {
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { Fraunces } from 'next/font/google';
+import { useScrollReveal } from '@/hooks/useScrollReveal';
 import classes from './Hero.module.css';
 
 // 워드마크와 같은 디스플레이 세리프 — 히어로 타이포에 유려함을 더한다
@@ -45,6 +46,9 @@ const PLATFORM_HIGHLIGHTS = [
 ];
 
 export function Hero() {
+  // 카드 행 스크롤 리빌 — 순차적으로 떠오르는 스태거 모션
+  const { ref: cardsRef, isVisible: cardsVisible } = useScrollReveal<HTMLDivElement>({ threshold: 0.1 });
+
   return (
     <>
       {/* ── 다크 틸 히어로 (저채도 청록 배경 + 이미지) ── */}
@@ -112,13 +116,14 @@ export function Hero() {
                 <div className={classes.heroImageFrame} />
                 <div className={classes.heroImageWrapper}>
                   <NextImage
-                    src="/images/hero-campaign.png"
-                    alt="Native forest of Aotearoa — watercolour illustration"
+                    src="/images/charity-art.png"
+                    alt="Community artists painting a tui mural on Cuba Street, Wellington"
                     fill
                     sizes="(max-width: 768px) 100vw, 380px"
-                    style={{ objectFit: 'cover' }}
+                    style={{ objectFit: 'cover', objectPosition: '68% 42%' }}
                     priority
                   />
+                  <div className={classes.heroImageScrim} />
                 </div>
                 <div className={classes.floatingChip}>
                   <span className={classes.floatingChipDot} />
@@ -130,12 +135,23 @@ export function Hero() {
         </Container>
       </section>
 
-      {/* ── Why give through DearGiver — 히어로 바로 아래 카드 행 ── */}
+      {/* ── Why give through DearGiver — 히어로 바로 아래 카드 행 (스태거 리빌) ── */}
       <section className={classes.highlightsSection}>
         <Container size="xl">
-          <SimpleGrid cols={{ base: 1, xs: 2, md: 4 }} spacing={16} className={classes.highlightsRow}>
-            {PLATFORM_HIGHLIGHTS.map((item) => (
-              <Card key={item.title} padding="lg" radius="lg" className={classes.highlightCard}>
+          <SimpleGrid
+            ref={cardsRef}
+            cols={{ base: 1, xs: 2, md: 4 }}
+            spacing={16}
+            className={`${classes.highlightsRow} ${cardsVisible ? classes.cardsVisible : ''}`}
+          >
+            {PLATFORM_HIGHLIGHTS.map((item, index) => (
+              <Card
+                key={item.title}
+                padding="lg"
+                radius="lg"
+                className={classes.highlightCard}
+                style={{ transitionDelay: `${index * 110}ms` }}
+              >
                 <ThemeIcon size={40} radius="md" color={item.color} variant="light" mb={10}>
                   <item.icon size={22} />
                 </ThemeIcon>

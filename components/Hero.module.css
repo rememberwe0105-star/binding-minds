@@ -177,6 +177,19 @@
   box-shadow: 0 28px 70px rgba(0, 0, 0, 0.32);
 }
 
+/* 이미지 위 은은한 틸 스크림 — 컬러풀한 사진을 히어로 팔레트와 조화시킨다 */
+.heroImageScrim {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    180deg,
+    rgba(51, 80, 74, 0.22) 0%,
+    rgba(51, 80, 74, 0.05) 45%,
+    rgba(51, 80, 74, 0.18) 100%
+  );
+  pointer-events: none;
+}
+
 /* 뒤로 살짝 어긋난 얇은 프레임 — 손으로 그린 듯한 이중선 느낌 */
 .heroImageFrame {
   position: absolute;
@@ -235,7 +248,18 @@
   background: white;
   border: 1px solid rgba(143, 151, 121, 0.14);
   box-shadow: 0 10px 30px rgba(26, 46, 53, 0.1);
-  transition: transform 0.3s var(--bm-ease-out), box-shadow 0.3s var(--bm-ease-out);
+  /* 스크롤 리빌 초기 상태 — cardsVisible에서 순차 등장 (transition-delay는 인라인) */
+  opacity: 0;
+  transform: translateY(22px);
+  transition:
+    opacity 0.55s var(--bm-ease-out),
+    transform 0.55s var(--bm-ease-out),
+    box-shadow 0.3s var(--bm-ease-out);
+}
+
+.cardsVisible .highlightCard {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 /* 카드 상단 액센트 라인 — 호버 시 확장 */
@@ -251,9 +275,10 @@
   transition: width 0.35s var(--bm-ease-out);
 }
 
-.highlightCard:hover {
+.cardsVisible .highlightCard:hover {
   transform: translateY(-4px);
   box-shadow: 0 16px 40px rgba(26, 46, 53, 0.14);
+  transition-delay: 0ms;
 }
 .highlightCard:hover::before { width: 100%; }
 
