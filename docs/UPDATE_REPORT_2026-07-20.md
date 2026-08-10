@@ -231,6 +231,31 @@
 - 요청서 v8.3에 "작업 방식 안내(게이트 패턴)" 섹션 + 게이트 지점 표 + payouts 응답
   스키마 제안 추가 (PDF 4p 재생성) — 백엔드가 사이트 클릭만으로 남은 작업을 파악 가능
 
+## 부록 — 백엔드 게이트 지점 목록 (백엔드 팀 참고용)
+
+> 아래 버튼/화면은 모두 **실제 엔드포인트를 먼저 호출**한다. 미구현(404/405/501/미기동)이면
+> "Backend integration pending" 다이얼로그가 뜨고, **엔드포인트가 응답을 시작하는 순간
+> 프론트 수정 없이 자동으로 실연동 전환**된다.
+> 스펙 원본: `lib/api.ts` 하단 "백엔드 게이트" 블록 · 상세: `BACKEND_API_REQUEST_V8_3.pdf`
+
+| # | 화면 / 버튼 | 호출 엔드포인트 | 요청서 | 미구현 시 폴백 |
+|---|---|---|---|---|
+| 1 | 결제 모달 (비로그인) → **Pay** | `POST /api/v1/checkout/donations/guest` | v8.1 P1 | 안내 후 대기 (결제 미진행) |
+| 2 | 기부자 대시보드 Recurring Giving 로드 | `GET /api/v1/me/subscriptions` | v7.0 P0 | 기부내역 기반 감지 데이터 표시 (Preview 배지) |
+| 3 | 구독 관리 **Pause / Resume** | `PATCH /api/v1/me/subscriptions/{id}` (`{status}`) | v7.0 P0 | 안내 후 대기 |
+| 4 | 구독 관리 **Change Amount** | `PATCH /api/v1/me/subscriptions/{id}` (`{amount}`) | v7.0 P0 | 안내 후 대기 |
+| 5 | 구독 관리 **Cancel Subscription** | `PATCH /api/v1/me/subscriptions/{id}` (`{status:'cancelled'}`) | v7.0 P0 | 안내 후 대기 |
+| 6 | Growth Profile → **Publish to checkout** (티어) | `PUT /api/v1/me/charity/donation-tiers` | v8.0 P3-1 | 안내, 로컬 드래프트 유지 |
+| 7 | Accounting 탭 로드 (payout summary) | `GET /api/v1/me/charity/payouts` | v8.3 A-1 | 샘플 payout 데이터 표시 (Preview 알림) |
+| 8 | Accounting → **Connect to Xero** | `POST /api/v1/me/charity/xero/connect` | v8.3 A-3 | 안내 후 데모 연결로 계속 (응답에 `url` 있으면 OAuth redirect) |
+| 9 | Accounting → **Send to Xero** | `POST /api/v1/me/charity/xero/sync/{payoutId}` | v8.3 A-3 | 안내 후 데모 sync 마킹으로 계속 |
+
+- 게이트 판정 규칙: HTTP **404/405/501**, 네트워크 실패, 인증 필요 API에서 Firebase 토큰
+  부재(데모 세션) → pending. 그 외 4xx/5xx는 **실제 오류로 그대로 표시**되므로,
+  엔드포인트를 구현하기 시작하면 정상적인 에러 디버깅이 가능하다
+- 확인 방법: binding-minds.vercel.app 에서 해당 버튼 클릭 → 다이얼로그에 필요한
+  `METHOD /path`와 요청서 번호가 그대로 표시됨
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA
