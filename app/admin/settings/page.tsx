@@ -170,7 +170,7 @@ export default function AdminSettingsPage() {
                 <Card padding="xl" radius="lg" withBorder>
                   <Group gap={8} mb={16}><ThemeIcon size={32} radius="md" color="gray" variant="light"><IconShieldCheck size={16} /></ThemeIcon><Text fw={700} size="md" c="var(--bm-text-dark)">Platform Info</Text></Group>
                   <Stack gap={8}>
-                    {[{ label: 'Platform', value: 'DearGiver NZ' }, { label: 'Version', value: '1.0.0-beta' }, { label: 'Region', value: 'New Zealand' }, { label: 'Currency', value: 'NZD' }, { label: 'Payment Provider', value: 'Stripe Connect' }].map(({ label, value }) => (
+                    {[{ label: 'Platform', value: 'Dear Giver NZ' }, { label: 'Version', value: '1.0.0-beta' }, { label: 'Region', value: 'New Zealand' }, { label: 'Currency', value: 'NZD' }, { label: 'Payment Provider', value: 'Stripe Connect' }].map(({ label, value }) => (
                       <Group key={label} justify="space-between"><Text size="sm" c="var(--bm-text-muted)">{label}</Text><Text size="sm" fw={600} c="var(--bm-text-dark)">{value}</Text></Group>
                     ))}
                   </Stack>

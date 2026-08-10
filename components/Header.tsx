@@ -79,7 +79,7 @@ export function Header() {
           <Group gap={8} className={classes.logo}>
             <NextImage
               src="/images/dg-logo-v2.png"
-              alt="DearGiver"
+              alt="Dear Giver"
               width={32}
               height={32}
               style={{ objectFit: 'contain' }}
@@ -277,7 +277,7 @@ export function Header() {
         onClose={close}
         size="70%"
         padding="md"
-        title="DearGiver"
+        title="Dear Giver"
         hiddenFrom="sm"
       >
         <Stack gap="md">

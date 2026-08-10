@@ -106,10 +106,12 @@
 }
 
 .highlight {
-  color: #eec39a;
+  /* 소프트 골드가 더 드러나도록 채도·명도 업 */
+  color: #f2c078;
   font-style: italic;
   font-weight: 500;
   position: relative;
+  text-shadow: 0 0 24px rgba(242, 192, 120, 0.25);
 }
 
 .highlight::after {
@@ -119,7 +121,7 @@
   left: -2px;
   width: calc(100% + 4px);
   height: 9px;
-  background: rgba(238, 195, 154, 0.16);
+  background: rgba(242, 192, 120, 0.28);
   border-radius: 5px;
   z-index: -1;
 }
@@ -132,14 +134,22 @@
 .ctaGroup { flex-wrap: wrap; }
 
 .ctaPrimary {
-  font-weight: 600;
-  padding-left: 26px;
-  padding-right: 26px;
-  transition: transform 0.25s var(--bm-ease-out), box-shadow 0.25s var(--bm-ease-out);
+  font-weight: 700;
+  padding-left: 28px;
+  padding-right: 28px;
+  /* 입체감: 골드→테라코타 그라데이션 + 상단 하이라이트 + 드롭섀도 */
+  background: linear-gradient(180deg, #d99a5f 0%, #c47a48 100%) !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 6px 18px rgba(0, 0, 0, 0.28);
+  transition: transform 0.25s var(--bm-ease-out), box-shadow 0.25s var(--bm-ease-out), filter 0.25s var(--bm-ease-out);
 }
 .ctaPrimary:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(226, 114, 91, 0.3);
+  filter: brightness(1.06);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    0 10px 26px rgba(0, 0, 0, 0.32);
 }
 
 .ctaSecondary {

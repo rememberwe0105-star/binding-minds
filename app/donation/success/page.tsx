@@ -24,9 +24,9 @@ export const dynamic = 'force-dynamic';
 
 function buildShareMessage(projectName?: string): string {
   if (projectName) {
-    return `I just donated to "${projectName}" on DearGiver 🇳🇿💚 Every dollar makes a difference — check it out and join me!`;
+    return `I just donated to "${projectName}" on Dear Giver 🇳🇿💚 Every dollar makes a difference — check it out and join me!`;
   }
-  return 'I just made a donation on DearGiver 🇳🇿💚 Supporting NZ communities, one gift at a time!';
+  return 'I just made a donation on Dear Giver 🇳🇿💚 Supporting NZ communities, one gift at a time!';
 }
 
 function buildShareUrl(path: string = '/projects'): string {
@@ -75,7 +75,7 @@ function SuccessContent() {
         donation_status: 'succeeded',
         paid_at: new Date().toISOString(),
         created_at: new Date().toISOString(),
-        charity_display_name: projectName || 'DearGiver Charity',
+        charity_display_name: projectName || 'Dear Giver Charity',
         charity_id: 0,
         cc_number: undefined,
         stripe_checkout_session_id: undefined,

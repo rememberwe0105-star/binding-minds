@@ -25,6 +25,7 @@ export default function CharitiesPage() {
   const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
   const [selectedRegion, setSelectedRegion] = useState<Region | ''>('');
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [sortBy, setSortBy] = useState<string | null>(null);
 
   const { isFavorite, getFavoriteCount } = useFavorites();
 
@@ -40,11 +41,28 @@ export default function CharitiesPage() {
     });
   }, [search, selectedCategories, selectedRegion]);
 
-  // favorites 필터 적용
+  // favorites 필터 + 정렬 적용
   const finalItems = useMemo(() => {
-    if (!showFavoritesOnly) return filteredOrgs;
-    return filteredOrgs.filter((o) => isFavorite('organization', o.id));
-  }, [filteredOrgs, showFavoritesOnly, isFavorite]);
+    let items = showFavoritesOnly
+      ? filteredOrgs.filter((o) => isFavorite('organization', o.id))
+      : filteredOrgs;
+
+    if (sortBy) {
+      const claimedRank = (s: string) => (s === 'partnered' ? 0 : s === 'claimed' ? 1 : 2);
+      items = [...items].sort((a, b) => {
+        if (sortBy === 'name') return a.name.localeCompare(b.name, 'en');
+        if (sortBy === 'claimed') {
+          const diff = claimedRank(a.status) - claimedRank(b.status);
+          return diff !== 0 ? diff : a.name.localeCompare(b.name, 'en');
+        }
+        // 'updated' — 갱신일 최신순, 갱신 기록 없는 프로필은 뒤로
+        const au = a.lastUpdated ?? '';
+        const bu = b.lastUpdated ?? '';
+        return bu.localeCompare(au) || a.name.localeCompare(b.name, 'en');
+      });
+    }
+    return items;
+  }, [filteredOrgs, showFavoritesOnly, isFavorite, sortBy]);
 
   const visibleItems = finalItems.slice(0, visibleCount);
   const hasMore = visibleCount < finalItems.length;
@@ -65,11 +83,17 @@ export default function CharitiesPage() {
     setVisibleCount(ITEMS_PER_PAGE);
   };
 
+  const handleSortChange = (value: string | null) => {
+    setSortBy(value);
+    setVisibleCount(ITEMS_PER_PAGE);
+  };
+
   const handleClearAll = () => {
     setSearch('');
     setSelectedCategories([]);
     setSelectedRegion('');
     setShowFavoritesOnly(false);
+    setSortBy(null);
     setVisibleCount(ITEMS_PER_PAGE);
   };
 
@@ -127,6 +151,8 @@ export default function CharitiesPage() {
                 showFavoritesOnly={showFavoritesOnly}
                 onFavoritesToggle={setShowFavoritesOnly}
                 favoriteCount={getFavoriteCount()}
+                sortBy={sortBy}
+                onSortChange={handleSortChange}
               />
             </div>
 
@@ -145,6 +171,8 @@ export default function CharitiesPage() {
                   showFavoritesOnly={showFavoritesOnly}
                   onFavoritesToggle={setShowFavoritesOnly}
                   favoriteCount={getFavoriteCount()}
+                sortBy={sortBy}
+                onSortChange={handleSortChange}
                 />
               </div>
 

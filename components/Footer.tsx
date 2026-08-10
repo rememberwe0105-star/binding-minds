@@ -31,7 +31,7 @@ export function Footer() {
             <Group gap={8} mb={16}>
               <NextImage
                 src="/images/dg-logo-v2.png"
-                alt="DearGiver"
+                alt="Dear Giver"
                 width={24}
                 height={24}
                 style={{ objectFit: 'contain' }}
@@ -101,7 +101,7 @@ export function Footer() {
 
         <Group justify="space-between">
           <Text size="xs" c="rgba(255,255,255,0.4)">
-            © {new Date().getFullYear()} DearGiver. All rights reserved.
+            © {new Date().getFullYear()} Dear Giver. All rights reserved.
           </Text>
           <Text size="xs" c="rgba(255,255,255,0.4)">
             Made with ❤️ in Aotearoa, New Zealand

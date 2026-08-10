@@ -1,5 +1,5 @@
 /**
- * DearGiver — NZ 연간 기부 세금 요약서 PDF 생성 유틸리티
+ * Dear Giver — NZ 연간 기부 세금 요약서 PDF 생성 유틸리티
  *
  * NZ IRD Donation Tax Credit 청구용 연간 통합 요약 문서:
  * - 선택한 NZ 과세연도(4/1 ~ 3/31)의 기부 전체 합산
@@ -12,7 +12,7 @@
 
 import type { DonationItem } from '@/lib/api';
 
-// ─── 색상 (DearGiver 브랜드) ────────────────────────────────────────────────
+// ─── 색상 (Dear Giver 브랜드) ────────────────────────────────────────────────
 const TEAL = [74, 124, 113] as const;    // #4A7C71
 const GOLD = [196, 154, 82] as const;   // #C49A52
 const TEXT_DARK = [30, 40, 35] as const;
@@ -165,7 +165,7 @@ export async function downloadTaxSummaryPdf(opts: TaxSummaryOptions): Promise<vo
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(255, 255, 255);
-  doc.text('DearGiver', MARGIN, 18);
+  doc.text('Dear Giver', MARGIN, 18);
 
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(9);
@@ -404,7 +404,7 @@ export async function downloadTaxSummaryPdf(opts: TaxSummaryOptions): Promise<vo
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.8);
   const disclaimerLines = [
-    'This Annual Tax Summary is prepared by DearGiver Limited on behalf of donors for use with',
+    'This Annual Tax Summary is prepared by Dear Giver Limited on behalf of donors for use with',
     'Inland Revenue New Zealand (IRD). This document is NOT a tax invoice.',
     'The estimated tax credit is based on the 33.33% donation tax credit rate applicable to eligible',
     'NZD donations made to Charities Services–registered organisations.',
@@ -450,7 +450,7 @@ export async function downloadTaxSummaryPdf(opts: TaxSummaryOptions): Promise<vo
   doc.setFontSize(7.5);
   rgb(TEXT_MUTED);
   doc.text(
-    'DearGiver Limited  |  Helping New Zealanders give more, together  |  deargiver.nz',
+    'Dear Giver Limited  |  Helping New Zealanders give more, together  |  deargiver.nz',
     W / 2, y, { align: 'center' },
   );
   y += 4.5;

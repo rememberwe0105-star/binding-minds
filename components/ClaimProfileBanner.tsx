@@ -73,8 +73,8 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
 
     try {
       const donorName = shareNameAgreed
-        ? (user.displayName || user.email?.split('@')[0] || 'A DearGiver user')
-        : 'A DearGiver user';
+        ? (user.displayName || user.email?.split('@')[0] || 'A Dear Giver user')
+        : 'A Dear Giver user';
 
       const res = await fetch('/api/interest-notify', {
         method: 'POST',
@@ -136,7 +136,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
           This profile was created from publicly available data on the NZ Charities Services register.
           If you are an authorised representative of <strong>{organization.name}</strong>,
           you can claim this profile, verify your identity, and complete Stripe onboarding
-          to enable donations through DearGiver.
+          to enable donations through Dear Giver.
         </Text>
 
         <Button
@@ -171,7 +171,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
 
         <Text size="xs" c="var(--bm-text-muted)" lh={1.7} mb={16}>
           Donations are only available once a charity has claimed their profile and completed onboarding.
-          By expressing interest, you help us invite {organization.name} to join DearGiver
+          By expressing interest, you help us invite {organization.name} to join Dear Giver
           so you can support them directly.
         </Text>
 
@@ -199,7 +199,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
             </Group>
             <Text size="xs" mt={4} c="var(--bm-text-muted)">
               {emailSent
-                ? `We've sent an invitation email to ${organization.name} on your behalf. You'll be notified when they join DearGiver!`
+                ? `We've sent an invitation email to ${organization.name} on your behalf. You'll be notified when they join Dear Giver!`
                 : `We'll let ${organization.name} know that donors are waiting. You'll be notified when donations become available.`}
             </Text>
           </Alert>
@@ -252,7 +252,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
           </Text>
 
           <Text size="sm" c="var(--bm-text-muted)" lh={1.6} mb={20} ta="center">
-            DearGiver will send an invitation email to <strong>{organization.name}</strong> on your behalf,
+            Dear Giver will send an invitation email to <strong>{organization.name}</strong> on your behalf,
             encouraging them to claim their profile so you can donate directly.
           </Text>
 
@@ -277,7 +277,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
               description={
                 shareNameAgreed && user
                   ? `The email will say "${user.displayName || user.email?.split('@')[0] || 'You'} is waiting to support ${organization.name}"`
-                  : 'The email will say "A DearGiver user is waiting to support your charity"'
+                  : 'The email will say "A Dear Giver user is waiting to support your charity"'
               }
               color="sage"
               radius="sm"
@@ -332,7 +332,7 @@ export function ClaimProfileBanner({ organization }: ClaimProfileBannerProps) {
             Log in to express your interest
           </Text>
           <Text size="sm" c="var(--bm-text-muted)" lh={1.6} mb={24}>
-            Sign in or create an account so we can notify you as soon as {organization.name} starts accepting donations on DearGiver.
+            Sign in or create an account so we can notify you as soon as {organization.name} starts accepting donations on Dear Giver.
           </Text>
           <Button
             color="sage"

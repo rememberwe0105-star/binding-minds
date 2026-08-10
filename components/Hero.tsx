@@ -3,7 +3,6 @@
 import { Container, Title, Text, Button, Group, Box, Card, Badge, ThemeIcon, SimpleGrid } from '@mantine/core';
 import {
   IconSearch,
-  IconShieldCheck,
   IconHeartHandshake,
   IconReceipt,
   IconBuildingCommunity,
@@ -20,28 +19,28 @@ const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], s
 // 히어로는 특정 기관/캠페인을 노출하지 않는다 — 플랫폼 자체의 가치만 중립적으로 전달
 const PLATFORM_HIGHLIGHTS = [
   {
-    icon: IconShieldCheck,
+    icon: IconSearch,
     color: 'sage',
-    title: 'Verified NZ charities',
-    description: 'Every organisation is checked against the NZ Charities Register.',
-  },
-  {
-    icon: IconHeartHandshake,
-    color: 'terracotta',
-    title: '100% goes to the charity',
-    description: 'You pay exactly what you choose to give — nothing added at checkout.',
-  },
-  {
-    icon: IconReceipt,
-    color: 'sage',
-    title: 'Effortless tax receipts',
-    description: 'Donation receipts are stored for you, ready for your IRD tax credit claim.',
+    title: 'Good work, easier to discover',
+    description: 'Find meaningful work happening in communities across New Zealand.',
   },
   {
     icon: IconBuildingCommunity,
     color: 'terracotta',
-    title: 'For every cause',
-    description: 'From conservation to community wellbeing — find causes across Aotearoa.',
+    title: 'Know the work before you give',
+    description: 'A clearer picture of who you\'re supporting and why it matters.',
+  },
+  {
+    icon: IconHeartHandshake,
+    color: 'sage',
+    title: 'Direct to the organisation',
+    description: 'Donations go to the organisation — not held for later redistribution.',
+  },
+  {
+    icon: IconReceipt,
+    color: 'terracotta',
+    title: 'Giving records, kept together',
+    description: 'Your giving details in one place, ready when you need them.',
   },
 ];
 
@@ -80,7 +79,7 @@ export function Hero() {
                 Where <span className={classes.highlight}>generosity</span><br />meets good work
               </Title>
 
-              <Text className={classes.subtitle} fz={19} maw={520}>
+              <Text className={classes.subtitle} fz={20} fw={500} maw={540}>
                 Discover organisations across New Zealand, understand their work,
                 and support the causes you care about with more confidence.
               </Text>
@@ -95,7 +94,7 @@ export function Hero() {
                   leftSection={<IconSearch size={20} />}
                   className={classes.ctaPrimary}
                 >
-                  Find a Cause
+                  Explore Causes
                 </Button>
                 <Button
                   component={Link}
@@ -127,7 +126,7 @@ export function Hero() {
                 </div>
                 <div className={classes.floatingChip}>
                   <span className={classes.floatingChipDot} />
-                  100% goes to the charity
+                  Kindness, made visible.
                 </div>
               </div>
             </div>
@@ -135,7 +134,7 @@ export function Hero() {
         </Container>
       </section>
 
-      {/* ── Why give through DearGiver — 히어로 바로 아래 카드 행 (스태거 리빌) ── */}
+      {/* ── Why give through Dear Giver — 히어로 바로 아래 카드 행 (스태거 리빌) ── */}
       <section className={classes.highlightsSection}>
         <Container size="xl">
           <SimpleGrid

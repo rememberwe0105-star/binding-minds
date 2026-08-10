@@ -35,6 +35,8 @@ export interface Organization {
   activeCampaigns: number;  // 활성 캠페인 수
   /** 기관의 플랫폼 참여 상태 */
   status: OrgStatus;
+  /** 프로필 정보가 마지막으로 관리/갱신된 날짜 (YYYY-MM-DD, 없으면 미상) */
+  lastUpdated?: string;
   /** "이 기관에 기부하고 싶어요!" 관심 표현 수 */
   interestCount: number;
 }
@@ -59,7 +61,8 @@ export const organizations: Organization[] = [
     "totalRaised": 0,
     "donorCount": 0,
     "activeCampaigns": 0,
-    "status": "unclaimed",
+    "status": "claimed",
+    "lastUpdated": "2026-08-05",
     "interestCount": 0
   },
   {
@@ -79,6 +82,7 @@ export const organizations: Organization[] = [
     "donorCount": 0,
     "activeCampaigns": 0,
     "status": "unclaimed",
+    "lastUpdated": "2026-08-02",
     "interestCount": 0
   },
   {
@@ -116,7 +120,8 @@ export const organizations: Organization[] = [
     "totalRaised": 0,
     "donorCount": 0,
     "activeCampaigns": 0,
-    "status": "unclaimed",
+    "status": "claimed",
+    "lastUpdated": "2026-07-30",
     "interestCount": 0
   },
   {
@@ -173,7 +178,8 @@ export const organizations: Organization[] = [
     "totalRaised": 0,
     "donorCount": 0,
     "activeCampaigns": 0,
-    "status": "unclaimed",
+    "status": "claimed",
+    "lastUpdated": "2026-08-08",
     "interestCount": 0
   },
   {
@@ -193,6 +199,7 @@ export const organizations: Organization[] = [
     "donorCount": 0,
     "activeCampaigns": 0,
     "status": "unclaimed",
+    "lastUpdated": "2026-07-22",
     "interestCount": 0
   },
   {
@@ -231,6 +238,7 @@ export const organizations: Organization[] = [
     "donorCount": 0,
     "activeCampaigns": 0,
     "status": "unclaimed",
+    "lastUpdated": "2026-08-06",
     "interestCount": 0
   },
   {

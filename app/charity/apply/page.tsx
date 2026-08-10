@@ -192,7 +192,7 @@ export default function CharityApplyPage() {
   };
 
   // 문의 이메일 생성 유틸리티
-  const contactMailto = `mailto:hello@deargiver.nz?subject=${encodeURIComponent(`Charity Claim Enquiry — ${form.ccNumber || 'CC Number'}`)}&body=${encodeURIComponent(`Hi DearGiver Team,\n\nI am trying to claim a profile for my organisation but encountered an issue during the CC number search.\n\nCC Number: ${form.ccNumber}\nOrganisation Name: \nMy Name: \nMy Email: \n\nPlease assist me with the claim process.\n\nKind regards`)}`;
+  const contactMailto = `mailto:hello@deargiver.nz?subject=${encodeURIComponent(`Charity Claim Enquiry — ${form.ccNumber || 'CC Number'}`)}&body=${encodeURIComponent(`Hi Dear Giver Team,\n\nI am trying to claim a profile for my organisation but encountered an issue during the CC number search.\n\nCC Number: ${form.ccNumber}\nOrganisation Name: \nMy Name: \nMy Email: \n\nPlease assist me with the claim process.\n\nKind regards`)}`;
 
   if (submitted) {
     return (
@@ -258,7 +258,7 @@ export default function CharityApplyPage() {
               Claim Your Profile
             </Title>
             <Text className={classes.heroSubtitle}>
-              Join DearGiver to manage your public profile and start receiving donations securely.
+              Join Dear Giver to manage your public profile and start receiving donations securely.
             </Text>
           </Container>
         </div>
@@ -362,7 +362,7 @@ export default function CharityApplyPage() {
                         radius="xl"
                         leftSection={<IconMail size={14} />}
                       >
-                        Contact DearGiver Support
+                        Contact Dear Giver Support
                       </Button>
                     </Alert>
                   )}
@@ -557,7 +557,7 @@ export default function CharityApplyPage() {
 
                   <Box bg="var(--bm-sage-light)" p={20} style={{ borderRadius: 8 }} mb={32}>
                     <Checkbox
-                      label="I confirm that I am an authorised representative of this charity and agree to the DearGiver Terms of Service."
+                      label="I confirm that I am an authorised representative of this charity and agree to the Dear Giver Terms of Service."
                       checked={form.agreed}
                       onChange={(event) => set('agreed')(event.currentTarget.checked)}
                       color="sage"
@@ -618,12 +618,12 @@ export default function CharityApplyPage() {
           <Card shadow="sm" radius="md" p={{ base: 20, sm: 40 }} withBorder mt={32}>
             <Title order={4} mb={4} c="var(--bm-text-dark)">Frequently Asked Questions</Title>
             <Text c="var(--bm-text-muted)" size="sm" mb={16}>
-              Quick answers about how profiles work on DearGiver.
+              Quick answers about how profiles work on Dear Giver.
             </Text>
             <Accordion variant="separated" radius="md" chevronPosition="right">
               <Accordion.Item value="why-appear">
                 <Accordion.Control>
-                  <Text size="sm" fw={600}>Why does my organisation appear on DearGiver?</Text>
+                  <Text size="sm" fw={600}>Why does my organisation appear on Dear Giver?</Text>
                 </Accordion.Control>
                 <Accordion.Panel>
                   <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
@@ -636,12 +636,12 @@ export default function CharityApplyPage() {
               </Accordion.Item>
               <Accordion.Item value="endorsement">
                 <Accordion.Control>
-                  <Text size="sm" fw={600}>Does appearing on DearGiver mean we have endorsed the platform?</Text>
+                  <Text size="sm" fw={600}>Does appearing on Dear Giver mean we have endorsed the platform?</Text>
                 </Accordion.Control>
                 <Accordion.Panel>
                   <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
                     No. An unclaimed profile does not mean your organisation has endorsed
-                    DearGiver. Claimed profiles will be clearly marked once an authorised
+                    Dear Giver. Claimed profiles will be clearly marked once an authorised
                     representative has access.
                   </Text>
                 </Accordion.Panel>
@@ -688,8 +688,10 @@ export default function CharityApplyPage() {
           <Card shadow="sm" radius="md" p={{ base: 20, sm: 40 }} withBorder mt={32}>
             <Title order={3} mb={8} c="var(--bm-text-dark)">Plans</Title>
             <Text c="var(--bm-text-muted)" size="sm" mb={24}>
-              Simple, honest pricing. Donors always pay exactly what they choose to give —
-              our service cost comes from the charity side, never added at checkout.
+              Our plans are designed for different stages of your organisation, from a free
+              profile to more advanced giving and admin tools. Subscription and platform
+              service fees help us maintain and improve these tools, with costs depending
+              on your chosen plan.
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="lg" mb={20}>
@@ -721,7 +723,7 @@ export default function CharityApplyPage() {
                 </Text>
                 <Button
                   component="a"
-                  href={`mailto:hello@deargiver.nz?subject=${encodeURIComponent('Growth plan — Register interest')}&body=${encodeURIComponent('Hi DearGiver Team,\n\nWe would like to register interest in the Growth plan.\n\nOrganisation Name: \nCC Number: \nContact Name: \nContact Email: \n\nKind regards')}`}
+                  href={`mailto:hello@deargiver.nz?subject=${encodeURIComponent('Growth plan — Register interest')}&body=${encodeURIComponent('Hi Dear Giver Team,\n\nWe would like to register interest in the Growth plan.\n\nOrganisation Name: \nCC Number: \nContact Name: \nContact Email: \n\nKind regards')}`}
                   color="terracotta"
                   variant="light"
                   radius="xl"
@@ -732,6 +734,10 @@ export default function CharityApplyPage() {
                 </Button>
               </Card>
             </SimpleGrid>
+
+            <Text size="xs" c="dimmed" mb={12}>
+              Payment processing fees are handled separately.
+            </Text>
 
             <Alert color="sage" variant="light" radius="md" icon={<IconInfoCircle size={16} />}>
               <Text size="sm" lh={1.7}>

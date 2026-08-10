@@ -1,5 +1,5 @@
 /**
- * DearGiver — 백엔드 API 클라이언트 래퍼
+ * Dear Giver — 백엔드 API 클라이언트 래퍼
  *
  * 백엔드 REST API (/api/v1) 와 통신하기 위한 인증 래퍼.
  * Firebase ID 토큰을 자동으로 Bearer 헤더에 포함합니다.

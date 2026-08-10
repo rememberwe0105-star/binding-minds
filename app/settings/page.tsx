@@ -90,7 +90,7 @@ function SettingsContent() {
     { key: 'fundraising_milestones', label: 'Fundraising Milestones', description: 'Celebrate when your project reaches 25%, 50%, 75%, 100% of its goal', defaultOn: true },
     { key: 'settlement_complete', label: 'Settlement Complete', description: 'Notification when funds are settled to your bank account', defaultOn: true },
     { key: 'stripe_alerts', label: 'Stripe Account Alerts', description: 'Notifications about your Stripe Connect account status', defaultOn: true, mandatory: true },
-    { key: 'admin_messages', label: 'Admin Messages', description: 'Messages from the DearGiver platform admin team', defaultOn: true, mandatory: true },
+    { key: 'admin_messages', label: 'Admin Messages', description: 'Messages from the Dear Giver platform admin team', defaultOn: true, mandatory: true },
     { key: 'document_expiry', label: 'Document Expiry', description: 'Reminders when your compliance documents are about to expire', defaultOn: true },
     { key: 'refund_alerts', label: 'Refund Notifications', description: 'Alerts when a donation refund is issued', defaultOn: true },
   ];

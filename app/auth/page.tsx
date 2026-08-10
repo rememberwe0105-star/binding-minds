@@ -138,7 +138,7 @@ export default function AuthPage() {
             <Text ta="center" c="var(--bm-text-muted)" size="sm" mb={28}>
               {mode === 'login'
                 ? 'Sign in to manage your donations and track your impact.'
-                : 'Join DearGiver and start making a difference today.'}
+                : 'Join Dear Giver and start making a difference today.'}
             </Text>
 
             {/* Google 로그인 */}

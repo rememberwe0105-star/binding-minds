@@ -10,22 +10,22 @@ import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
 
 export const metadata: Metadata = {
-  title: 'DearGiver — Every Giver Matters',
+  title: 'Dear Giver — Every Giver Matters',
   description:
-    'Discover verified charities in New Zealand, donate securely, and claim your 33.33% tax refund effortlessly. DearGiver makes giving transparent, easy, and rewarding.',
-  keywords: ['donation', 'New Zealand', 'charity', 'tax refund', 'giving', 'community', 'Aotearoa', 'nonprofit', 'DearGiver'],
+    'Discover verified charities in New Zealand, donate securely, and claim your 33.33% tax refund effortlessly. Dear Giver makes giving transparent, easy, and rewarding.',
+  keywords: ['donation', 'New Zealand', 'charity', 'tax refund', 'giving', 'community', 'Aotearoa', 'nonprofit', 'Dear Giver'],
   openGraph: {
-    title: 'DearGiver — Every Giver Matters',
+    title: 'Dear Giver — Every Giver Matters',
     description:
       'Discover verified charities in New Zealand, donate securely, and claim your 33.33% tax refund effortlessly.',
     url: 'https://deargiver.co.nz',
-    siteName: 'DearGiver',
+    siteName: 'Dear Giver',
     images: [
       {
         url: '/images/og-image.png',
         width: 1200,
         height: 630,
-        alt: 'DearGiver — Every Giver Matters',
+        alt: 'Dear Giver — Every Giver Matters',
       },
     ],
     locale: 'en_NZ',
@@ -33,7 +33,7 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'DearGiver — Every Giver Matters',
+    title: 'Dear Giver — Every Giver Matters',
     description:
       'Discover verified charities in New Zealand, donate securely, and claim your 33.33% tax refund effortlessly.',
     images: ['/images/og-image.png'],

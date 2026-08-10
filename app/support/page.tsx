@@ -31,12 +31,12 @@ import classes from './page.module.css';
 
 const faqs = [
   {
-    q: 'How does DearGiver work?',
-    a: 'DearGiver connects you with verified charities across New Zealand. Browse campaigns, donate securely via Stripe, and we automatically generate your tax receipts for the 33.33% donation tax credit.',
+    q: 'How does Dear Giver work?',
+    a: 'Dear Giver connects you with verified charities across New Zealand. Browse campaigns, donate securely via Stripe, and we automatically generate your tax receipts for the 33.33% donation tax credit.',
   },
   {
     q: 'Is my donation tax deductible?',
-    a: 'Yes! Donations to approved charities in New Zealand qualify for a 33.33% tax credit. DearGiver automatically consolidates your receipts to make claiming easy.',
+    a: 'Yes! Donations to approved charities in New Zealand qualify for a 33.33% tax credit. Dear Giver automatically consolidates your receipts to make claiming easy.',
   },
   {
     q: 'How do I know the charities are legitimate?',
@@ -178,11 +178,13 @@ export default function SupportPage() {
               </Text>
             </Group>
             <Title order={2} className={classes.sectionTitle} mb={8}>
-              Want to List Your Charity on DearGiver?
+              Want to Add Your Charity to Dear Giver?
             </Title>
-            <Text size="md" c="var(--bm-text-muted)" lh={1.7} mb={32} maw={600}>
-              If your charity is registered with NZ Charities Services, you can apply to join DearGiver
-              and connect with thousands of donors across New Zealand.
+            <Text size="md" c="var(--bm-text-muted)" lh={1.7} mb={32} maw={640}>
+              If your organisation is registered with NZ Charities Services and you can&apos;t
+              find your profile on Dear Giver yet, you can apply to create one. We&apos;ll review
+              your request and help you build a stronger presence for sharing your work and
+              reaching engaged supporters across New Zealand.
             </Text>
 
             <SimpleGrid cols={{ base: 1, sm: 3 }} spacing={20} mb={32}>
@@ -190,7 +192,7 @@ export default function SupportPage() {
                 {
                   icon: IconShieldCheck,
                   title: 'Free to List',
-                  desc: 'No monthly fees or subscriptions. We only charge a 1% platform fee per donation received.',
+                  desc: 'Claim and manage your profile at no monthly cost. A service fee applies only to donations processed through our platform.',
                 },
                 {
                   icon: IconHeart,
@@ -222,7 +224,7 @@ export default function SupportPage() {
                 size="md"
                 rightSection={<IconArrowRight size={16} />}
               >
-                Register Your Charity
+                Create Your Profile
               </Button>
               <Button
                 component={Link}

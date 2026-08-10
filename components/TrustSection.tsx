@@ -18,12 +18,12 @@ const promises = [
   {
     icon: IconHeartHandshake,
     title: 'Your money goes straight to the cause',
-    description: 'We use Stripe Connect so donations are routed directly to each charity. DearGiver never holds, redirects, or touches your funds at any point.',
+    description: 'We use Stripe Connect so donations are routed directly to each charity. Dear Giver never holds, redirects, or touches your funds at any point.',
   },
   {
     icon: IconEyeCheck,
     title: 'Only real, registered charities',
-    description: 'Every charity on DearGiver is cross-checked against the NZ Charities Register. If it\'s not verified, it\'s not on our platform.',
+    description: 'Every charity on Dear Giver is cross-checked against the NZ Charities Register. If it\'s not verified, it\'s not on our platform.',
   },
   {
     icon: IconLockOpen,
@@ -55,7 +55,7 @@ export function TrustSection() {
             </Group>
 
             <Text size="md" c="var(--bm-text-muted)" lh={1.7} mb={28} maw={500}>
-              We built DearGiver because giving should feel simple, safe, and honest.
+              We built Dear Giver because giving should feel simple, safe, and honest.
               Here&apos;s how we hold ourselves to that standard.
             </Text>
 
@@ -87,7 +87,7 @@ export function TrustSection() {
               rightSection={<IconArrowRight size={14} />}
               className={classes.learnMoreBtn}
             >
-              Read more about how DearGiver works
+              Read more about how Dear Giver works
             </Button>
           </div>
 
@@ -105,11 +105,11 @@ export function TrustSection() {
               </Group>
 
               <Title order={3} className={classes.charityTitle}>
-                Your charity is already on DearGiver
+                Your charity is already on Dear Giver
               </Title>
 
               <Text size="sm" c="rgba(255,255,255,0.75)" lh={1.7} mt={10} mb={20}>
-                Your organisation may already appear on DearGiver to help supporters
+                Your organisation may already appear on Dear Giver to help supporters
                 find your work. Claim your profile to manage your details, share your
                 story, and make it easier for them to give directly.
               </Text>

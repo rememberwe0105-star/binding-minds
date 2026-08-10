@@ -19,7 +19,17 @@ interface CharityFiltersProps {
   showFavoritesOnly: boolean;
   onFavoritesToggle: (value: boolean) => void;
   favoriteCount: number;
+  /** 정렬 기준 — null이면 기본 순서 */
+  sortBy: string | null;
+  onSortChange: (value: string | null) => void;
 }
+
+/** Charities 정렬 옵션 (update 4) */
+export const CHARITY_SORT_OPTIONS = [
+  { value: 'updated', label: 'Recently updated' },
+  { value: 'name', label: 'Name: A–Z' },
+  { value: 'claimed', label: 'Claimed profiles first' },
+];
 
 export function CharityFilters({
   search,
@@ -35,6 +45,8 @@ export function CharityFilters({
   showFavoritesOnly,
   onFavoritesToggle,
   favoriteCount,
+  sortBy,
+  onSortChange,
 }: CharityFiltersProps) {
   const [drawerOpened, { open: openDrawer, close: closeDrawer }] = useDisclosure(false);
 
@@ -107,6 +119,27 @@ export function CharityFilters({
           clearable
           size="sm"
         />
+      </Box>
+
+      {/* 정렬 (update 4) */}
+      <Box mb={24}>
+        <Text size="sm" fw={600} c="var(--bm-text-dark)" mb={12}>
+          Sort by
+        </Text>
+        <Select
+          placeholder="Default order"
+          data={CHARITY_SORT_OPTIONS}
+          value={sortBy}
+          onChange={onSortChange}
+          clearable
+          size="sm"
+        />
+        <Text size="xs" c="dimmed" mt={8} lh={1.55}>
+          Profiles may include publicly available information and organisation-provided
+          updates; claimed profiles are managed by the organisation. Sort and filter
+          options help you browse; they do not represent a ranking or endorsement
+          by Dear Giver.
+        </Text>
       </Box>
 
       {/* 필터 초기화 */}

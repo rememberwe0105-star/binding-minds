@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<title>DearGiver Backend 통합 추가 요청서 v8.3</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm; }
+  * { box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Segoe UI', 'Malgun Gothic', sans-serif;
+    font-size: 10.5px; line-height: 1.65; color: #222; margin: 0;
+  }
+  .cover {
+    background: linear-gradient(135deg, #2d5a4e 0%, #3a6a5f 60%, #c4724a 130%);
+    color: white; border-radius: 14px; padding: 34px 38px; margin-bottom: 24px;
+  }
+  .cover .brand { font-size: 13px; letter-spacing: 2.5px; text-transform: uppercase; opacity: .85; margin-bottom: 10px; }
+  .cover h1 { font-size: 25px; margin: 0 0 10px; line-height: 1.3; }
+  .cover .meta { font-size: 10.5px; opacity: .9; line-height: 1.9; }
+  .cover .meta strong { color: #ffe0c9; }
+  h2 {
+    font-size: 15.5px; color: #2d5a4e; margin: 26px 0 10px;
+    border-left: 5px solid #c4724a; padding-left: 10px;
+    page-break-after: avoid;
+  }
+  h3 { font-size: 12.5px; color: #c4724a; margin: 16px 0 6px; page-break-after: avoid; }
+  p { margin: 6px 0; }
+  code {
+    background: #f1f4f2; border: 1px solid #e2e8e4; padding: 1px 5px; border-radius: 4px;
+    font-family: 'SF Mono', Consolas, Menlo, monospace; font-size: 9.5px; color: #1f4d40;
+  }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 10px; page-break-inside: avoid; }
+  th { background: #2d5a4e; color: white; padding: 7px 10px; text-align: left; font-weight: 600; }
+  td { padding: 6px 10px; border-bottom: 1px solid #e4e4e4; vertical-align: top; }
+  tr:nth-child(even) td { background: #f7faf8; }
+  .note {
+    background: #fef7f0; border: 1px solid #f3ddc9; border-left: 5px solid #c4724a;
+    border-radius: 8px; padding: 10px 14px; margin: 12px 0; page-break-inside: avoid;
+  }
+  .note.green { background: #f2f8f5; border-color: #d5e6de; border-left-color: #2d5a4e; }
+  .note.red { background: #fdf2f2; border-color: #f0d4d4; border-left-color: #b3452f; }
+  .note .t { font-weight: 700; margin-bottom: 3px; }
+  .checklist { list-style: none; padding-left: 4px; margin: 8px 0; }
+  .checklist li { margin: 5px 0; padding-left: 24px; position: relative; }
+  .checklist li::before {
+    content: '☐'; position: absolute; left: 0; top: -1px;
+    color: #c4724a; font-size: 13px; font-weight: 700;
+  }
+  .tag { display: inline-block; border-radius: 10px; padding: 1px 9px; font-size: 9px; font-weight: 700; margin-right: 4px; }
+  .tag.p2 { background: #2d5a4e; color: white; }
+  .tag.p3 { background: #7a8a80; color: white; }
+  .tag.done { background: #e7f1ec; color: #2d5a4e; border: 1px solid #bcd6ca; }
+  .flow { display: flex; gap: 6px; align-items: stretch; margin: 10px 0; page-break-inside: avoid; }
+  .flow .step { flex: 1; background: #f2f8f5; border: 1px solid #d5e6de; border-radius: 8px; padding: 8px 10px; text-align: center; }
+  .flow .step .amt { font-size: 12px; font-weight: 800; color: #2d5a4e; }
+  .flow .step .lbl { font-size: 9px; color: #667; }
+  .flow .arrow { align-self: center; color: #c4724a; font-weight: 800; }
+  ul { padding-left: 18px; margin: 6px 0; }
+  li { margin: 3px 0; }
+  .footer-note { margin-top: 26px; padding-top: 12px; border-top: 2px solid #e4e4e4; color: #555; font-size: 10px; }
+  .pagebreak { page-break-before: always; }
+</style>
+</head>
+<body>
+
+<div class="cover">
+  <div class="brand">DearGiver · Frontend → Backend</div>
+  <h1>Backend 통합 추가 요청서 v8.3<br/>— 업데이트 3+4 (Accounting/Xero + 기관 프로필 메타)</h1>
+  <div class="meta">
+    작성일: <strong>2026년 8월 10일</strong> &nbsp;|&nbsp; 작성: 프론트엔드 (Poma) &nbsp;|&nbsp; 대상: 백엔드 팀<br/>
+    선행 문서: <strong>v8.0 · v8.1</strong> (반영 중) — 두 문서의 항목은 <strong>변경 없이 그대로 유효</strong>합니다<br/>
+    ⚠️ 이 문서는 <strong>미착수 상태인 v8.2를 대체·통합</strong>합니다 — v8.2는 폐기하고 이 문서만 봐주세요
+  </div>
+</div>
+
+<p>안녕하세요, 백엔드 팀 여러분. v8.0/v8.1 반영에 집중하고 계신 것 알고 있습니다. 🙏</p>
+<p>
+  그 사이 프론트에 <strong>업데이트 3·4</strong>(디자인 개편 + Growth 회계 기능 데모 + Charities 정렬)가
+  배포되어서, 백엔드 몫을 <strong>한 문서로 통합</strong>해 다시 정리했습니다. 대부분은
+  Growth 플랜 출시 시점에 맞추면 되는 항목이라 <strong>v8.0 P0/P1이 여전히 우선</strong>입니다.
+</p>
+
+<h2>이번 요청 한눈에 보기</h2>
+<table>
+  <thead><tr><th style="width:52px">우선순위</th><th>항목</th><th style="width:70px">난이도</th><th>프론트 상태</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag p2">P2</span></td><td><strong>A. Accounting &amp; Xero Sync</strong> (Growth 유료 기능, 구 v8.2 전체)</td><td>높음</td><td>데모 UI 배포 완료</td></tr>
+    <tr><td><span class="tag p3">P3</span></td><td><strong>B. 기관 프로필 메타데이터</strong> — <code>profile_updated_at</code> / <code>claim_status</code></td><td>낮음</td><td>정렬 UI 배포 완료 (로컬 데이터)</td></tr>
+  </tbody>
+</table>
+
+<h2><span class="tag p2">P2</span> A. Accounting &amp; Xero Sync — Growth 유료 기능</h2>
+
+<h3>무엇인가요?</h3>
+<p>
+  Stripe가 기관 계좌로 입금하는 <strong>payout이 어떤 기부금과 수수료로 구성됐는지</strong> 정리해,
+  NZ에서 가장 널리 쓰이는 회계 소프트웨어 <strong>Xero</strong>로 보내는 기능입니다.
+  방식은 검토 결과 <strong>플랫폼 → Xero API 직접 단방향 sync</strong>로 확정했습니다
+  (Zapier 방식은 payout summary 로직이 어차피 내부에 필요 + 기관별 유료 계정 요구로 부적합.
+  Donorfy/Keela와 같은 업계 표준 패턴입니다). Xero에서 읽는 것은 <strong>계정과목(COA)뿐</strong>이고,
+  거래 데이터는 플랫폼→Xero 한 방향으로만 흐릅니다.
+</p>
+
+<h3>기본 계산 구조</h3>
+<div class="flow">
+  <div class="step"><div class="amt">Donations gross</div><div class="lbl">payout 포함 기부 총액</div></div>
+  <div class="arrow">−</div>
+  <div class="step"><div class="amt">Stripe fees</div><div class="lbl">카드 처리 수수료</div></div>
+  <div class="arrow">−</div>
+  <div class="step"><div class="amt">Platform fees</div><div class="lbl">2.5% / 2.0%</div></div>
+  <div class="arrow">±</div>
+  <div class="step"><div class="amt">Adjustments</div><div class="lbl">환불·chargeback</div></div>
+  <div class="arrow">=</div>
+  <div class="step"><div class="amt">Net payout</div><div class="lbl">실제 입금액</div></div>
+</div>
+
+<h3>A-1. Stripe payout 집계</h3>
+<ul class="checklist">
+  <li>Stripe webhook <code>payout.paid</code> 수신 → balance transaction 조회로 payout별 구성 내역(기부 총액/건수, Stripe 수수료, 플랫폼 수수료, 조정) 집계·저장</li>
+  <li><code>GET /api/v1/me/charity/payouts</code> — payout summary 목록/상세 (Growth 전용)</li>
+</ul>
+
+<h3>A-2. 환불·chargeback 기록 (조정 라인)</h3>
+<ul class="checklist">
+  <li>webhook <code>charge.refunded</code>, <code>charge.dispute.*</code> 수신 → 해당 payout에 조정 내역 기록</li>
+  <li><strong>플랫폼 내 환불 요청/승인 기능은 만들지 않습니다</strong> — 기관이 Stripe 대시보드에서 직접 처리 (Donorbox 운영 모델). 우리는 기록·표시만 합니다</li>
+</ul>
+
+<h3>A-3. Xero 연동 API (Growth 전용)</h3>
+<table>
+  <thead><tr><th>Method</th><th>Endpoint</th><th>설명</th></tr></thead>
+  <tbody>
+    <tr><td>POST</td><td><code>/api/v1/me/charity/xero/connect</code></td><td>OAuth2 연결 시작 (redirect flow)</td></tr>
+    <tr><td>DELETE</td><td><code>/api/v1/me/charity/xero/connect</code></td><td>연결 해제</td></tr>
+    <tr><td>GET</td><td><code>/api/v1/me/charity/xero/accounts</code></td><td>계정과목(COA) 조회</td></tr>
+    <tr><td>PUT</td><td><code>/api/v1/me/charity/xero/mapping</code></td><td>매핑 저장 — 기부수입/Stripe수수료/플랫폼수수료/조정 → 계정</td></tr>
+    <tr><td>POST</td><td><code>/api/v1/me/charity/xero/sync/{payoutId}</code></td><td><strong>Receive Money</strong> 전송 (수입 라인 + 음수 수수료 라인), 결과 기록</td></tr>
+    <tr><td>GET</td><td><code>/api/v1/me/charity/xero/history</code></td><td>sync 이력</td></tr>
+  </tbody>
+</table>
+
+<h3>A-4. 플랜 게이팅</h3>
+<ul class="checklist">
+  <li>위 엔드포인트 전부 <code>plan=paid</code>(Growth)만 접근 — Community는 403 + 업그레이드 안내</li>
+</ul>
+
+<div class="note green">
+  <div class="t">✅ 프론트 상태 — 화면은 이미 있습니다</div>
+  Growth 데모 대시보드의 <strong>Accounting 탭</strong>에 Xero 연결 카드, 계정 매핑, payout summary 테이블,
+  Send to Xero, sync history가 mock 데이터로 배포되어 있습니다. API 스펙이 위와 달라져야 한다면
+  프론트를 맞추면 되니 편하게 제안해 주세요. Xero 개발자 앱 등록은 저희 쪽에서 준비하겠습니다.
+</div>
+
+<h2><span class="tag p3">P3</span> B. 기관 프로필 메타데이터 (업데이트 4 신규 — 가벼운 작업)</h2>
+<p>
+  Charities 목록에 정렬 옵션(<strong>Recently updated / Name A–Z / Claimed profiles first</strong>)이
+  추가됐습니다. 지금은 프론트 로컬 데이터로 동작하며, 추후 기관 API 연동 시 아래 필드가
+  응답에 포함되면 실데이터 정렬로 자연스럽게 전환됩니다.
+</p>
+<ul class="checklist">
+  <li>기관 목록/상세 응답에 <code>profile_updated_at</code> 추가 — 프로필 정보가 마지막으로 관리/갱신된 시각</li>
+  <li>기관 목록/상세 응답에 <code>claim_status</code> 추가 (<code>unclaimed</code> | <code>claimed</code> | <code>partnered</code>) — 기존 승인 파이프라인 상태와 매핑</li>
+  <li>프로필 수정·승인·티어 변경 등 관리 이벤트 발생 시 <code>profile_updated_at</code> 갱신</li>
+</ul>
+
+<h2>참고 — 백엔드 작업이 필요 없는 업데이트 3·4 변경 (배포 완료)</h2>
+<table>
+  <thead><tr><th>변경</th><th>내용</th></tr></thead>
+  <tbody>
+    <tr><td><span class="tag done">배포됨</span> 브랜드 표기</td><td>"DearGiver" → "Dear Giver" (전 화면), 워드마크·히어로 디자인 개편</td></tr>
+    <tr><td><span class="tag done">배포됨</span> 카피 전면 개편</td><td>홈 히어로/카드, About(Mission·Vision·Funded·Stand For·Features), Claim 페이지 Plans, Help Centre — 수수료 표현이 "organisation subscriptions and service fees" 프레임으로 통일</td></tr>
+    <tr><td><span class="tag done">배포됨</span> Charities 정렬</td><td>정렬 3종 + 안내 문구 (랭킹/보증 아님 고지)</td></tr>
+  </tbody>
+</table>
+
+<div class="footer-note">
+  <p>
+    <strong>진행 순서 제안</strong>: v8.0 P0(수수료 모델·최소 $5) → v8.1 P1(게스트 기부) →
+    본 문서 B(가벼움, 기관 API 작업 시 함께) → A(Growth 출시 일정에 맞춰).
+    궁금한 점은 언제든 연락 주세요. 감사합니다! — <strong>Poma (프론트엔드)</strong>
+  </p>
+</div>
+
+</body>
+</html>

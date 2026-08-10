@@ -1,5 +1,5 @@
 /**
- * DearGiver — NZ 기부 영수증 PDF 생성 유틸리티
+ * Dear Giver — NZ 기부 영수증 PDF 생성 유틸리티
  *
  * NZ IRD Donation Tax Credit 요건 기반:
  * - 기부자 이름, 단체명, 날짜, 금액, 통화, 영수증 번호
@@ -11,7 +11,7 @@
 
 import type { DonationItem } from '@/lib/api';
 
-// ─── 색상 (DearGiver 브랜드) ────────────────────────────────────────────────
+// ─── 색상 (Dear Giver 브랜드) ────────────────────────────────────────────────
 const COLOR_TEAL_R = 74;
 const COLOR_TEAL_G = 124;
 const COLOR_TEAL_B = 113; // #4A7C71 (sage-dark)
@@ -119,7 +119,7 @@ export async function downloadReceiptPdf(opts: ReceiptOptions): Promise<void> {
   doc.setFont('helvetica', 'bold');
   doc.setFontSize(22);
   doc.setTextColor(255, 255, 255);
-  text('DearGiver', MARGIN, 18);
+  text('Dear Giver', MARGIN, 18);
 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'normal');
@@ -264,7 +264,7 @@ export async function downloadReceiptPdf(opts: ReceiptOptions): Promise<void> {
   doc.setFontSize(8);
   setRGB(120, 80, 20);
   const disclaimer = [
-    'This receipt is issued by DearGiver Limited on behalf of the named charity organisation.',
+    'This receipt is issued by Dear Giver Limited on behalf of the named charity organisation.',
     'This is NOT a tax invoice. It is a donation receipt for the purposes of claiming a',
     'Donation Tax Credit with Inland Revenue (IRD) New Zealand.',
   ];
@@ -304,7 +304,7 @@ export async function downloadReceiptPdf(opts: ReceiptOptions): Promise<void> {
   doc.setFont('helvetica', 'normal');
   doc.setFontSize(7.5);
   setRGB(...COLOR_TEXT_MUTED);
-  const footer1 = 'DearGiver Limited  |  Helping New Zealanders give more, together  |  deargiver.nz';
+  const footer1 = 'Dear Giver Limited  |  Helping New Zealanders give more, together  |  deargiver.nz';
   const footer2 = `This document was generated on ${todayNZ()}. Keep this receipt for your tax records.`;
   text(footer1, W / 2, y, { align: 'center' });
   y += 5;

@@ -187,6 +187,35 @@
   현 PS 버전 생성 기능 미지원으로 보류 — 추후 세로형(3:4) 이미지를
   `public/images/`에 추가하면 Hero.tsx src 한 줄로 교체 가능
 
+## 추가 작업 (8/10) — 업데이트 4 (deargiver update 4.docx)
+
+**전 항목 프론트엔드 단독 처리 — 신규 백엔드 의존 없음** (기관 프로필 메타 필드만 v8.3에 경량 요청)
+
+### 기능
+- **Charities 정렬**: Region 아래 Sort by (Recently updated / Name A–Z / Claimed profiles
+  first) + "랭킹/보증 아님" 안내 문구. 시연용으로 기관 3곳 claimed 전환 + 6곳에
+  `lastUpdated` 시드 (`Organization.lastUpdated?` 필드 신설)
+
+### 브랜드/카피
+- **"DearGiver" → "Dear Giver"** 사용자 노출 표기 전수 교체 (헤더·푸터·본문·영수증 PDF 등)
+- 홈: 칩 "Kindness, made visible.", 카드 4종 신규 카피, CTA "Explore Causes"
+  (골드→테라코타 그라데이션 입체 버튼), generosity 골드 강조 업, 서브카피 확대·볼드
+- About: Mission/Vision/How We're Funded(3카드 재구성, Real Example 삭제)/
+  What We Stand For 6카드/Thoughtful Features for Giving 6카드 — 제공된 카피로 전면 교체
+- Claim 페이지 Plans 소개문 교체 + "Payment processing fees are handled separately." 고지
+- Help Centre 하단: "Want to Add Your Charity…" + 새 소개문 + "Create Your Profile" 버튼,
+  구모델(1% 수수료) 잔재 문구 정리
+
+### 디자인
+- About How Dear Giver Works 타임라인 아이콘 초록→골드 그라데이션 (5단계)
+- About 상단 우측에 **편지 주고받는 라인아트 일러스트** (SVG 자체 제작 — 봉투+하트 실링+
+  "Dear friend," 스크립트+점선 궤적+주고받는 손, 배경 위에 자연스럽게 얹힘, md 이상 노출)
+
+### 백엔드
+- **요청서 v8.3** 신규 (`BACKEND_API_REQUEST_V8_3.md/.pdf`) — **미착수 v8.2를 대체·통합**:
+  A. Accounting/Xero 전체(구 v8.2) + B. 기관 프로필 `profile_updated_at`/`claim_status` 필드.
+  v8.0/v8.1 불변 명시
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

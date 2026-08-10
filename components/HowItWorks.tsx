@@ -87,7 +87,7 @@ export function HowItWorks() {
       <Container size="lg">
         <Box ta="center" mb={48} className="reveal">
           <Text size="sm" fw={600} c="var(--bm-sage-dark)" tt="uppercase" mb={8} style={{ letterSpacing: '2px' }}>
-            How DearGiver Works
+            How Dear Giver Works
           </Text>
           <Title order={2} className={classes.heading}>
             From heartfelt giving to<br />hassle-free tax time.

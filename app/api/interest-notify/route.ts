@@ -76,7 +76,7 @@ function buildEmailHtml({
           <!-- Header -->
           <tr>
             <td style="background:linear-gradient(135deg, #4A7C71 0%, #5a8f83 100%); padding:32px 40px; text-align:center;">
-              <h1 style="color:#ffffff; font-size:24px; margin:0 0 4px 0; font-weight:700;">🌿 DearGiver</h1>
+              <h1 style="color:#ffffff; font-size:24px; margin:0 0 4px 0; font-weight:700;">🌿 Dear Giver</h1>
               <p style="color:rgba(255,255,255,0.85); font-size:14px; margin:0;">Every Giver Matters</p>
             </td>
           </tr>
@@ -91,11 +91,11 @@ function buildEmailHtml({
               <p style="font-size:15px; color:#555; margin:0 0 16px 0; line-height:1.7;">
                 Great news! <strong style="color:#C4724A;">${donorName}</strong> wants to donate to 
                 <strong>${charityName}</strong> — but they can't yet because your organisation 
-                hasn't claimed its profile on DearGiver.
+                hasn't claimed its profile on Dear Giver.
               </p>
 
               <p style="font-size:15px; color:#555; margin:0 0 28px 0; line-height:1.7;">
-                DearGiver is a modern donation platform built for New Zealand charities. 
+                Dear Giver is a modern donation platform built for New Zealand charities. 
                 Claiming your profile is <strong>free</strong> and takes less than 5 minutes.
               </p>
 
@@ -128,7 +128,7 @@ function buildEmailHtml({
               </p>
 
               <p style="font-size:14px; color:#999; margin:32px 0 0 0;">
-                — The DearGiver Team
+                — The Dear Giver Team
               </p>
             </td>
           </tr>
@@ -139,7 +139,7 @@ function buildEmailHtml({
               <p style="font-size:11px; color:#999; margin:0 0 4px 0; line-height:1.5;">
                 This email was sent because a donor expressed interest in supporting 
                 <a href="${profileUrl}" style="color:#4A7C71; text-decoration:none;">${charityName}</a> 
-                through DearGiver.
+                through Dear Giver.
               </p>
               <p style="font-size:11px; color:#999; margin:0; line-height:1.5;">
                 If you believe this was sent in error or wish to opt out, please reply to this email.
@@ -217,12 +217,12 @@ export async function POST(request: NextRequest) {
 
     // 이메일 발송
     const resend = new Resend(resendApiKey);
-    const fromAddress = process.env.INTEREST_EMAIL_FROM || 'DearGiver <onboarding@resend.dev>';
+    const fromAddress = process.env.INTEREST_EMAIL_FROM || 'Dear Giver <onboarding@resend.dev>';
 
     const { error } = await resend.emails.send({
       from: fromAddress,
       to: charityEmail,
-      subject: `🌿 ${donorName} is waiting to support ${charityName} on DearGiver!`,
+      subject: `🌿 ${donorName} is waiting to support ${charityName} on Dear Giver!`,
       html: buildEmailHtml({ donorName, charityName, charitySlug }),
     });
 

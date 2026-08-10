@@ -145,7 +145,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                           textDecoration: 'underline',
                           textUnderlineOffset: 3,
                         }}
-                        title={`Visit ${campaign.organizer}'s page on DearGiver`}
+                        title={`Visit ${campaign.organizer}'s page on Dear Giver`}
                       >
                         {campaign.organizer} ↗
                       </Link>
