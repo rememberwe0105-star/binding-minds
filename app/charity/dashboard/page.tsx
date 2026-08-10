@@ -28,6 +28,7 @@ import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthContext';
 import { AccountingTab } from '@/components/AccountingTab';
+import { BackendPendingDialog } from '@/components/BackendPendingDialog';
 import { campaigns } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
@@ -44,6 +45,8 @@ import {
   uploadProjectImages,
   uploadCharityImages,
   uploadCharityDocument,
+  publishDonationTiers,
+  BackendPendingError,
   type CharityAnalytics,
   type CharityDonationItem,
   type CharityProject,
@@ -1393,6 +1396,23 @@ function DonationTiersSection({ plan }: { plan: CharityPlan }) {
   const [tiers, setTiers] = useState<EditableTier[]>(() => loadTiers());
   const [newAmount, setNewAmount] = useState('');
   const [newDesc, setNewDesc] = useState('');
+  // 백엔드 게이트 — 티어 API가 열리면 Publish가 자동으로 실저장이 된다
+  const [publishing, setPublishing] = useState(false);
+  const [published, setPublished] = useState(false);
+  const [pendingError, setPendingError] = useState<BackendPendingError | null>(null);
+
+  const publish = async () => {
+    setPublishing(true);
+    setPublished(false);
+    try {
+      await publishDonationTiers(tiers.map(({ amount, description }) => ({ amount, description })));
+      setPublished(true);
+    } catch (e) {
+      if (e instanceof BackendPendingError) setPendingError(e);
+    } finally {
+      setPublishing(false);
+    }
+  };
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -1489,9 +1509,32 @@ function DonationTiersSection({ plan }: { plan: CharityPlan }) {
         </Group>
       )}
 
+      {tiers.length > 0 && (
+        <Group mt={16} gap={10}>
+          <Button
+            color="sage"
+            radius="xl"
+            size="sm"
+            leftSection={<IconSend size={14} />}
+            onClick={publish}
+            loading={publishing}
+          >
+            Publish to checkout
+          </Button>
+          {published && (
+            <Badge variant="light" color="teal" leftSection={<IconCheck size={10} />}>
+              Published
+            </Badge>
+          )}
+        </Group>
+      )}
+
       <Text size="xs" c="dimmed" mt={12}>
-        Saved locally for preview — tiers go live on your public checkout once the tier API is connected.
+        Drafts are saved locally. &ldquo;Publish to checkout&rdquo; calls the live tier API
+        and switches over automatically once the backend endpoint responds.
       </Text>
+
+      <BackendPendingDialog error={pendingError} onClose={() => setPendingError(null)} />
     </Card>
   );
 }

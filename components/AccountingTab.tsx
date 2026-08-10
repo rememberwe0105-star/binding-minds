@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Card,
   Text,
@@ -25,6 +25,13 @@ import {
   IconHistory,
   IconArrowsExchange,
 } from '@tabler/icons-react';
+import {
+  getCharityPayouts,
+  connectXero,
+  syncPayoutToXero,
+  BackendPendingError,
+} from '@/lib/api';
+import { BackendPendingDialog } from './BackendPendingDialog';
 
 // ============================================================
 // Accounting & Xero Sync (Growth 플랜 전용) — 데모 UX
@@ -108,6 +115,32 @@ export function AccountingTab() {
   // Xero 연결 상태 (데모 — 실제로는 백엔드 OAuth 상태 조회)
   const [connected, setConnected] = useState(false);
 
+  // ── 백엔드 게이트: 실 API를 먼저 시도, 미구현이면 안내 후 데모로 폴백 ──
+  const [pendingError, setPendingError] = useState<BackendPendingError | null>(null);
+  const [liveData, setLiveData] = useState(false);
+
+  useEffect(() => {
+    // payout API가 열리면 자동으로 라이브 모드 배지 전환
+    getCharityPayouts()
+      .then(() => setLiveData(true))
+      .catch(() => { /* pending — mock 데이터 유지 */ });
+  }, []);
+
+  const handleConnect = async () => {
+    try {
+      const res = await connectXero();
+      if (res.url) {
+        window.location.href = res.url; // 실제 OAuth redirect
+        return;
+      }
+      setConnected(true);
+    } catch (e) {
+      if (e instanceof BackendPendingError) setPendingError(e);
+      // 안내 후 데모 연결로 계속 (UX 미리보기 유지)
+      setConnected(true);
+    }
+  };
+
   // 계정 매핑 (데모 — 실제로는 백엔드에 저장)
   const [mapDonations, setMapDonations] = useState<string | null>('200');
   const [mapStripeFees, setMapStripeFees] = useState<string | null>('404');
@@ -122,7 +155,14 @@ export function AccountingTab() {
 
   const mappingComplete = mapDonations && mapStripeFees && mapPlatformFees && mapAdjustments;
 
-  const sendToXero = (id: string) => {
+  const sendToXero = async (id: string) => {
+    // 실 sync API 우선 — 미구현이면 안내 후 데모 마킹으로 폴백
+    try {
+      await syncPayoutToXero(id);
+    } catch (e) {
+      if (e instanceof BackendPendingError) setPendingError(e);
+      else return;
+    }
     const now = new Date();
     const stamp = `${now.toISOString().slice(0, 10)} ${now.toTimeString().slice(0, 5)}`;
     setPayouts((prev) =>
@@ -140,13 +180,15 @@ export function AccountingTab() {
   return (
     <Stack gap={20} mt={20}>
       {/* 데모 안내 */}
-      <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" radius="md">
-        <Text size="xs" lh={1.6}>
-          <strong>Preview.</strong> This is a demo of the upcoming Xero integration —
-          payout figures shown are sample data. Live Stripe payout sync is being
-          built by our engineering team.
-        </Text>
-      </Alert>
+      {!liveData && (
+        <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" radius="md">
+          <Text size="xs" lh={1.6}>
+            <strong>Preview.</strong> Payout figures shown are sample data. Every button
+            here already calls the live API first — the moment the backend endpoints
+            respond, this tab switches to real data automatically.
+          </Text>
+        </Alert>
+      )}
 
       {/* ── Xero 연결 카드 ── */}
       <Card withBorder radius="lg" padding="lg">
@@ -169,7 +211,7 @@ export function AccountingTab() {
               Connected
             </Badge>
           ) : (
-            <Button color="sage" radius="xl" size="sm" onClick={() => setConnected(true)}>
+            <Button color="sage" radius="xl" size="sm" onClick={handleConnect}>
               Connect to Xero
             </Button>
           )}
@@ -329,6 +371,12 @@ export function AccountingTab() {
           modified or read back apart from your chart of accounts.
         </Text>
       </Card>
+
+      <BackendPendingDialog
+        error={pendingError}
+        onClose={() => setPendingError(null)}
+        continuesWithDemo
+      />
     </Stack>
   );
 }

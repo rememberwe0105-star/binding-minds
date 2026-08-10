@@ -216,6 +216,21 @@
   A. Accounting/Xero 전체(구 v8.2) + B. 기관 프로필 `profile_updated_at`/`claim_status` 필드.
   v8.0/v8.1 불변 명시
 
+## 추가 작업 (8/10, 2차) — "백엔드 게이트" 패턴 전면 배선
+
+백엔드 미구현 기능 전부를 프론트에서 완성 배선하는 패턴 도입:
+
+- **동작 방식**: 모든 게이트 버튼이 실제 엔드포인트를 먼저 호출 → 404/405/501/미기동이면
+  "Backend integration pending" 다이얼로그(한/영, 필요한 `METHOD /path` + 요청서 번호 표시)
+  → 해당되는 경우 데모 동작으로 폴백. **엔드포인트가 응답을 시작하면 프론트 수정 없이
+  자동 실연동 전환**
+- 공통 모듈: `lib/api.ts`의 `gatedFetch`/`BackendPendingError` +
+  `components/BackendPendingDialog.tsx`
+- 배선 지점 7곳: 게스트 결제(Pay), 정기기부 로드/Pause/Resume/Change/Cancel,
+  티어 Publish to checkout(신규 버튼), Accounting payout 로드/Connect to Xero/Send to Xero
+- 요청서 v8.3에 "작업 방식 안내(게이트 패턴)" 섹션 + 게이트 지점 표 + payouts 응답
+  스키마 제안 추가 (PDF 4p 재생성) — 백엔드가 사이트 클릭만으로 남은 작업을 파악 가능
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

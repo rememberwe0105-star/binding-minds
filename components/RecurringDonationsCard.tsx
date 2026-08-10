@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import {
   Card,
   Text,
@@ -30,7 +30,13 @@ import {
   IconAlertTriangle,
 } from '@tabler/icons-react';
 import Link from 'next/link';
-import type { DonationItem } from '@/lib/api';
+import {
+  getMySubscriptions,
+  updateMySubscription,
+  BackendPendingError,
+  type DonationItem,
+} from '@/lib/api';
+import { BackendPendingDialog } from './BackendPendingDialog';
 
 // ============================================================
 // 정기 기부 관리 컴포넌트
@@ -110,9 +116,53 @@ function formatShortDate(dateStr: string): string {
 }
 
 export function RecurringDonationsCard({ items }: { items: DonationItem[] }) {
-  const subscriptions = useMemo(() => detectRecurringFromDonations(items), [items]);
+  const detected = useMemo(() => detectRecurringFromDonations(items), [items]);
   const [manageModalOpened, { open: openManage, close: closeManage }] = useDisclosure(false);
   const [selectedSub, setSelectedSub] = useState<RecurringSubscription | null>(null);
+
+  // ── 백엔드 게이트: 실 구독 API를 먼저 시도, 미구현이면 감지 데이터(프리뷰) 폴백 ──
+  const [liveSubs, setLiveSubs] = useState<RecurringSubscription[] | null>(null);
+  const [pendingError, setPendingError] = useState<BackendPendingError | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getMySubscriptions()
+      .then((res) => {
+        if (cancelled) return;
+        const mapped: RecurringSubscription[] = (res.items ?? []).map((s, i) => ({
+          id: String(s.id ?? `live-${i}`),
+          charityName: s.charity_name ?? 'Charity',
+          amount: (s.amount_minor ?? 0) / 100,
+          currency: s.currency_code ?? 'NZD',
+          frequency: 'monthly',
+          status: (s.status as RecurringSubscription['status']) ?? 'active',
+          nextPaymentDate: s.next_payment_at ?? '',
+          startedAt: '',
+          totalPaid: 0,
+          paymentCount: 0,
+        }));
+        setLiveSubs(mapped);
+      })
+      .catch(() => {
+        // BackendPendingError 등 — 조용히 감지 기반 프리뷰 유지
+      });
+    return () => { cancelled = true; };
+  }, []);
+
+  const isLive = liveSubs !== null;
+  const subscriptions = liveSubs ?? detected;
+
+  // 구독 변경 시도 — 엔드포인트가 열리면 그대로 실동작, 아니면 안내
+  const tryUpdate = async (patch: { status?: 'active' | 'paused' | 'cancelled'; amount?: number }) => {
+    if (!selectedSub) return;
+    try {
+      await updateMySubscription(selectedSub.id, patch);
+      closeManage();
+    } catch (e) {
+      if (e instanceof BackendPendingError) setPendingError(e);
+      else closeManage();
+    }
+  };
 
   const activeCount = subscriptions.filter((s) => s.status === 'active').length;
   const monthlyTotal = subscriptions
@@ -158,6 +208,9 @@ export function RecurringDonationsCard({ items }: { items: DonationItem[] }) {
             <IconRepeat size={18} color="var(--bm-terracotta)" />
             <Text fw={700} size="sm" c="var(--bm-text-dark)">Recurring Giving</Text>
             <Badge size="sm" variant="light" color="sage">{activeCount} active</Badge>
+            {!isLive && (
+              <Badge size="xs" variant="light" color="orange">Preview</Badge>
+            )}
           </Group>
           <Text size="xs" fw={600} c="var(--bm-sage-dark)">
             {formatCurrencyAmount(monthlyTotal, 'NZD')}/mo
@@ -288,14 +341,14 @@ export function RecurringDonationsCard({ items }: { items: DonationItem[] }) {
               </Text>
             </Alert>
 
-            {/* Action Buttons */}
+            {/* Action Buttons — 실 API 우선, 미구현 시 안내 (게이트) */}
             <SimpleGrid cols={2} spacing={8}>
               <Button
                 variant="light"
                 color={selectedSub.status === 'active' ? 'yellow' : 'sage'}
                 radius="md"
                 leftSection={selectedSub.status === 'active' ? <IconPlayerPause size={16} /> : <IconPlayerPlay size={16} />}
-                onClick={closeManage}
+                onClick={() => tryUpdate({ status: selectedSub.status === 'active' ? 'paused' : 'active' })}
               >
                 {selectedSub.status === 'active' ? 'Pause' : 'Resume'}
               </Button>
@@ -304,7 +357,7 @@ export function RecurringDonationsCard({ items }: { items: DonationItem[] }) {
                 color="blue"
                 radius="md"
                 leftSection={<IconEdit size={16} />}
-                onClick={closeManage}
+                onClick={() => tryUpdate({ amount: selectedSub.amount })}
               >
                 Change Amount
               </Button>
@@ -316,20 +369,25 @@ export function RecurringDonationsCard({ items }: { items: DonationItem[] }) {
               size="sm"
               radius="md"
               leftSection={<IconX size={14} />}
-              onClick={closeManage}
+              onClick={() => tryUpdate({ status: 'cancelled' })}
             >
               Cancel Subscription
             </Button>
 
-            <Alert icon={<IconAlertTriangle size={14} />} color="orange" variant="light" radius="md">
-              <Text size="xs">
-                Subscription management will be fully enabled once the backend is connected.
-                Currently showing detected recurring patterns from your donation history.
-              </Text>
-            </Alert>
+            {!isLive && (
+              <Alert icon={<IconAlertTriangle size={14} />} color="orange" variant="light" radius="md">
+                <Text size="xs">
+                  Showing recurring patterns detected from your donation history.
+                  These controls call the live subscriptions API and switch over
+                  automatically once the backend endpoint responds.
+                </Text>
+              </Alert>
+            )}
           </Stack>
         )}
       </Modal>
+
+      <BackendPendingDialog error={pendingError} onClose={() => setPendingError(null)} />
     </>
   );
 }

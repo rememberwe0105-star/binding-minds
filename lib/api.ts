@@ -795,26 +795,179 @@ export async function createCheckoutSession(data: CheckoutParams): Promise<Check
  * 게스트(비로그인) 기부 Checkout Session 생성 — 백엔드 v8.1 요청.
  * 인증 헤더 없이 이름/이메일을 받아 고객 기록을 생성하고,
  * 완료 이메일에 계정 연결 링크를 포함해 발송한다.
+ * 엔드포인트가 열리기 전까지는 BackendPendingError를 던진다 (UI가 안내 표시).
  */
 export async function createGuestCheckoutSession(
   data: CheckoutParams & { guestName: string; guestEmail: string },
 ): Promise<CheckoutSession> {
-  const res = await fetch(`${API_BASE_URL}/api/v1/checkout/donations/guest`, {
+  return gatedFetch<CheckoutSession>({
+    feature: 'Guest donation checkout',
+    doc: '요청서 v8.1 · P1',
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(data),
+    path: '/api/v1/checkout/donations/guest',
+    body: data,
   });
-  const text = await res.text();
-  let body: CheckoutSession & { error?: ApiError };
+}
+
+// ---------------------------------------------------------------------------
+// 백엔드 게이트 (Backend Gate)
+//
+// 아직 백엔드에 없는 엔드포인트를 프론트가 "먼저" 호출하도록 배선해 두는 패턴.
+// - 404/405/501, 네트워크 실패, 인증 토큰 부재(데모 세션) → BackendPendingError
+//   → UI가 "백엔드 작업이 필요한 부분입니다" 안내를 띄우고 데모 동작으로 폴백
+// - 엔드포인트가 정상 응답하기 시작하면 프론트 수정 없이 자동으로 실연동 전환
+// 백엔드 팀은 아래 함수들의 path/body가 곧 스펙이다 (요청서 v8.0/v8.1/v8.3 참조).
+// ---------------------------------------------------------------------------
+
+/** 백엔드 미구현/미연결 신호 — UI는 이 에러로 안내 다이얼로그를 띄운다 */
+export class BackendPendingError extends Error {
+  constructor(
+    /** 기능 이름 */
+    public feature: string,
+    /** 필요한 엔드포인트 라벨 (예: 'POST /api/v1/...') */
+    public endpoint: string,
+    /** 관련 요청서 (예: '요청서 v8.1 · P1') */
+    public doc: string,
+  ) {
+    super(`${feature} — backend endpoint pending: ${endpoint} (${doc})`);
+    this.name = 'BackendPendingError';
+  }
+}
+
+const PENDING_STATUSES = [404, 405, 501];
+
+interface GatedRequest {
+  feature: string;
+  doc: string;
+  method: string;
+  path: string;
+  body?: unknown;
+  /** true면 Firebase 토큰 첨부 — 토큰이 없으면(데모 세션 등) pending 취급 */
+  auth?: boolean;
+}
+
+/** 미구현 엔드포인트 감지 fetch 래퍼 — 상세는 위 블록 주석 참조 */
+export async function gatedFetch<T>(req: GatedRequest): Promise<T> {
+  const endpointLabel = `${req.method} ${req.path}`;
+  const pending = () => new BackendPendingError(req.feature, endpointLabel, req.doc);
+
+  const headers: Record<string, string> = { 'Content-Type': 'application/json' };
+  if (req.auth) {
+    try {
+      headers.Authorization = `Bearer ${await getIdToken()}`;
+    } catch {
+      throw pending();
+    }
+  }
+
+  let res: Response;
   try {
-    body = text ? JSON.parse(text) : ({} as CheckoutSession);
+    res = await fetch(`${API_BASE_URL}${req.path}`, {
+      method: req.method,
+      headers,
+      body: req.body !== undefined ? JSON.stringify(req.body) : undefined,
+    });
   } catch {
-    throw new Error(`게스트 결제 응답 파싱 실패 (HTTP ${res.status})`);
+    throw pending();
+  }
+  if (PENDING_STATUSES.includes(res.status)) throw pending();
+
+  const text = await res.text();
+  let body: T & { error?: ApiError };
+  try {
+    body = text ? JSON.parse(text) : ({} as T & { error?: ApiError });
+  } catch {
+    throw pending();
   }
   if (!res.ok) {
-    throw new Error(body.error?.message ?? `게스트 결제를 시작할 수 없습니다 (HTTP ${res.status})`);
+    throw new Error(body.error?.message ?? `요청에 실패했습니다 (HTTP ${res.status})`);
   }
   return body;
+}
+
+// --- 게이트가 걸린 기능별 API (엔드포인트 스펙 = 요청서) ---
+
+/** 정기 기부 목록 — 요청서 v7.0 P0 */
+export interface SubscriptionItem {
+  id: string | number;
+  charity_name?: string;
+  amount_minor?: number;
+  currency_code?: string;
+  status?: string;
+  next_payment_at?: string;
+  [key: string]: unknown;
+}
+
+export async function getMySubscriptions(): Promise<{ items: SubscriptionItem[] }> {
+  return gatedFetch({
+    feature: 'Recurring donations (live data)',
+    doc: '요청서 v7.0 · P0',
+    method: 'GET',
+    path: '/api/v1/me/subscriptions',
+    auth: true,
+  });
+}
+
+/** 정기 기부 수정(일시정지/재개/금액/해지) — 요청서 v7.0 P0 */
+export async function updateMySubscription(
+  id: string | number,
+  patch: { status?: 'active' | 'paused' | 'cancelled'; amount?: number },
+): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Subscription management',
+    doc: '요청서 v7.0 · P0',
+    method: 'PATCH',
+    path: `/api/v1/me/subscriptions/${id}`,
+    body: patch,
+    auth: true,
+  });
+}
+
+/** 금액별 기부 티어 저장 — 요청서 v8.0 P3-1 */
+export async function publishDonationTiers(
+  tiers: { amount: number; description: string; title?: string; imageUrl?: string }[],
+): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Custom donation tiers',
+    doc: '요청서 v8.0 · P3-1',
+    method: 'PUT',
+    path: '/api/v1/me/charity/donation-tiers',
+    body: { tiers },
+    auth: true,
+  });
+}
+
+/** Stripe payout summary 목록 — 요청서 v8.3 A-1 */
+export async function getCharityPayouts(): Promise<{ items: unknown[] }> {
+  return gatedFetch({
+    feature: 'Stripe payout summaries (live data)',
+    doc: '요청서 v8.3 · A-1',
+    method: 'GET',
+    path: '/api/v1/me/charity/payouts',
+    auth: true,
+  });
+}
+
+/** Xero OAuth 연결 시작 — 요청서 v8.3 A-3 */
+export async function connectXero(): Promise<{ url?: string }> {
+  return gatedFetch({
+    feature: 'Xero connection',
+    doc: '요청서 v8.3 · A-3',
+    method: 'POST',
+    path: '/api/v1/me/charity/xero/connect',
+    auth: true,
+  });
+}
+
+/** payout을 Xero로 전송 (Receive Money) — 요청서 v8.3 A-3 */
+export async function syncPayoutToXero(payoutId: string): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Send payout to Xero',
+    doc: '요청서 v8.3 · A-3',
+    method: 'POST',
+    path: `/api/v1/me/charity/xero/sync/${payoutId}`,
+    auth: true,
+  });
 }
 
 /**

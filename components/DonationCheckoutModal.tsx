@@ -31,8 +31,9 @@ import {
   IconMail,
 } from '@tabler/icons-react';
 import type { Campaign } from '@/data/campaigns';
-import { createCheckoutSession, createGuestCheckoutSession } from '@/lib/api';
+import { createCheckoutSession, createGuestCheckoutSession, BackendPendingError } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
+import { BackendPendingDialog } from './BackendPendingDialog';
 import classes from './DonationCheckoutModal.module.css';
 
 // ============================================================
@@ -104,6 +105,8 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   // 로딩/에러
   const [isLoading, setIsLoading] = useState(false);
   const [apiError, setApiError] = useState<string | null>(null);
+  // 백엔드 미연동 안내 (게스트 엔드포인트 등)
+  const [pendingError, setPendingError] = useState<BackendPendingError | null>(null);
 
   const amount = selectedPreset === 'custom' ? Number(customAmount) || 0 : Number(selectedPreset);
   // 기부자는 선택한 금액만 결제한다 (팁/수수료 없음)
@@ -184,6 +187,12 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
       // Stripe Checkout 페이지로 리다이렉트
       window.location.href = session.url;
     } catch (err: unknown) {
+      if (err instanceof BackendPendingError) {
+        // 백엔드 미연동 — 에러 대신 안내 다이얼로그 (엔드포인트가 열리면 자동 실연동)
+        setPendingError(err);
+        setIsLoading(false);
+        return;
+      }
       const msg = err instanceof Error ? err.message : '결제를 시작할 수 없습니다. 다시 시도해주세요.';
       setApiError(msg);
       setIsLoading(false);
@@ -191,6 +200,8 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
   };
 
   return (
+    <>
+    <BackendPendingDialog error={pendingError} onClose={() => setPendingError(null)} />
     <Modal
       opened={opened}
       onClose={resetAndClose}
@@ -566,5 +577,6 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
         </div>
       )}
     </Modal>
+    </>
   );
 }
