@@ -90,6 +90,13 @@
 - v8.0은 기전달·유효, v8.2는 폐기(v8.3이 대체)
 - 우선순위: v8.0 P0 → v8.1 P1 → v7.0 구독 → 경량(P2·프로필 메타) → Growth 묶음(티어·Xero·P2P)
 
+## 배포 인프라 메모 (8/11)
+
+- 업데이트 5 첫 배포가 Vercel에서 **Error** — 원인은 코드가 아니라 `next/font/google`
+  Fraunces 페칭의 일시적 네트워크 실패("Error while requesting resource"). 재배포로 즉시 복구.
+- 재발 방지: Fraunces를 `lib/fonts.ts` **단일 공유 인스턴스**로 통합해 빌드 시 폰트 페칭을
+  6회 → 1회로 축소 (커밋 f03b8d9, 배포 Ready). 향후 배포 안정성 개선.
+
 ## 남은 항목 (콘텐츠/후속 대기)
 
 - Donation Tax Credits 페이지 **본문** — 이번 주 문구 확정 시 placeholder 교체 (5분 작업)
