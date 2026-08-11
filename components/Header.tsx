@@ -20,14 +20,11 @@ import { useDisclosure } from '@mantine/hooks';
 import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
-import { Fraunces } from 'next/font/google';
 import { useAuth } from '@/contexts/AuthContext';
 import { useRewards } from '@/hooks/useRewards';
 import { UnifiedNotificationBell } from './UnifiedNotificationBell';
+import { fraunces } from '@/lib/fonts';
 import classes from './Header.module.css';
-
-// 워드마크 전용 디스플레이 세리프 — 본문(Inter)과 대비되는 기억에 남는 로고 타이포그래피
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['600', '700'], style: ['normal', 'italic'] });
 
 const navLinks = [
   { label: 'About Us', href: '/about' },

@@ -9,12 +9,9 @@ import {
 } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
-import { Fraunces } from 'next/font/google';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
+import { fraunces } from '@/lib/fonts';
 import classes from './Hero.module.css';
-
-// 워드마크와 같은 디스플레이 세리프 — 히어로 타이포에 유려함을 더한다
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['500', '600', '700'], style: ['normal', 'italic'] });
 
 // 히어로는 특정 기관/캠페인을 노출하지 않는다 — 플랫폼 자체의 가치만 중립적으로 전달
 const PLATFORM_HIGHLIGHTS = [

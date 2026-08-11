@@ -1,6 +1,5 @@
 'use client';
 
-import { Fraunces } from 'next/font/google';
 import {
   Container,
   Title,
@@ -24,9 +23,8 @@ import {
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import { fraunces } from '@/lib/fonts';
 
-// 히어로/워드마크와 통일된 디스플레이 세리프
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['600'], style: ['normal'] });
 
 // ============================================================
 // Donation Tax Credits 가이드 (update 5)

@@ -1,11 +1,8 @@
 'use client';
 
 import { useState, useMemo } from 'react';
-import { Fraunces } from 'next/font/google';
 import { Container, Title, Text, SimpleGrid, Button, Box } from '@mantine/core';
 
-// 히어로/워드마크와 통일된 디스플레이 세리프
-const fraunces = Fraunces({ subsets: ['latin'], weight: ['600'], style: ['normal'] });
 import { IconArrowDown } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -15,6 +12,7 @@ import { RichSearchInput } from '@/components/RichSearchInput';
 import { organizations as allOrganizations, filterOrganizations } from '@/data/organizations';
 import { type Region } from '@/data/campaigns';
 import { useFavorites } from '@/contexts/FavoritesContext';
+import { fraunces } from '@/lib/fonts';
 import classes from './page.module.css';
 
 const ITEMS_PER_PAGE = 12;
