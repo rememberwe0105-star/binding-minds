@@ -9,12 +9,32 @@
   border-bottom: 1px solid var(--bm-border, #e8ede9);
 }
 
+/* update 5: 상단 밸런스 — 제목 축소 + 요소 사이 여백 확대 */
+.hero {
+  background: linear-gradient(135deg, #f8f4ef 0%, #eef5f0 100%);
+  padding: 76px 0 60px;
+  border-bottom: 1px solid var(--bm-border, #e8ede9);
+  text-align: center;
+}
+
 .heroTitle {
-  font-size: clamp(2rem, 5vw, 3rem);
+  font-size: clamp(1.7rem, 3.5vw, 2.25rem);
   font-weight: 900;
   color: var(--bm-text-dark, #1a2e1f);
   line-height: 1.2;
-  margin-top: 8px;
+  margin-top: 12px;
+}
+
+.heroSubtitle {
+  color: var(--bm-text-muted, #6e6a62);
+  font-size: 1.02rem;
+  line-height: 1.7;
+  max-width: 560px;
+  margin: 16px auto 0;
+}
+
+.contentArea {
+  padding: 56px 0 80px;
 }
 
 .formSection {

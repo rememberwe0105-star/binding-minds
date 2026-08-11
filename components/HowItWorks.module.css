@@ -14,8 +14,9 @@
 /* ── 5-Column Grid ── */
 .grid {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 20px;
+  /* 6단계 → 3×2 배열 (update 5: Keep Giving 카드 추가) */
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
   position: relative;
 }
 
@@ -31,6 +32,28 @@
   transition: transform 0.35s var(--bm-ease-out), box-shadow 0.35s var(--bm-ease-out);
 }
 
+/* 카드 사이 흐름 화살표 — update 5: 더 진하고 두껍게 */
+.stepCard::after {
+  content: '›';
+  position: absolute;
+  right: -22px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 2rem;
+  font-weight: 800;
+  line-height: 1;
+  color: var(--bm-sage-dark, #6b7359);
+  -webkit-text-stroke: 0.8px var(--bm-sage-dark, #6b7359);
+  z-index: 2;
+  pointer-events: none;
+}
+
+/* 각 행의 마지막(3n)과 맨 마지막 카드에는 화살표 없음 */
+.stepCard:nth-child(3n)::after,
+.stepCard:last-child::after {
+  content: none;
+}
+
 .stepCard:hover {
   transform: translateY(-6px);
   box-shadow: 0 16px 48px rgba(143, 151, 121, 0.12);
@@ -43,7 +66,8 @@
   right: 16px;
   font-size: 2rem;
   font-weight: 800;
-  color: rgba(143, 151, 121, 0.1);
+  /* update 5: 번호가 더 잘 보이도록 진하게 */
+  color: rgba(107, 115, 89, 0.3);
   line-height: 1;
   pointer-events: none;
 }
@@ -96,6 +120,11 @@
   .grid {
     grid-template-columns: repeat(2, 1fr);
     gap: 16px;
+  }
+
+  /* 2열 배열에서는 흐름 화살표 숨김 */
+  .stepCard::after {
+    content: none;
   }
 }
 

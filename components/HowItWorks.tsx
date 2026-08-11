@@ -9,6 +9,7 @@ import {
   IconChartBar,
   IconCircleCheck,
   IconLock,
+  IconRepeat,
 } from '@tabler/icons-react';
 import classes from './HowItWorks.module.css';
 
@@ -58,6 +59,15 @@ const steps = [
     badge: null,
     trust: null,
   },
+  {
+    icon: IconRepeat,
+    title: 'Keep Giving',
+    description:
+      'Return to the organisations you care about, continue your support, or discover new causes when you\'re ready.',
+    color: 'terracotta',
+    badge: null,
+    trust: null,
+  },
 ];
 
 export function HowItWorks() {
@@ -90,10 +100,10 @@ export function HowItWorks() {
             How Dear Giver Works
           </Text>
           <Title order={2} className={classes.heading}>
-            From heartfelt giving to<br />hassle-free tax time.
+            From heartfelt giving to<br />organised tax time
           </Title>
-          <Text size="md" c="var(--bm-text-muted)" maw={520} mx="auto" mt={12} lh={1.7}>
-            We handle the paperwork so you can focus on what matters — making a difference across Aotearoa.
+          <Text size="md" c="var(--bm-text-muted)" maw={540} mx="auto" mt={12} lh={1.7}>
+            We help keep the details together, so you can stay close to the causes you care about.
           </Text>
         </Box>
 

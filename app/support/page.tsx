@@ -36,7 +36,18 @@ const faqs = [
   },
   {
     q: 'Is my donation tax deductible?',
-    a: 'Yes! Donations to approved charities in New Zealand qualify for a 33.33% tax credit. Dear Giver automatically consolidates your receipts to make claiming easy.',
+    a: (
+      <>
+        Yes! In New Zealand, eligible donations to approved donee organisations may
+        qualify for a donation tax credit of 33.33%. Dear Giver consolidates your
+        donation receipts and giving records in one place, making it easier to prepare
+        your claim at tax time. Different rules may apply if you&apos;re donating as a
+        business or organisation. Learn more in our{' '}
+        <Link href="/donation-tax-credits" style={{ color: 'var(--bm-sage-dark)', fontWeight: 600 }}>
+          Donation Tax Credits guide
+        </Link>.
+      </>
+    ),
   },
   {
     q: 'How do I know the charities are legitimate?',

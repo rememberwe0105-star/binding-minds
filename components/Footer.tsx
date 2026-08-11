@@ -13,7 +13,10 @@ const footerLinks = {
   ],
   getInvolved: [
     { label: 'List Your Charity', href: '/charity/apply' },
+  ],
+  support: [
     { label: 'Help Centre', href: '/support' },
+    { label: 'Donation Tax Credits', href: '/donation-tax-credits' },
   ],
   legal: [
     { label: 'Privacy Policy', href: '/legal/privacy' },
@@ -76,6 +79,19 @@ export function Footer() {
             </Text>
             <Stack gap={10}>
               {footerLinks.getInvolved.map((link) => (
+                <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
+                  {link.label}
+                </Anchor>
+              ))}
+            </Stack>
+          </div>
+
+          <div className={classes.linkGroup}>
+            <Text fw={600} size="sm" c="white" mb={16} tt="uppercase" style={{ letterSpacing: '1px' }}>
+              Support
+            </Text>
+            <Stack gap={10}>
+              {footerLinks.support.map((link) => (
                 <Anchor key={link.label} href={link.href} className={classes.link} underline="never">
                   {link.label}
                 </Anchor>

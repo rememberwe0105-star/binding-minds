@@ -1,5 +1,5 @@
 // ==============================
-// DearGiver — GiveBack Rewards 뱃지 정의
+// Dear Giver — GiveBack Rewards 뱃지 정의
 // ==============================
 
 // --- 타입 ---
@@ -30,8 +30,8 @@ export const BADGES: BadgeDefinition[] = [
     icon: 'IconSeedling',
     emoji: '🌱',
     tier: 'beginner',
-    conditionLabel: 'Sign up for DearGiver',
-    unlockMessage: '🌱 Welcome to DearGiver! Your giving journey starts right here.',
+    conditionLabel: 'Sign up for Dear Giver',
+    unlockMessage: '🌱 Welcome to Dear Giver! Your giving journey starts right here.',
     color: 'green',
   },
   {

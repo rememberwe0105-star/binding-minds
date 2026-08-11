@@ -1,5 +1,5 @@
 // ==============================
-// DearGiver — 기관(Organization) 데이터 모듈
+// Dear Giver — 기관(Organization) 데이터 모듈
 // ==============================
 // 데이터 소스: NZ Charities Services Register (charities.govt.nz)
 // 라이선스: Creative Commons Attribution 3.0 New Zealand

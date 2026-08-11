@@ -970,6 +970,59 @@ export async function syncPayoutToXero(payoutId: string): Promise<unknown> {
   });
 }
 
+// --- P2P Supporter Fundraisers (Growth 유료 기능) — 요청서 v8.4 ---
+
+/** 서포터 펀드레이저 생성 요청 body */
+export interface FundraiserCreate {
+  charitySlug: string;
+  /** project-level이면 캠페인 슬러그, organisation-level이면 생략 */
+  campaignSlug?: string;
+  level: 'organisation' | 'project';
+  title: string;
+  goalAmount: number;
+  message?: string;
+  /** public: 기관 승인 후 공개 페이지 게시 / private: 링크로만 공유 (즉시 생성) */
+  visibility: 'public' | 'private';
+}
+
+/** 기부자가 펀드레이저 생성 — 요청서 v8.4 */
+export async function createFundraiser(data: FundraiserCreate): Promise<{ id?: string; shareUrl?: string }> {
+  return gatedFetch({
+    feature: 'Start a supporter fundraiser',
+    doc: '요청서 v8.4 · P2P',
+    method: 'POST',
+    path: '/api/v1/fundraisers',
+    body: data,
+    auth: true,
+  });
+}
+
+/** 기관 관리자 — 펀드레이저 목록 — 요청서 v8.4 */
+export async function getCharityFundraisers(): Promise<{ items: unknown[] }> {
+  return gatedFetch({
+    feature: 'Supporter fundraisers (live data)',
+    doc: '요청서 v8.4 · P2P',
+    method: 'GET',
+    path: '/api/v1/me/charity/fundraisers',
+    auth: true,
+  });
+}
+
+/** 기관 관리자 — 펀드레이저 승인/거절 — 요청서 v8.4 */
+export async function updateFundraiserStatus(
+  id: string,
+  status: 'approved' | 'declined',
+): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Approve / decline supporter fundraiser',
+    doc: '요청서 v8.4 · P2P',
+    method: 'PATCH',
+    path: `/api/v1/me/charity/fundraisers/${id}`,
+    body: { status },
+    auth: true,
+  });
+}
+
 /**
  * 기부 내역 조회 (페이지네이션)
  * @see API_FOR_FRONTEND_DEVELOPERS.md §5.4

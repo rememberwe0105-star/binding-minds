@@ -5,8 +5,9 @@
 
 .grid {
   display: grid;
-  grid-template-columns: 1.5fr 1fr 1fr 1fr;
-  gap: 48px;
+  /* update 5: Support 열 추가 → 5열 */
+  grid-template-columns: 1.5fr 1fr 1fr 1fr 1fr;
+  gap: 40px;
 }
 
 .brand {

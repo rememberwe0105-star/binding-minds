@@ -256,6 +256,22 @@
 - 확인 방법: binding-minds.vercel.app 에서 해당 버튼 클릭 → 다이얼로그에 필요한
   `METHOD /path`와 요청서 번호가 그대로 표시됨
 
+## 추가 작업 (8/11) — 업데이트 5 (deargiver update 5.docx)
+
+- 홈 How Dear Giver Works: 신규 카피, 01~06 번호·"›" 화살표 강조, **Keep Giving 06 카드**
+  추가 (3×2 배열 전환)
+- Claim 페이지 상단 밸런스: 제목 축소 + hero/contentArea 여백 확대 (누락돼 있던
+  .hero/.heroSubtitle/.contentArea CSS 정의 신설)
+- About 일러스트: **열린 봉투 + "Dear Giver," 편지 노출**로 개편, 텍스트에 더 가깝게
+- 푸터 **Support 메뉴** 신설 (Help Centre + Donation Tax Credits), `/donation-tax-credits`
+  placeholder 페이지, FAQ 2번 답변 교체 + guide 링크
+- Claimed 기관 프로젝트 연결: 섹션 조건 claimed 이상으로 확대 + View Projects 버튼
+- **P2P Supporter Fundraisers 데모** (`components/SupporterFundraisers.tsx`):
+  생성 모달(level/visibility) + 기관·프로젝트 페이지 섹션 + Growth 대시보드 관리 탭
+  (통계·필터·승인/거절) — 게이트 3곳 추가 (총 12곳), 요청서 **v8.4** 신규
+- "DearGiver" 표기 잔재 최종 정리 (0건)
+- 통합 보고서 `UPDATE_SUMMARY_U3-U5.md` 작성, 인수인계 표지 v8.4 반영 갱신
+
 ## 4. 남은 작업 (다음 세션)
 
 1. 백엔드 v8.0 응답 수신 시: 티어 API 연동, donor_type 실데이터 확인, 익명 처리 QA

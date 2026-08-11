@@ -30,6 +30,7 @@ import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ShareButton } from '@/components/ShareButton';
+import { SupporterFundraisersSection } from '@/components/SupporterFundraisers';
 import { ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
 import {
   getCampaignBySlug,
@@ -310,6 +311,16 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
               </div>
             </div>
           </div>
+
+          {/* P2P 서포터 펀드레이저 — Growth(티어 보유) 데모 캠페인만 (update 5) */}
+          {campaign.donationTiers && ORGANIZER_TO_ORG_SLUG[campaign.organizer] && (
+            <SupporterFundraisersSection
+              charityName={campaign.organizer}
+              charitySlug={ORGANIZER_TO_ORG_SLUG[campaign.organizer]}
+              projectName={campaign.name}
+              projectSlug={campaign.slug}
+            />
+          )}
 
           {/* 관련 캠페인 */}
           {relatedCampaigns.length > 0 && (

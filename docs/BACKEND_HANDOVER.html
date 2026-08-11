@@ -53,7 +53,7 @@
   <div class="brand">Dear Giver · Frontend → Backend</div>
   <h1>백엔드 인수인계 패키지<br/>— 문서 체계 · 우선순위 · 게이트 확인 방법</h1>
   <div class="meta">
-    작성일: <strong>2026년 8월 10일</strong> &nbsp;|&nbsp; 작성: 프론트엔드 (Poma) &nbsp;|&nbsp; 대상: 백엔드 팀<br/>
+    작성일: <strong>2026년 8월 11일</strong> (v8.4 반영 갱신) &nbsp;|&nbsp; 작성: 프론트엔드 (Poma) &nbsp;|&nbsp; 대상: 백엔드 팀<br/>
     프론트엔드: <strong>https://binding-minds.vercel.app</strong> &nbsp;|&nbsp; 백엔드 API: <strong>http://libertron.iptime.org:8787</strong><br/>
     GitHub: <strong>rememberwe0105-star/binding-minds</strong> (프론트 스펙 원본: <code>lib/api.ts</code>)
   </div>
@@ -61,7 +61,7 @@
 
 <p>안녕하세요, 백엔드 팀 여러분. 그동안 요청서가 여러 번 나가서 헷갈리실 수 있어,
 <strong>어떤 문서가 유효하고, 어떤 순서로 작업하면 되는지</strong>를 한 장으로 정리했습니다.
-이 문서 + 첨부 PDF 2개(v8.1, v8.3)만 보시면 됩니다.</p>
+이 문서 + 첨부 PDF 3개(v8.1, v8.3, v8.4)만 보시면 됩니다.</p>
 
 <h2>1. 문서 체계 — 무엇이 유효한가</h2>
 <table>
@@ -72,7 +72,8 @@
     <tr><td><strong>v8.0</strong> (기전달)</td><td><span class="tag valid">유효</span></td><td>수수료 모델 전환(charity-side 2.5%/2.0%) · 최소 $5 · 익명 기부 · 회사 기부/영수증 · GST enum · 카테고리 · 티어 API · direct debit</td></tr>
     <tr><td><strong>v8.1</strong></td><td><span class="tag valid">유효</span></td><td>게스트(비로그인) 기부 엔드포인트 · 플랫폼 팁(addSupport) 제거 정정</td></tr>
     <tr><td>v8.2</td><td><span class="tag dead">폐기</span></td><td>v8.3에 통합됨 — 보지 마세요</td></tr>
-    <tr><td><strong>v8.3</strong> (최신)</td><td><span class="tag new">신규 전달</span></td><td>Accounting/Xero 전체(구 v8.2) · 기관 프로필 메타(<code>profile_updated_at</code>/<code>claim_status</code>) · <strong>게이트 패턴 작업 방식 + payouts 스키마</strong></td></tr>
+    <tr><td><strong>v8.3</strong></td><td><span class="tag new">신규 전달</span></td><td>Accounting/Xero 전체(구 v8.2) · 기관 프로필 메타(<code>profile_updated_at</code>/<code>claim_status</code>) · <strong>게이트 패턴 작업 방식 + payouts 스키마</strong></td></tr>
+    <tr><td><strong>v8.4</strong> (최신)</td><td><span class="tag new">신규 전달</span></td><td><strong>P2P Supporter Fundraisers</strong> (Growth) — 생성/공개 목록/관리·승인 API 4종, public 승인·private 링크 정책</td></tr>
   </tbody>
 </table>
 
@@ -85,7 +86,7 @@
     <tr><td>3</td><td>게스트 기부 엔드포인트 (<code>POST /checkout/donations/guest</code>)</td><td>v8.1 P1</td></tr>
     <tr><td>4</td><td>정기 기부 API (<code>GET/PATCH /me/subscriptions</code>)</td><td>v7.0 P0</td></tr>
     <tr><td>5</td><td>GST enum · 카테고리 · 기관 프로필 메타 (가벼움 — 틈틈이)</td><td>v8.0 P2 · v8.3 B</td></tr>
-    <tr><td>6</td><td>티어 API → Accounting/Xero (Growth 출시 일정에 맞춰)</td><td>v8.0 P3-1 · v8.3 A</td></tr>
+    <tr><td>6</td><td>티어 API → Accounting/Xero → P2P 펀드레이저 (Growth 출시 일정에 맞춰)</td><td>v8.0 P3-1 · v8.3 A · v8.4</td></tr>
   </tbody>
 </table>
 
@@ -106,6 +107,9 @@
     <tr><td>7</td><td>Accounting 탭 로드</td><td><code>GET /api/v1/me/charity/payouts</code></td><td>v8.3 A-1</td></tr>
     <tr><td>8</td><td>Connect to Xero</td><td><code>POST /api/v1/me/charity/xero/connect</code></td><td>v8.3 A-3</td></tr>
     <tr><td>9</td><td>Send to Xero</td><td><code>POST /api/v1/me/charity/xero/sync/{payoutId}</code></td><td>v8.3 A-3</td></tr>
+    <tr><td>10</td><td>Start a fundraiser → Create</td><td><code>POST /api/v1/fundraisers</code></td><td>v8.4</td></tr>
+    <tr><td>11</td><td>대시보드 Supporter Fundraisers 로드</td><td><code>GET /api/v1/me/charity/fundraisers</code></td><td>v8.4</td></tr>
+    <tr><td>12</td><td>〃 Approve / Decline</td><td><code>PATCH /api/v1/me/charity/fundraisers/{id}</code></td><td>v8.4</td></tr>
   </tbody>
 </table>
 <div class="note green">

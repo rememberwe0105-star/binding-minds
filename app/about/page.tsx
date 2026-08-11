@@ -128,36 +128,45 @@ function LetterExchangeArt() {
   return (
     <svg viewBox="0 0 380 320" fill="none" aria-hidden="true" style={{ width: '100%', height: 'auto' }}>
       {/* 배경 소프트 블롭 */}
-      <ellipse cx="200" cy="175" rx="165" ry="130" fill="rgba(143,151,121,0.09)" />
-      <ellipse cx="235" cy="150" rx="105" ry="85" fill="rgba(216,169,95,0.07)" />
+      <ellipse cx="205" cy="180" rx="165" ry="130" fill="rgba(143,151,121,0.09)" />
+      <ellipse cx="240" cy="150" rx="105" ry="85" fill="rgba(216,169,95,0.07)" />
 
       {/* 점선 궤적 + 작은 하트 */}
-      <path d="M105 118 C150 62 255 56 308 98" stroke="#c9a05c" strokeWidth="1.6" strokeDasharray="1.5 8" strokeLinecap="round" />
-      <path d="M296 78 c2.6-4 8-4 10 0 c2-4 7.4-4 10 0 c2.6 4-2 9-10 14 c-8-5-12.6-10-10-14z" fill="#e2725b" opacity="0.8" transform="scale(0.72) translate(118 22)" />
-      <path d="M118 96 c2.6-4 8-4 10 0 c2-4 7.4-4 10 0 c2.6 4-2 9-10 14 c-8-5-12.6-10-10-14z" fill="#8f9779" opacity="0.65" transform="scale(0.55) translate(88 62)" />
+      <path d="M92 96 C140 46 250 40 312 78" stroke="#c9a05c" strokeWidth="1.6" strokeDasharray="1.5 8" strokeLinecap="round" />
+      <path d="M296 78 c2.6-4 8-4 10 0 c2-4 7.4-4 10 0 c2.6 4-2 9-10 14 c-8-5-12.6-10-10-14z" fill="#e2725b" opacity="0.8" transform="scale(0.7) translate(140 8)" />
+      <path d="M118 96 c2.6-4 8-4 10 0 c2-4 7.4-4 10 0 c2.6 4-2 9-10 14 c-8-5-12.6-10-10-14z" fill="#8f9779" opacity="0.6" transform="scale(0.52) translate(66 46)" />
 
-      {/* 봉투 (살짝 기울임) */}
-      <g transform="rotate(-7 205 185)">
-        <rect x="128" y="146" width="154" height="96" rx="10" fill="#faf6ee" stroke="#c9a05c" strokeWidth="2" />
-        <path d="M130 152 L205 204 L280 152" stroke="#c9a05c" strokeWidth="1.8" fill="none" strokeLinecap="round" strokeLinejoin="round" />
-        {/* 하트 실링 */}
-        <path d="M205 196 c3.4-5.2 10.4-5.2 13 0 c2.6-5.2 9.6-5.2 13 0 c3.4 5.2-2.6 11.7-13 18.2 c-10.4-6.5-16.4-13-13-18.2z" fill="#e2725b" transform="translate(-13 -6) scale(0.92)" />
-        {/* Dear friend, 손글씨 */}
-        <text x="205" y="232" textAnchor="middle" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" fontSize="14.5" fill="#a9814e">Dear friend,</text>
+      {/* ── 열린 봉투 + 살짝 나온 편지 (update 5) ── */}
+      <g transform="rotate(-6 227 190)">
+        {/* 뒤로 젖혀진 열린 플랩 */}
+        <path d="M142 178 L227 106 L312 178" fill="#f0e6d2" stroke="#c9a05c" strokeWidth="1.8" strokeLinejoin="round" />
+        {/* 봉투에서 위로 나온 편지지 */}
+        <g>
+          <rect x="158" y="90" width="138" height="104" rx="5" fill="#fffdf8" stroke="#ddd0b8" strokeWidth="1.4" />
+          <text x="170" y="118" fontFamily="Georgia, 'Times New Roman', serif" fontStyle="italic" fontSize="15" fill="#a9814e">Dear Giver,</text>
+          <line x1="170" y1="134" x2="282" y2="134" stroke="#e2dccd" strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="170" y1="148" x2="270" y2="148" stroke="#e2dccd" strokeWidth="2.2" strokeLinecap="round" />
+          <line x1="170" y1="162" x2="234" y2="162" stroke="#e2dccd" strokeWidth="2.2" strokeLinecap="round" />
+          {/* 편지지 위 작은 하트 */}
+          <path d="M272 104 c2.4-3.6 7.2-3.6 9 0 c1.8-3.6 6.6-3.6 9 0 c2.4 3.6-1.8 8.2-9 12.6 c-7.2-4.4-11.4-9-9-12.6z" fill="#e2725b" opacity="0.9" />
+        </g>
+        {/* 봉투 몸통 (앞) */}
+        <rect x="140" y="176" width="174" height="72" rx="9" fill="#faf6ee" stroke="#c9a05c" strokeWidth="2" />
+        <path d="M143 181 L227 236 L311 181" stroke="#c9a05c" strokeWidth="1.6" fill="none" strokeLinecap="round" strokeLinejoin="round" />
       </g>
 
       {/* 건네는 손 (좌하단) — 미니멀 라인 */}
       <g stroke="#4a7c71" strokeWidth="2.4" strokeLinecap="round" fill="none">
-        <path d="M16 268 C58 276 104 268 138 244 C148 237 158 234 167 238" />
-        <path d="M132 250 C140 260 154 263 165 256" />
-        <path d="M42 276 C74 282 108 276 134 262" opacity="0.55" />
+        <path d="M16 272 C58 280 104 272 138 248 C148 241 158 238 167 242" />
+        <path d="M132 254 C140 264 154 267 165 260" />
+        <path d="M42 280 C74 286 108 280 134 266" opacity="0.55" />
       </g>
 
       {/* 받는 손 (우상단) — 미니멀 라인 */}
       <g stroke="#4a7c71" strokeWidth="2.4" strokeLinecap="round" fill="none">
-        <path d="M366 84 C330 76 296 86 272 108 C264 115 255 118 247 115" />
-        <path d="M280 100 C274 90 262 86 252 91" />
-        <path d="M352 66 C324 62 298 70 278 86" opacity="0.55" />
+        <path d="M368 96 C334 86 302 94 278 114 C270 121 261 124 253 121" />
+        <path d="M286 106 C280 96 268 92 258 97" />
+        <path d="M354 78 C326 74 300 82 280 98" opacity="0.55" />
       </g>
     </svg>
   );
@@ -175,7 +184,8 @@ export default function AboutPage() {
             visibleFrom="md"
             style={{
               position: 'absolute',
-              right: 20,
+              /* update 5: 왼쪽 텍스트와 더 가깝게 */
+              right: 'clamp(24px, 9vw, 132px)',
               top: '50%',
               transform: 'translateY(-50%)',
               width: 330,

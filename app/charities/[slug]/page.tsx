@@ -35,6 +35,7 @@ import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ClaimProfileBanner } from '@/components/ClaimProfileBanner';
 import { ShareButton } from '@/components/ShareButton';
+import { SupporterFundraisersSection } from '@/components/SupporterFundraisers';
 import { getOrganizationBySlug, ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
 import { campaigns, formatCurrency } from '@/data/campaigns';
 import type { Campaign } from '@/data/campaigns';
@@ -172,6 +173,20 @@ export default function OrganizationDetailPage({
                   Visit Website
                 </Button>
               )}
+              {org.status !== 'unclaimed' && orgCampaigns.length > 0 && (
+                <Button
+                  component="a"
+                  href="#org-projects"
+                  variant="outline"
+                  size="lg"
+                  radius="xl"
+                  color="white"
+                  leftSection={<IconClipboardList size={18} />}
+                  className={classes.websiteBtn}
+                >
+                  View Projects ({orgCampaigns.length})
+                </Button>
+              )}
               <ShareButton variant="outline" color="white" className={classes.websiteBtn} />
             </Group>
           </Container>
@@ -297,9 +312,9 @@ export default function OrganizationDetailPage({
             </div>
           </Box>
 
-          {/* 관련 캠페인 — partnered 기관만 */}
-          {isPartnered && orgCampaigns.length > 0 && (
-            <>
+          {/* 관련 캠페인 — 기관이 관리 중(claimed 이상)이면 표시 (update 5) */}
+          {org.status !== 'unclaimed' && orgCampaigns.length > 0 && (
+            <div id="org-projects">
               <Divider
                 my={48}
                 label={
@@ -315,7 +330,12 @@ export default function OrganizationDetailPage({
                   <CampaignCard key={c.id} campaign={c} />
                 ))}
               </SimpleGrid>
-            </>
+            </div>
+          )}
+
+          {/* P2P 서포터 펀드레이저 — 기관이 관리 중(claimed 이상)이면 표시 (update 5) */}
+          {org.status !== 'unclaimed' && (
+            <SupporterFundraisersSection charityName={org.name} charitySlug={org.slug} />
           )}
 
           {/* 정보 카드 */}

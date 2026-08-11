@@ -29,6 +29,7 @@ import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthContext';
 import { AccountingTab } from '@/components/AccountingTab';
 import { BackendPendingDialog } from '@/components/BackendPendingDialog';
+import { SupporterFundraisersTab } from '@/components/SupporterFundraisers';
 import { campaigns } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
@@ -1606,6 +1607,13 @@ function CharityDashboardContent() {
               <Tabs.Tab value="projects" leftSection={<IconClipboardList size={16} />}>Projects</Tabs.Tab>
               <Tabs.Tab value="updates" leftSection={<IconMail size={16} />}>Donor Updates</Tabs.Tab>
               <Tabs.Tab
+                value="fundraisers"
+                leftSection={<IconUsersGroup size={16} />}
+                rightSection={isFreePlan ? lockIcon : undefined}
+              >
+                Supporter Fundraisers
+              </Tabs.Tab>
+              <Tabs.Tab
                 value="accounting"
                 leftSection={<IconReportMoney size={16} />}
                 rightSection={isFreePlan ? lockIcon : undefined}
@@ -1623,6 +1631,9 @@ function CharityDashboardContent() {
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
             {/* Community 플랜도 Donor Updates 접근 가능 — 템플릿 1개 제한 모드 */}
             <Tabs.Panel value="updates"><DonorUpdatesTab plan={plan} /></Tabs.Panel>
+            <Tabs.Panel value="fundraisers">
+              {isFreePlan ? <PlanLockedPanel feature="Supporter Fundraisers" /> : <SupporterFundraisersTab />}
+            </Tabs.Panel>
             <Tabs.Panel value="accounting">
               {isFreePlan ? <PlanLockedPanel feature="Accounting & Xero Sync" /> : <AccountingTab />}
             </Tabs.Panel>
