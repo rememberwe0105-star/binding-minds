@@ -118,6 +118,8 @@ export default function OrganizationDetailPage({
   }
 
   const isPartnered = org.status === 'partnered';
+  const isUnclaimed = org.status === 'unclaimed';
+  const isClaimed = org.status === 'claimed'; // 기관이 관리 중이나 아직 유료 파트너는 아님
   const fakeCampaign = orgToCampaign(org, detail?.stripe_account_id);
 
   return (
@@ -150,7 +152,7 @@ export default function OrganizationDetailPage({
               >
                 Registered Charity · {org.charityNumber}
               </Badge>
-              {!isPartnered && (
+              {isUnclaimed && (
                 <Badge
                   size="lg"
                   variant="light"
@@ -160,25 +162,23 @@ export default function OrganizationDetailPage({
                   Unclaimed Profile
                 </Badge>
               )}
+              {isClaimed && (
+                <Badge
+                  size="lg"
+                  variant="light"
+                  color="sage"
+                  leftSection={<IconShieldCheck size={14} />}
+                >
+                  Managed by the organisation
+                </Badge>
+              )}
             </Group>
             <Title order={1} className={classes.heroTitle}>
               {org.name}
             </Title>
             <Text className={classes.heroMission}>{org.mission}</Text>
             <Group mt={24} gap={12}>
-              {isPartnered ? (
-                <Button
-                  size="lg"
-                  radius="xl"
-                  color="terracotta"
-                  leftSection={<IconHeart size={18} />}
-                  onClick={() => setDonationOpened(true)}
-                  className={classes.donateBtn}
-                  disabled={!fakeCampaign.stripeAccountId}
-                >
-                  {fakeCampaign.stripeAccountId ? `Donate to ${org.name}` : 'Donations opening soon'}
-                </Button>
-              ) : (
+              {isUnclaimed ? (
                 <Button
                   component={Link}
                   href="/charity/apply"
@@ -189,6 +189,18 @@ export default function OrganizationDetailPage({
                   className={classes.donateBtn}
                 >
                   Claim this Profile
+                </Button>
+              ) : (
+                <Button
+                  size="lg"
+                  radius="xl"
+                  color="terracotta"
+                  leftSection={<IconHeart size={18} />}
+                  onClick={() => setDonationOpened(true)}
+                  className={classes.donateBtn}
+                  disabled={!fakeCampaign.stripeAccountId}
+                >
+                  {fakeCampaign.stripeAccountId ? `Donate to ${org.name}` : 'Donations opening soon'}
                 </Button>
               )}
               {org.website && (
@@ -227,8 +239,8 @@ export default function OrganizationDetailPage({
         </div>
 
         <Container size="lg" className={classes.contentArea}>
-          {/* Claim / Interest 배너 — unclaimed 기관에만 표시 */}
-          {!isPartnered && (
+          {/* Claim / Interest 배너 — unclaimed 기관에만 표시 (claimed/partnered는 이미 관리 중) */}
+          {isUnclaimed && (
             <ClaimProfileBanner organization={org} />
           )}
 
@@ -408,10 +420,10 @@ export default function OrganizationDetailPage({
                 <Text size="xs" c="dimmed" w={100}>Status</Text>
                 <Badge
                   size="sm"
-                  color={isPartnered ? 'sage' : 'orange'}
+                  color={isUnclaimed ? 'orange' : 'sage'}
                   variant="light"
                 >
-                  {isPartnered ? 'Active Partner' : 'Unclaimed Profile'}
+                  {isPartnered ? 'Active Partner' : isClaimed ? 'Managed by the organisation' : 'Unclaimed Profile'}
                 </Badge>
               </Group>
             </SimpleGrid>
@@ -419,23 +431,7 @@ export default function OrganizationDetailPage({
 
           {/* 하단 CTA */}
           <Box ta="center" mt={48} mb={32}>
-            {isPartnered ? (
-              <>
-                <Button
-                  size="xl"
-                  radius="xl"
-                  color="terracotta"
-                  leftSection={<IconHeart size={20} />}
-                  onClick={() => setDonationOpened(true)}
-                  className={classes.donateBtn}
-                >
-                  Support {org.name} Today
-                </Button>
-                <Text size="xs" c="dimmed" mt={8}>
-                  33.33% tax credit on all donations to verified NZ charities
-                </Text>
-              </>
-            ) : (
+            {isUnclaimed ? (
               <>
                 <Text size="md" c="var(--bm-text-muted)" mb={12}>
                   Are you from {org.name}?
@@ -454,14 +450,31 @@ export default function OrganizationDetailPage({
                   Data sourced from NZ Charities Services public register
                 </Text>
               </>
+            ) : (
+              <>
+                <Button
+                  size="xl"
+                  radius="xl"
+                  color="terracotta"
+                  leftSection={<IconHeart size={20} />}
+                  onClick={() => setDonationOpened(true)}
+                  className={classes.donateBtn}
+                  disabled={!fakeCampaign.stripeAccountId}
+                >
+                  {fakeCampaign.stripeAccountId ? `Support ${org.name} Today` : 'Donations opening soon'}
+                </Button>
+                <Text size="xs" c="dimmed" mt={8}>
+                  33.33% tax credit on all donations to verified NZ charities
+                </Text>
+              </>
             )}
           </Box>
         </Container>
       </main>
       <Footer />
 
-      {/* 기부 모달 — partnered 기관만 접근 가능 */}
-      {isPartnered && (
+      {/* 기부 모달 — 관리 중(claimed/partnered) 기관에서 접근 가능. 실제 결제는 Stripe 계정 있을 때만 */}
+      {!isUnclaimed && (
         <DonationCheckoutModal
           opened={donationOpened}
           onClose={() => setDonationOpened(false)}
