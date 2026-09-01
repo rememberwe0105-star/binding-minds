@@ -40,12 +40,12 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
           </div>
           <Badge
             className={classes.typeBadge}
-            color={organization.status === 'partnered' ? 'dark' : 'orange'}
+            color={organization.status === 'unclaimed' ? 'orange' : organization.status === 'partnered' ? 'dark' : 'sage'}
             variant="filled"
             size="sm"
-            leftSection={organization.status === 'partnered' ? <IconBuilding size={10} /> : <IconLock size={10} />}
+            leftSection={organization.status === 'unclaimed' ? <IconLock size={10} /> : organization.status === 'partnered' ? <IconBuilding size={10} /> : <IconShieldCheck size={10} />}
           >
-            {organization.status === 'partnered' ? 'Charity' : 'Unclaimed'}
+            {organization.status === 'unclaimed' ? 'Unclaimed' : organization.status === 'partnered' ? 'Charity' : 'Managed'}
           </Badge>
           <Badge
             className={classes.categoryBadge}
@@ -66,7 +66,7 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
               <IconShieldCheck size={16} color="var(--bm-sage)" />
             )}
             <Text size="xs" c="dimmed">
-              Est. {organization.yearFounded} · {organization.region}
+              {organization.yearFounded > 0 ? `Est. ${organization.yearFounded} · ` : ''}{organization.region}
             </Text>
           </Group>
 
@@ -118,7 +118,7 @@ export function OrganizationCard({ organization }: OrganizationCardProps) {
           ) : (
             <Box mt={16}>
               <Text size="xs" c="dimmed" lh={1.6}>
-                Est. {organization.yearFounded} · {organization.charityNumber}
+                {organization.yearFounded > 0 ? `Est. ${organization.yearFounded} · ` : ''}{organization.charityNumber || 'Registered NZ charity'}
               </Text>
             </Box>
           )}
