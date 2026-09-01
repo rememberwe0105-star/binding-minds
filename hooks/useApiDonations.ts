@@ -65,21 +65,27 @@ export function useApiDonations(pageSize = 20): UseDonationsResult {
 
 // ── 편의 함수 ──────────────────────────────────────────────
 
-/** donation_status → 배지 색상 */
+/** donation_status → 배지 색상 (FE-012: pending/failed/disputed 포함) */
 export function statusColor(s: string): string {
   switch (s) {
     case 'succeeded': return 'green';
-    case 'checkout_created': return 'yellow';
-    case 'refunded': return 'red';
+    case 'checkout_created':
+    case 'pending': return 'yellow';
+    case 'failed': return 'red';
+    case 'disputed': return 'orange';
+    case 'refunded': return 'gray';
     default: return 'gray';
   }
 }
 
-/** donation_status → 표시 레이블 */
+/** donation_status → 표시 레이블 (FE-012: pending/failed/disputed 포함) */
 export function statusLabel(s: string): string {
   switch (s) {
     case 'succeeded': return 'Completed';
-    case 'checkout_created': return 'Pending';
+    case 'checkout_created':
+    case 'pending': return 'Pending';
+    case 'failed': return 'Failed';
+    case 'disputed': return 'Disputed';
     case 'refunded': return 'Refunded';
     default: return s;
   }

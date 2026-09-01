@@ -1,22 +1,22 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Container, Title, Text, SimpleGrid, Button, Box } from '@mantine/core';
+import { useState, useMemo, useEffect } from 'react';
+import { Container, Title, Text, SimpleGrid, Button, Box, Loader, Alert } from '@mantine/core';
 
-import { IconArrowDown } from '@tabler/icons-react';
+import { IconArrowDown, IconAlertCircle } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { CampaignCard } from '@/components/CampaignCard';
 import { ProjectFilters } from '@/components/ProjectFilters';
 import { RichSearchInput } from '@/components/RichSearchInput';
 import {
-  campaigns as allCampaigns,
-  filterAndSortCampaigns,
   CAMPAIGNS_PER_PAGE,
   type Category,
   type Region,
   type SortOption,
 } from '@/data/campaigns';
+import { getPublicProjects } from '@/lib/api';
+import { adaptProject, type AdaptedProject } from '@/lib/adapters';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { fraunces } from '@/lib/fonts';
 import classes from './page.module.css';
@@ -34,15 +34,55 @@ export default function ProjectsPage() {
   // 페이지네이션 상태
   const [visibleCount, setVisibleCount] = useState(CAMPAIGNS_PER_PAGE);
 
-  // 필터링된 Projects
+  // 백엔드 실데이터 (FE-009) — 목업 대신 GET /projects
+  const [allCampaigns, setAllCampaigns] = useState<AdaptedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPublicProjects({ pageSize: 200 })
+      .then((res) => {
+        if (cancelled) return;
+        setAllCampaigns(res.items.map(adaptProject));
+        setLoadError(null);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setLoadError(e instanceof Error ? e.message : 'Failed to load projects.');
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 필터 + 정렬 (클라이언트 — 로드된 실데이터 대상)
   const filteredProjects = useMemo(() => {
-    return filterAndSortCampaigns({
-      search,
-      categories: selectedCategories,
-      region: selectedRegion,
-      sort,
-    });
-  }, [search, selectedCategories, selectedRegion, sort]);
+    let result = allCampaigns;
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          c.description.toLowerCase().includes(q) ||
+          c.organizer.toLowerCase().includes(q),
+      );
+    }
+    if (selectedCategories.length > 0) {
+      result = result.filter((c) => selectedCategories.includes(c.category));
+    }
+    if (selectedRegion) {
+      result = result.filter((c) => c.region === selectedRegion);
+    }
+    const progress = (c: AdaptedProject) => (c.goal > 0 ? (c.raised / c.goal) * 100 : 0);
+    const sorted = [...result];
+    switch (sort) {
+      case 'most-funded': sorted.sort((a, b) => progress(b) - progress(a)); break;
+      case 'ending-soon': sorted.sort((a, b) => a.daysLeft - b.daysLeft); break;
+      case 'newest': sorted.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()); break;
+      default: sorted.sort((a, b) => b.donorCount - a.donorCount); break;
+    }
+    return sorted;
+  }, [allCampaigns, search, selectedCategories, selectedRegion, sort]);
 
   // favorites 필터 적용
   const finalItems = useMemo(() => {
@@ -164,7 +204,16 @@ export default function ProjectsPage() {
                 />
               </div>
 
-              {finalItems.length === 0 ? (
+              {loading ? (
+                <Box ta="center" py={80}>
+                  <Loader color="sage" size="lg" />
+                  <Text size="sm" c="var(--bm-text-muted)" mt={16}>Loading projects…</Text>
+                </Box>
+              ) : loadError ? (
+                <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" radius="md">
+                  {loadError}
+                </Alert>
+              ) : finalItems.length === 0 ? (
                 <Box className={classes.emptyState}>
                   <Text size="xl" fw={700} c="var(--bm-text-dark)" mb={8}>
                     No results found

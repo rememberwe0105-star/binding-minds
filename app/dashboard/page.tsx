@@ -597,7 +597,8 @@ function DonationHistoryTab() {
     if (statusFilter) {
       result = result.filter((d) => {
         if (statusFilter === 'completed') return d.donation_status === 'succeeded';
-        if (statusFilter === 'pending') return d.donation_status === 'checkout_created';
+        if (statusFilter === 'pending') return d.donation_status === 'checkout_created' || d.donation_status === 'pending';
+        if (statusFilter === 'failed') return d.donation_status === 'failed' || d.donation_status === 'disputed';
         if (statusFilter === 'refunded') return d.donation_status === 'refunded';
         return true;
       });
@@ -622,6 +623,7 @@ function DonationHistoryTab() {
           data={[
             { value: 'completed', label: '✅ Completed' },
             { value: 'pending', label: '⏳ Pending' },
+            { value: 'failed', label: '⚠️ Failed' },
             { value: 'refunded', label: '↩️ Refunded' },
           ]}
           value={statusFilter}

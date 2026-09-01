@@ -30,7 +30,7 @@ import {
   IconEyeOff,
   IconMail,
 } from '@tabler/icons-react';
-import type { Campaign } from '@/data/campaigns';
+import type { AdaptedProject } from '@/lib/adapters';
 import { createCheckoutSession, createGuestCheckoutSession, BackendPendingError } from '@/lib/api';
 import { useAuth } from '@/contexts/AuthContext';
 import { BackendPendingDialog } from './BackendPendingDialog';
@@ -42,7 +42,7 @@ import classes from './DonationCheckoutModal.module.css';
 interface DonationCheckoutModalProps {
   opened: boolean;
   onClose: () => void;
-  campaign: Campaign;
+  campaign: AdaptedProject;
   frequency?: 'one-time' | 'monthly';
   /** 상세 페이지에서 미리 선택한 금액 — 모달이 열릴 때 동기화된다 */
   initialAmount?: string;
@@ -161,14 +161,21 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
     setApiError(null);
 
     try {
-      // 백엔드 API: amount는 기부 원금(달러 단위, 소수점 가능). 수수료는 백엔드가 계산.
-      const charityAccountId = campaign.stripeAccountId ?? 'acct_1TLekBRHr11OamkF';
+      // FE-008: 폴백 계정 제거 — API 응답의 결제 계정만 사용. 없으면 결제 불가.
+      const charityAccountId = campaign.stripeAccountId;
+      if (!charityAccountId) {
+        setApiError('This organisation is not able to receive donations yet (payment setup pending).');
+        setIsLoading(false);
+        return;
+      }
 
       const payload = {
         amount,
         currency: currency as 'NZD' | 'AUD' | 'USD',
         charityAccountId,
         charityName: campaign.name,
+        // FE-008: 프로젝트 페이지 기부는 projectId 포함 (캠페인 모금액 집계용)
+        projectId: campaign.backendProjectId > 0 ? campaign.backendProjectId : undefined,
         recurring: frequency === 'monthly',
         anonymous,
         donorType,

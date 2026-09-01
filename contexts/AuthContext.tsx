@@ -83,6 +83,8 @@ interface AuthContextType {
   /** 사용자 역할 (데모 역할 우선, 실제 역할 fallback) */
   userRole: UserRole;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
+  /** FE-002: 서비스 DB 등록 실패 복구 — 다시 등록을 시도한다. 성공 시 true. */
+  retryRegistration: () => Promise<boolean>;
   logIn: (email: string, password: string) => Promise<void>;
   logOut: () => Promise<void>;
   signInWithGoogle: () => Promise<void>;
@@ -144,12 +146,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setServiceUser(regResult.user);
             setIsRegistered(true);
           } else {
-            // 미등록 → Firebase 프로필로 자동 등록
+            // 미등록 → Firebase 프로필로 자동 등록 (FE-001: 실제 표시이름 우선, 이메일 앞부분 폴백은 최후)
             const email = firebaseUser.email ?? regResult.suggestedEmail ?? '';
             const name = firebaseUser.displayName ?? regResult.suggestedName ?? email.split('@')[0];
 
             try {
-              const registerResult = await postRegistration({ email, name });
+              // FE-010: 이메일은 토큰에서 백엔드가 확정 — name만 전달
+              const registerResult = await postRegistration({ name });
               setServiceUser(registerResult.user);
               setIsRegistered(true);
             } catch (registerErr) {
@@ -177,6 +180,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const { createUserWithEmailAndPassword, updateProfile } = await import('firebase/auth');
     const credential = await createUserWithEmailAndPassword(auth, email, password);
     await updateProfile(credential.user, { displayName });
+    // FE-001: onAuthStateChanged 자동 등록은 updateProfile 이전에 실행되어 displayName이
+    // 아직 비어 있는 레이스가 존재한다(→ 이메일 앞부분이 이름으로 저장됨). 실제 입력 이름으로
+    // 여기서 즉시 등록해 정본을 확정한다. 이미 등록됐다면 백엔드가 멱등 처리/무시한다.
+    try {
+      const registerResult = await postRegistration({ name: displayName });
+      setServiceUser(registerResult.user);
+      setIsRegistered(true);
+    } catch (registerErr) {
+      // 실패해도 onAuthStateChanged 경로에서 재시도된다.
+      console.error('[AuthContext] 회원가입 직후 등록 실패:', registerErr);
+    }
+  };
+
+  // FE-002: 서비스 DB 등록 실패 복구 — 로그인 상태에서 등록을 재시도한다.
+  const retryRegistration = async (): Promise<boolean> => {
+    if (!auth?.currentUser) return false;
+    try {
+      // 이미 등록됐을 수도 있으므로 먼저 조회
+      const regResult = await getRegistration();
+      if (regResult.registered) {
+        setServiceUser(regResult.user);
+        setIsRegistered(true);
+        return true;
+      }
+      const email = auth.currentUser.email ?? regResult.suggestedEmail ?? '';
+      const name = auth.currentUser.displayName ?? regResult.suggestedName ?? email.split('@')[0];
+      const registerResult = await postRegistration({ name });
+      setServiceUser(registerResult.user);
+      setIsRegistered(true);
+      return true;
+    } catch (err) {
+      console.error('[AuthContext] 등록 재시도 실패:', err);
+      setIsRegistered(false);
+      return false;
+    }
   };
 
   // 이메일/비밀번호 로그인
@@ -230,6 +268,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isRegistered,
     userRole,
     signUp,
+    retryRegistration,
     logIn,
     logOut,
     signInWithGoogle,

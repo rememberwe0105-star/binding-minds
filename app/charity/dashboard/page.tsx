@@ -30,7 +30,7 @@ import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthConte
 import { AccountingTab } from '@/components/AccountingTab';
 import { BackendPendingDialog } from '@/components/BackendPendingDialog';
 import { SupporterFundraisersTab } from '@/components/SupporterFundraisers';
-import { campaigns } from '@/data/campaigns';
+import { campaigns, CATEGORIES, REGIONS } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
 import {
@@ -75,8 +75,29 @@ function timeAgo(dateStr: string): string {
   return `${days}d ago`;
 }
 
-const statusColor = (s: string) => s === 'succeeded' ? 'green' : s === 'pending' ? 'orange' : 'red';
-const statusLabel = (s: string) => s === 'succeeded' ? 'Completed' : s === 'pending' ? 'Pending' : 'Refunded';
+// FE-012: 기부 상태 배지 — succeeded/pending/failed/disputed/refunded 정확히 구분
+const statusColor = (s: string) => {
+  switch (s) {
+    case 'succeeded': return 'green';
+    case 'checkout_created':
+    case 'pending': return 'orange';
+    case 'failed': return 'red';
+    case 'disputed': return 'grape';
+    case 'refunded': return 'gray';
+    default: return 'gray';
+  }
+};
+const statusLabel = (s: string) => {
+  switch (s) {
+    case 'succeeded': return 'Completed';
+    case 'checkout_created':
+    case 'pending': return 'Pending';
+    case 'failed': return 'Failed';
+    case 'disputed': return 'Disputed';
+    case 'refunded': return 'Refunded';
+    default: return s;
+  }
+};
 const projectStatusColor = (s: string) => s === 'active' ? 'green' : s === 'completed' ? 'blue' : s === 'draft' ? 'gray' : 'red';
 
 const PIE_COLORS = ['#e67e5e', '#8eb897', '#4b6bfb', '#f9c74f'];
@@ -327,6 +348,7 @@ function DonationsTab({ charityId }: { charityId: number }) {
           data={[
             { value: 'succeeded', label: '✅ Completed' },
             { value: 'pending', label: '⏳ Pending' },
+            { value: 'failed', label: '⚠️ Failed' },
             { value: 'refunded', label: '↩️ Refunded' },
           ]}
           value={filter}
@@ -715,9 +737,14 @@ function ProfileTab({ charityId }: { charityId: number }) {
   const [displayName, setDisplayName] = useState('');
   const [description, setDescription] = useState('');
   const [websiteUrl, setWebsiteUrl] = useState('');
+  const [category, setCategory] = useState<string | null>(null);
+  const [region, setRegion] = useState<string | null>(null);
+  const [contactName, setContactName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadWarning, setUploadWarning] = useState<string | null>(null);
 
   // Image uploads
   const [logo, setLogo] = useState<UploadedFile | null>(null);
@@ -728,12 +755,18 @@ function ProfileTab({ charityId }: { charityId: number }) {
   const handleSave = async () => {
     setSaving(true);
     setError(null);
+    setUploadWarning(null);
+    const uploadFailures: string[] = [];
     try {
-      // 1. Save text profile fields
+      // 1. Save text profile fields (FE-011: 9개 필드까지 확장)
       const updates: CharityProfileUpdate = {};
       if (displayName) updates.display_name = displayName;
       if (description) updates.description = description;
       if (websiteUrl) updates.website_url = websiteUrl;
+      if (category) updates.category = category;
+      if (region) updates.region = region;
+      if (contactName) updates.contact_name = contactName;
+      if (contactPhone) updates.contact_phone = contactPhone;
       await updateCharityProfile(charityId, updates);
 
       // 2. Upload logo if changed
@@ -741,7 +774,8 @@ function ProfileTab({ charityId }: { charityId: number }) {
         try {
           await uploadCharityLogo(charityId, logo.file);
         } catch (uploadErr) {
-          console.warn('Logo upload not yet supported by backend:', uploadErr);
+          console.error('Logo upload failed:', uploadErr);
+          uploadFailures.push('logo');
         }
       }
 
@@ -750,7 +784,8 @@ function ProfileTab({ charityId }: { charityId: number }) {
         try {
           await uploadCharityBanner(charityId, banner.file);
         } catch (uploadErr) {
-          console.warn('Banner upload not yet supported by backend:', uploadErr);
+          console.error('Banner upload failed:', uploadErr);
+          uploadFailures.push('banner');
         }
       }
 
@@ -765,7 +800,8 @@ function ProfileTab({ charityId }: { charityId: number }) {
             Math.max(primaryIdx, 0),
           );
         } catch (uploadErr) {
-          console.warn('Gallery upload not yet supported by backend:', uploadErr);
+          console.error('Gallery upload failed:', uploadErr);
+          uploadFailures.push('gallery images');
         }
       }
 
@@ -775,8 +811,15 @@ function ProfileTab({ charityId }: { charityId: number }) {
         try {
           await uploadCharityDocument(charityId, doc.file, 'other', doc.name);
         } catch (uploadErr) {
-          console.warn('Document upload not yet supported by backend:', uploadErr);
+          console.error('Document upload failed:', uploadErr);
+          uploadFailures.push(`document “${doc.name}”`);
         }
+      }
+
+      if (uploadFailures.length > 0) {
+        setUploadWarning(
+          `Profile text was saved, but these uploads failed: ${uploadFailures.join(', ')}. Please try uploading them again.`,
+        );
       }
 
       setSaved(true);
@@ -830,6 +873,10 @@ function ProfileTab({ charityId }: { charityId: number }) {
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={16}>
           <TextInput label="Display Name" value={displayName} onChange={e => setDisplayName(e.currentTarget.value)} radius="md" placeholder="Enter display name" />
           <TextInput label="Website" value={websiteUrl} onChange={e => setWebsiteUrl(e.currentTarget.value)} radius="md" leftSection={<IconWorld size={14} />} placeholder="https://..." />
+          <Select label="Category" value={category} onChange={setCategory} data={CATEGORIES} radius="md" placeholder="Select a category" clearable searchable />
+          <Select label="Region" value={region} onChange={setRegion} data={REGIONS} radius="md" placeholder="Select a region" leftSection={<IconMapPin size={14} />} clearable searchable />
+          <TextInput label="Contact Name" value={contactName} onChange={e => setContactName(e.currentTarget.value)} radius="md" leftSection={<IconUsers size={14} />} placeholder="Primary contact person" />
+          <TextInput label="Contact Phone" value={contactPhone} onChange={e => setContactPhone(e.currentTarget.value)} radius="md" leftSection={<IconPhone size={14} />} placeholder="e.g. 09 123 4567" />
         </SimpleGrid>
         <Textarea label="Description" value={description} onChange={e => setDescription(e.currentTarget.value)} radius="md" mt={16} autosize minRows={3} placeholder="Tell donors about your organisation..." />
       </Card>
@@ -862,6 +909,9 @@ function ProfileTab({ charityId }: { charityId: number }) {
 
       {error && (
         <Alert icon={<IconAlertCircle size={14} />} color="red" variant="light" radius="md">{error}</Alert>
+      )}
+      {uploadWarning && (
+        <Alert icon={<IconAlertCircle size={14} />} color="orange" variant="light" radius="md">{uploadWarning}</Alert>
       )}
 
       <Group justify="flex-end">

@@ -174,6 +174,14 @@ export interface CharityProfileUpdate {
   display_name?: string;
   description?: string;
   website_url?: string;
+  category?: string;
+  region?: string;
+  contact_name?: string;
+  contact_phone?: string;
+  /** FE-011: 이미지 URL은 업로드 엔드포인트(uploadCharityLogo/Banner)로만 설정한다.
+   *  이 PATCH에서는 null(제거)만 허용 — 임의 URL 주입을 막기 위함. */
+  logo_url?: null;
+  banner_url?: null;
 }
 
 /** 캠페인/프로젝트 아이템 */
@@ -757,12 +765,16 @@ export async function getRegistration(): Promise<RegistrationResponse> {
  * @see API_FOR_FRONTEND_DEVELOPERS.md §5.2
  */
 export async function postRegistration(data: {
-  email: string;
+  /** FE-010: 이메일은 Firebase ID 토큰에서 백엔드가 확정 — 클라이언트 body에 넣지 않는다.
+   *  (레거시 백엔드 호환용으로 선택적으로 전달 가능하나, name만 보내는 것이 정본) */
   name: string;
+  email?: string;
 }): Promise<RegistrationResult> {
+  const body: { name: string; email?: string } = { name: data.name };
+  if (data.email) body.email = data.email;
   return apiFetch<RegistrationResult>('/api/v1/me/registration', {
     method: 'POST',
-    body: JSON.stringify(data),
+    body: JSON.stringify(body),
   });
 }
 
@@ -782,6 +794,8 @@ export interface CheckoutParams {
   /** 기부 주체 — 회사(organization) 기부 시 영수증을 회사 명의로 발급 (백엔드 v8.0 요청) */
   donorType?: 'individual' | 'organization';
   organizationName?: string;
+  /** 프로젝트(캠페인) 기부 시 백엔드 프로젝트 ID — 캠페인 모금액 집계용 (FE-008) */
+  projectId?: number;
 }
 
 export async function createCheckoutSession(data: CheckoutParams): Promise<CheckoutSession> {
@@ -1793,4 +1807,116 @@ export async function getReceiptDownloadUrl(
   } catch {
     return null;
   }
+}
+
+// ===========================================================================
+// 공개 단체/프로젝트 API (FE-004 / FE-009) — 백엔드 실데이터
+// 목업(data/*.ts) 대신 이 함수들로 화면 데이터를 가져온다.
+// slug 는 응답 값을 그대로 사용한다 (프론트에서 생성 금지).
+// ===========================================================================
+
+/** 이미지 등 미디어 상대경로(/uploads/...)에 백엔드 오리진(프록시)을 붙인다 */
+export function mediaUrl(path?: string | null): string | null {
+  if (!path) return null;
+  if (/^https?:\/\//i.test(path)) return path;
+  return `${API_BASE_URL}${path.startsWith('/') ? '' : '/'}${path}`;
+}
+
+export interface ApiCharityListItem {
+  id: number;
+  display_name: string;
+  slug: string;
+  description: string | null;
+  logo_url: string | null;
+  banner_url: string | null;
+  category: string | null;
+  region: string | null;
+  website_url: string | null;
+  registration_no: string | null;
+  plan: string | null;
+  claim_status: 'unclaimed' | 'claimed' | 'partnered' | string;
+  profile_updated_at: string | null;
+  created_at: string | null;
+  stripe_account_id?: string | null;
+}
+
+export interface ApiProjectCharity {
+  id: number;
+  display_name: string;
+  slug: string;
+  category: string | null;
+  region: string | null;
+  logo_url: string | null;
+  stripe_account_id: string | null;
+}
+
+export interface ApiProjectListItem {
+  id: number;
+  title: string;
+  slug: string;
+  description: string | null;
+  goal_amount_minor: number;
+  current_amount_minor: number;
+  currency_code: string;
+  start_date: string | null;
+  end_date: string | null;
+  donor_count: number;
+  charity: ApiProjectCharity;
+}
+
+export interface ApiCharitiesPage {
+  page: number;
+  pageSize: number;
+  total: number;
+  items: ApiCharityListItem[];
+}
+
+export interface ApiProjectsPage {
+  page: number;
+  pageSize: number;
+  total: number;
+  items: ApiProjectListItem[];
+}
+
+/** 단체 상세 — 응답에 projects[] 포함 */
+export interface ApiCharityDetail extends ApiCharityListItem {
+  contact_name?: string | null;
+  contact_phone?: string | null;
+  projects?: ApiProjectListItem[];
+}
+
+/** GET /charities — 단체 목록 (FE-004) */
+export async function getCharities(
+  params: { page?: number; pageSize?: number; sort?: string; category?: string; search?: string } = {},
+): Promise<ApiCharitiesPage> {
+  const q = new URLSearchParams();
+  q.set('page', String(params.page ?? 1));
+  q.set('pageSize', String(params.pageSize ?? 100));
+  if (params.sort) q.set('sort', params.sort);
+  if (params.category) q.set('category', params.category);
+  if (params.search) q.set('search', params.search);
+  return publicFetch<ApiCharitiesPage>(`/api/v1/charities?${q.toString()}`);
+}
+
+/** GET /charities/:slug — 단체 상세 (FE-004) */
+export async function getCharityBySlug(slug: string): Promise<ApiCharityDetail> {
+  return publicFetch<ApiCharityDetail>(`/api/v1/charities/${encodeURIComponent(slug)}`);
+}
+
+/** GET /projects — 프로젝트 목록 (FE-009) */
+export async function getPublicProjects(
+  params: { page?: number; pageSize?: number; category?: string; region?: string; search?: string } = {},
+): Promise<ApiProjectsPage> {
+  const q = new URLSearchParams();
+  q.set('page', String(params.page ?? 1));
+  q.set('pageSize', String(params.pageSize ?? 100));
+  if (params.category) q.set('category', params.category);
+  if (params.region) q.set('region', params.region);
+  if (params.search) q.set('search', params.search);
+  return publicFetch<ApiProjectsPage>(`/api/v1/projects?${q.toString()}`);
+}
+
+/** GET /projects/:slug — 프로젝트 상세 (FE-009) */
+export async function getProjectBySlug(slug: string): Promise<ApiProjectListItem> {
+  return publicFetch<ApiProjectListItem>(`/api/v1/projects/${encodeURIComponent(slug)}`);
 }

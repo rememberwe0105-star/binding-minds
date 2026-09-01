@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import { useDisclosure } from '@mantine/hooks';
 import {
   Container,
@@ -14,6 +14,7 @@ import {
   SimpleGrid,
   SegmentedControl,
   TextInput,
+  Loader,
 } from '@mantine/core';
 import {
   IconArrowLeft,
@@ -31,13 +32,9 @@ import { CampaignCard } from '@/components/CampaignCard';
 import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ShareButton } from '@/components/ShareButton';
 import { SupporterFundraisersSection } from '@/components/SupporterFundraisers';
-import { ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
-import {
-  getCampaignBySlug,
-  getRelatedCampaigns,
-  getProgress,
-  formatCurrency,
-} from '@/data/campaigns';
+import { formatCurrency } from '@/data/campaigns';
+import { getProjectBySlug, getPublicProjects } from '@/lib/api';
+import { adaptProject, type AdaptedProject } from '@/lib/adapters';
 import classes from './page.module.css';
 
 // Next.js App Router에서 동적 경로 파라미터
@@ -47,14 +44,55 @@ interface CampaignDetailPageProps {
 
 export default function CampaignDetailPage({ params }: CampaignDetailPageProps) {
   const { slug } = use(params);
-  const campaign = getCampaignBySlug(slug);
   const [donationAmount, setDonationAmount] = useState('50');
   const [customAmount, setCustomAmount] = useState('');
   const [frequency, setFrequency] = useState<'one-time' | 'monthly'>('one-time');
   const [modalOpened, { open: openModal, close: closeModal }] = useDisclosure(false);
 
-  // 캠페인이 없으면 404
-  if (!campaign) {
+  // 백엔드 실데이터 (FE-009) — GET /projects/:slug
+  const [campaign, setCampaign] = useState<AdaptedProject | null>(null);
+  const [relatedCampaigns, setRelatedCampaigns] = useState<AdaptedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getProjectBySlug(slug)
+      .then((res) => {
+        if (cancelled) return;
+        const adapted = adaptProject(res);
+        setCampaign(adapted);
+        // 관련 프로젝트: 같은 카테고리 우선, 자기 제외 최대 3개
+        getPublicProjects({ pageSize: 24 })
+          .then((all) => {
+            if (cancelled) return;
+            const others = all.items
+              .map(adaptProject)
+              .filter((p) => p.slug !== adapted.slug);
+            const sameCat = others.filter((p) => p.category === adapted.category);
+            setRelatedCampaigns([...sameCat, ...others.filter((p) => p.category !== adapted.category)].slice(0, 3));
+          })
+          .catch(() => { /* 관련 없음 */ });
+      })
+      .catch(() => { if (!cancelled) setFailed(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className={classes.page}>
+          <Box ta="center" py={120}><Loader color="sage" size="lg" /></Box>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  // 프로젝트가 없으면 404
+  if (failed || !campaign) {
     return (
       <>
         <Header />
@@ -72,8 +110,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
     );
   }
 
-  const progress = getProgress(campaign);
-  const relatedCampaigns = getRelatedCampaigns(campaign, 3);
+  const progress = campaign.goal > 0 ? Math.round((campaign.raised / campaign.goal) * 100) : 0;
 
   // 실제 기부 금액 (프리셋 또는 커스텀)
   const actualAmount = donationAmount === 'custom' ? customAmount : donationAmount;
@@ -135,11 +172,11 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                     <Text size="sm" c="var(--bm-text-muted)">{campaign.region}</Text>
                   </Group>
                   {/* 주관 기관 프로필로 이동 — 플랫폼 안에서 기관 탐색 유도 */}
-                  {ORGANIZER_TO_ORG_SLUG[campaign.organizer] ? (
+                  {campaign.charitySlug ? (
                     <Text size="sm" c="dimmed">
                       by{' '}
                       <Link
-                        href={`/charities/${ORGANIZER_TO_ORG_SLUG[campaign.organizer]}`}
+                        href={`/charities/${campaign.charitySlug}`}
                         style={{
                           color: 'var(--bm-sage-dark)',
                           fontWeight: 700,
@@ -297,6 +334,7 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   radius="xl"
                   className={classes.donateBtn}
                   onClick={openModal}
+                  disabled={!campaign.stripeAccountId}
                 >
                   Donate {actualAmount ? `$${actualAmount}` : ''} {frequency === 'monthly' ? 'Monthly' : 'Now'}
                 </Button>
@@ -305,18 +343,24 @@ export default function CampaignDetailPage({ params }: CampaignDetailPageProps) 
                   <ShareButton fullWidth size="md" label="Share this campaign" />
                 </Box>
 
-                <Text ta="center" size="xs" c="dimmed" mt={8}>
-                  🔒 Secure payment via Stripe
-                </Text>
+                {campaign.stripeAccountId ? (
+                  <Text ta="center" size="xs" c="dimmed" mt={8}>
+                    🔒 Secure payment via Stripe
+                  </Text>
+                ) : (
+                  <Text ta="center" size="xs" c="dimmed" mt={8}>
+                    This organisation is completing its payment setup — donations open soon.
+                  </Text>
+                )}
               </div>
             </div>
           </div>
 
-          {/* P2P 서포터 펀드레이저 — Growth(티어 보유) 데모 캠페인만 (update 5) */}
-          {campaign.donationTiers && ORGANIZER_TO_ORG_SLUG[campaign.organizer] && (
+          {/* P2P 서포터 펀드레이저 — 주최 단체가 연결된 프로젝트에 노출 (update 5) */}
+          {campaign.charitySlug && (
             <SupporterFundraisersSection
               charityName={campaign.organizer}
-              charitySlug={ORGANIZER_TO_ORG_SLUG[campaign.organizer]}
+              charitySlug={campaign.charitySlug}
               projectName={campaign.name}
               projectSlug={campaign.slug}
             />

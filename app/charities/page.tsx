@@ -1,16 +1,18 @@
 'use client';
 
-import { useState, useMemo } from 'react';
-import { Container, Title, Text, SimpleGrid, Button, Box } from '@mantine/core';
+import { useState, useMemo, useEffect } from 'react';
+import { Container, Title, Text, SimpleGrid, Button, Box, Loader, Alert } from '@mantine/core';
 
-import { IconArrowDown } from '@tabler/icons-react';
+import { IconArrowDown, IconAlertCircle } from '@tabler/icons-react';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { OrganizationCard } from '@/components/OrganizationCard';
 import { CharityFilters } from '@/components/CharityFilters';
 import { RichSearchInput } from '@/components/RichSearchInput';
-import { organizations as allOrganizations, filterOrganizations } from '@/data/organizations';
+import { type Organization } from '@/data/organizations';
 import { type Region } from '@/data/campaigns';
+import { getCharities } from '@/lib/api';
+import { adaptCharity } from '@/lib/adapters';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { fraunces } from '@/lib/fonts';
 import classes from './page.module.css';
@@ -30,14 +32,47 @@ export default function CharitiesPage() {
   // 페이지네이션 상태
   const [visibleCount, setVisibleCount] = useState(ITEMS_PER_PAGE);
 
-  // 필터링된 Organizations
+  // 백엔드 실데이터 (FE-004) — 목업 대신 GET /charities
+  const [allOrganizations, setAllOrganizations] = useState<Organization[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCharities({ pageSize: 200 })
+      .then((res) => {
+        if (cancelled) return;
+        setAllOrganizations(res.items.map(adaptCharity));
+        setLoadError(null);
+      })
+      .catch((e: unknown) => {
+        if (cancelled) return;
+        setLoadError(e instanceof Error ? e.message : 'Failed to load charities.');
+      })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  // 필터링된 Organizations (클라이언트 필터 — 로드된 실데이터 대상)
   const filteredOrgs = useMemo(() => {
-    return filterOrganizations({
-      search,
-      categories: selectedCategories,
-      region: selectedRegion,
-    });
-  }, [search, selectedCategories, selectedRegion]);
+    let result = allOrganizations;
+    if (search) {
+      const q = search.toLowerCase();
+      result = result.filter(
+        (o) =>
+          o.name.toLowerCase().includes(q) ||
+          o.mission.toLowerCase().includes(q) ||
+          o.charityNumber.toLowerCase().includes(q),
+      );
+    }
+    if (selectedCategories.length > 0) {
+      result = result.filter((o) => selectedCategories.includes(o.category));
+    }
+    if (selectedRegion) {
+      result = result.filter((o) => o.region === selectedRegion);
+    }
+    return result;
+  }, [allOrganizations, search, selectedCategories, selectedRegion]);
 
   // favorites 필터 + 정렬 적용
   const finalItems = useMemo(() => {
@@ -174,7 +209,16 @@ export default function CharitiesPage() {
                 />
               </div>
 
-              {finalItems.length === 0 ? (
+              {loading ? (
+                <Box ta="center" py={80}>
+                  <Loader color="sage" size="lg" />
+                  <Text size="sm" c="var(--bm-text-muted)" mt={16}>Loading charities…</Text>
+                </Box>
+              ) : loadError ? (
+                <Alert icon={<IconAlertCircle size={16} />} color="red" variant="light" radius="md">
+                  {loadError}
+                </Alert>
+              ) : finalItems.length === 0 ? (
                 <Box className={classes.emptyState}>
                   <Text size="xl" fw={700} c="var(--bm-text-dark)" mb={8}>
                     No results found

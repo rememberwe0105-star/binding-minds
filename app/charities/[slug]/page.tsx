@@ -1,6 +1,6 @@
 'use client';
 
-import { use, useState } from 'react';
+import { use, useState, useEffect } from 'react';
 import {
   Container,
   Title,
@@ -12,6 +12,7 @@ import {
   Button,
   ThemeIcon,
   Divider,
+  Loader,
   Title as MantineTitle,
 } from '@mantine/core';
 import {
@@ -36,31 +37,36 @@ import { DonationCheckoutModal } from '@/components/DonationCheckoutModal';
 import { ClaimProfileBanner } from '@/components/ClaimProfileBanner';
 import { ShareButton } from '@/components/ShareButton';
 import { SupporterFundraisersSection } from '@/components/SupporterFundraisers';
-import { getOrganizationBySlug, ORGANIZER_TO_ORG_SLUG } from '@/data/organizations';
-import { campaigns, formatCurrency } from '@/data/campaigns';
-import type { Campaign } from '@/data/campaigns';
+import { formatCurrency } from '@/data/campaigns';
+import type { Organization } from '@/data/organizations';
+import { getCharityBySlug, type ApiCharityDetail } from '@/lib/api';
+import { adaptCharity, adaptProject, type AdaptedProject } from '@/lib/adapters';
 import classes from './page.module.css';
 
-// Organization → "fake" Campaign 변환 (기부 모달 호환용 — partnered 기관 전용)
-function orgToCampaign(org: ReturnType<typeof getOrganizationBySlug>): Campaign {
+// 기관 직접 기부용 "fake" Campaign (기부 모달 호환) — stripe 계정 값 포함
+function orgToCampaign(org: Organization, stripeAccountId?: string | null): AdaptedProject {
   return {
-    id: org!.id,
-    name: org!.name,
-    slug: `org/${org!.slug}`,
-    category: org!.category,
-    region: org!.region,
-    description: org!.mission,
-    longDescription: org!.description,
-    image: org!.image,
-    raised: org!.totalRaised,
+    id: org.id,
+    name: org.name,
+    slug: `org/${org.slug}`,
+    category: org.category,
+    region: org.region,
+    description: org.mission,
+    longDescription: org.description,
+    image: org.image,
+    raised: org.totalRaised,
     goal: 0, // 기관 직접 기부는 목표 없음
-    donorCount: org!.donorCount,
+    donorCount: org.donorCount,
     daysLeft: 0, // 상시 열려있음
-    organizer: org!.name,
-    verified: org!.verified,
+    organizer: org.name,
+    verified: org.verified,
     featured: false,
     trending: false,
     createdAt: '',
+    stripeAccountId: stripeAccountId ?? undefined,
+    backendProjectId: 0,
+    charitySlug: org.slug,
+    charityId: Number(org.id) || 0,
   };
 }
 
@@ -70,22 +76,49 @@ export default function OrganizationDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
-  const org = getOrganizationBySlug(slug);
   const [donationOpened, setDonationOpened] = useState(false);
 
-  if (!org) {
+  // 백엔드 실데이터 (FE-004) — GET /charities/:slug (projects[] 포함)
+  const [org, setOrg] = useState<Organization | null>(null);
+  const [detail, setDetail] = useState<ApiCharityDetail | null>(null);
+  const [orgCampaigns, setOrgCampaigns] = useState<AdaptedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCharityBySlug(slug)
+      .then((res) => {
+        if (cancelled) return;
+        setDetail(res);
+        setOrg(adaptCharity(res));
+        setOrgCampaigns((res.projects ?? []).map(adaptProject));
+      })
+      .catch(() => { if (!cancelled) setFailed(true); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <>
+        <Header />
+        <main className={classes.page}>
+          <Box ta="center" py={120}>
+            <Loader color="sage" size="lg" />
+          </Box>
+        </main>
+        <Footer />
+      </>
+    );
+  }
+
+  if (failed || !org) {
     notFound();
   }
 
   const isPartnered = org.status === 'partnered';
-
-  // 이 기관의 캠페인 찾기
-  const orgCampaigns = campaigns.filter((c) => {
-    const mappedSlug = ORGANIZER_TO_ORG_SLUG[c.organizer];
-    return mappedSlug === org.slug;
-  });
-
-  const fakeCampaign = orgToCampaign(org);
+  const fakeCampaign = orgToCampaign(org, detail?.stripe_account_id);
 
   return (
     <>
@@ -141,8 +174,9 @@ export default function OrganizationDetailPage({
                   leftSection={<IconHeart size={18} />}
                   onClick={() => setDonationOpened(true)}
                   className={classes.donateBtn}
+                  disabled={!fakeCampaign.stripeAccountId}
                 >
-                  Donate to {org.name}
+                  {fakeCampaign.stripeAccountId ? `Donate to ${org.name}` : 'Donations opening soon'}
                 </Button>
               ) : (
                 <Button
@@ -233,9 +267,9 @@ export default function OrganizationDetailPage({
                   <IconCalendar size={20} />
                 </ThemeIcon>
                 <Text size="xl" fw={800} mt={8} c="var(--bm-text-dark)">
-                  {org.yearFounded}
+                  {org.region}
                 </Text>
-                <Text size="xs" c="dimmed">Established</Text>
+                <Text size="xs" c="dimmed">Region</Text>
               </div>
             </SimpleGrid>
           )}
@@ -257,9 +291,9 @@ export default function OrganizationDetailPage({
                   <IconCalendar size={20} />
                 </ThemeIcon>
                 <Text size="md" fw={700} mt={8} c="var(--bm-text-dark)">
-                  {org.yearFounded}
+                  {org.category}
                 </Text>
-                <Text size="xs" c="dimmed">Established</Text>
+                <Text size="xs" c="dimmed">Category</Text>
               </div>
               <div className={classes.statCard}>
                 <ThemeIcon size={40} radius="xl" color="blue" variant="light">

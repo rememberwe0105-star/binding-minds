@@ -8,6 +8,7 @@ import { theme } from '../theme';
 const inter = Inter({ subsets: ['latin'] });
 import { AuthProvider } from '@/contexts/AuthContext';
 import { FavoritesProvider } from '@/contexts/FavoritesContext';
+import { RegistrationRecoveryBanner } from '@/components/RegistrationRecoveryBanner';
 
 export const metadata: Metadata = {
   title: 'Dear Giver — Every Giver Matters',
@@ -61,6 +62,7 @@ export default function RootLayout({
           <AuthProvider>
             <FavoritesProvider>
               {children}
+              <RegistrationRecoveryBanner />
             </FavoritesProvider>
           </AuthProvider>
         </MantineProvider>

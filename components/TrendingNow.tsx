@@ -1,19 +1,44 @@
 'use client';
 
-import { useRef } from 'react';
-import { Container, Text, Group, Card, Progress, Box, ActionIcon } from '@mantine/core';
+import { useRef, useEffect, useState } from 'react';
+import { Container, Text, Group, Card, Progress, Box, ActionIcon, Loader } from '@mantine/core';
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useScrollReveal } from '@/hooks/useScrollReveal';
-import { getTrendingCampaigns, getProgress } from '@/data/campaigns';
+import { getPublicProjects } from '@/lib/api';
+import { adaptProject, type AdaptedProject } from '@/lib/adapters';
 import classes from './TrendingNow.module.css';
-
-const trendingCampaigns = getTrendingCampaigns();
 
 export function TrendingNow() {
   const scrollRef = useRef<HTMLDivElement>(null);
   const { ref: sectionRef, isVisible } = useScrollReveal<HTMLElement>();
+
+  // 백엔드 실데이터 (FE-009) — 모금액 높은 순 상위 노출
+  const [trendingCampaigns, setTrendingCampaigns] = useState<AdaptedProject[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    getPublicProjects({ pageSize: 24 })
+      .then((res) => {
+        if (cancelled) return;
+        const items = res.items
+          .map(adaptProject)
+          .sort((a, b) => {
+            const pa = a.goal > 0 ? a.raised / a.goal : 0;
+            const pb = b.goal > 0 ? b.raised / b.goal : 0;
+            return pb - pa;
+          })
+          .slice(0, 8);
+        setTrendingCampaigns(items);
+      })
+      .catch(() => { /* 홈 섹션 — 실패 시 조용히 */ })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!loading && trendingCampaigns.length === 0) return null;
 
   const scroll = (direction: 'left' | 'right') => {
     if (scrollRef.current) {
@@ -68,9 +93,12 @@ export function TrendingNow() {
           </Group>
         </Group>
 
+        {loading ? (
+          <Box ta="center" py={30}><Loader color="sage" size="md" /></Box>
+        ) : (
         <div className={classes.scrollContainer} ref={scrollRef}>
           {trendingCampaigns.map((campaign) => {
-            const progress = getProgress(campaign);
+            const progress = campaign.goal > 0 ? Math.round((campaign.raised / campaign.goal) * 100) : 0;
             return (
             <Link key={campaign.id} href={`/projects/${campaign.slug}`} style={{ textDecoration: 'none' }}>
             <Card
@@ -106,6 +134,7 @@ export function TrendingNow() {
             );
           })}
         </div>
+        )}
       </Container>
     </section>
   );
