@@ -760,6 +760,8 @@ function ProfileTab({ charityId }: { charityId: number }) {
     const uploadFailures: string[] = [];
     try {
       // 1. Save text profile fields (FE-011: 9개 필드까지 확장)
+      //    변경된 텍스트 필드가 하나도 없으면 PATCH를 보내지 않는다.
+      //    (빈 body는 백엔드가 "수정할 필드 없음"으로 거부 → 이미지만 올릴 때 막히던 버그 수정)
       const updates: CharityProfileUpdate = {};
       if (displayName) updates.display_name = displayName;
       if (description) updates.description = description;
@@ -768,7 +770,18 @@ function ProfileTab({ charityId }: { charityId: number }) {
       if (region) updates.region = region;
       if (contactName) updates.contact_name = contactName;
       if (contactPhone) updates.contact_phone = contactPhone;
-      await updateCharityProfile(charityId, updates);
+      const hasFileToUpload =
+        !!logo?.file || !!banner?.file ||
+        galleryImages.some((img) => img.file !== null) ||
+        documents.some((doc) => doc.file);
+      if (Object.keys(updates).length > 0) {
+        await updateCharityProfile(charityId, updates);
+      } else if (!hasFileToUpload) {
+        // 텍스트 변경도, 업로드할 파일도 없음
+        setError('수정할 필드를 하나 이상 지정하거나 이미지를 선택하세요.');
+        setSaving(false);
+        return;
+      }
 
       // 2. Upload logo if changed
       if (logo?.file) {
