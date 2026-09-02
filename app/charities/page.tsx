@@ -11,7 +11,7 @@ import { CharityFilters } from '@/components/CharityFilters';
 import { RichSearchInput } from '@/components/RichSearchInput';
 import { type Organization } from '@/data/organizations';
 import { type Region } from '@/data/campaigns';
-import { getCharities } from '@/lib/api';
+import { getAllCharities } from '@/lib/api';
 import { adaptCharity } from '@/lib/adapters';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { fraunces } from '@/lib/fonts';
@@ -39,10 +39,10 @@ export default function CharitiesPage() {
 
   useEffect(() => {
     let cancelled = false;
-    getCharities({ pageSize: 200 })
-      .then((res) => {
+    getAllCharities()
+      .then((items) => {
         if (cancelled) return;
-        setAllOrganizations(res.items.map(adaptCharity));
+        setAllOrganizations(items.map(adaptCharity));
         setLoadError(null);
       })
       .catch((e: unknown) => {

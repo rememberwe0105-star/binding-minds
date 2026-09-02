@@ -15,7 +15,7 @@ import {
   type Region,
   type SortOption,
 } from '@/data/campaigns';
-import { getPublicProjects } from '@/lib/api';
+import { getAllPublicProjects } from '@/lib/api';
 import { adaptProject, type AdaptedProject } from '@/lib/adapters';
 import { useFavorites } from '@/contexts/FavoritesContext';
 import { fraunces } from '@/lib/fonts';
@@ -41,10 +41,10 @@ export default function ProjectsPage() {
 
   useEffect(() => {
     let cancelled = false;
-    getPublicProjects({ pageSize: 200 })
-      .then((res) => {
+    getAllPublicProjects()
+      .then((items) => {
         if (cancelled) return;
-        setAllCampaigns(res.items.map(adaptProject));
+        setAllCampaigns(items.map(adaptProject));
         setLoadError(null);
       })
       .catch((e: unknown) => {

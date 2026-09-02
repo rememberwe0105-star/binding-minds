@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Modal,
   Card,
@@ -35,7 +35,9 @@ import {
 import {
   createFundraiser,
   updateFundraiserStatus,
+  getPublicFundraisers,
   BackendPendingError,
+  type PublicFundraiser,
 } from '@/lib/api';
 import { BackendPendingDialog } from './BackendPendingDialog';
 
@@ -62,29 +64,6 @@ interface DemoFundraiser {
   goal: number;
   supporters: number;
 }
-
-const DEMO_PUBLIC_FUNDRAISERS: Omit<DemoFundraiser, 'visibility' | 'status'>[] = [
-  {
-    id: 'fr-demo-1',
-    owner: 'Hana W.',
-    title: "Hana's 40th Birthday — trees instead of gifts",
-    level: 'project',
-    target: '',
-    raised: 640,
-    goal: 1000,
-    supporters: 18,
-  },
-  {
-    id: 'fr-demo-2',
-    owner: 'Te Rōpū Whānau',
-    title: 'Our whānau half-marathon challenge',
-    level: 'organisation',
-    target: '',
-    raised: 1240,
-    goal: 2000,
-    supporters: 32,
-  },
-];
 
 // ============================================================
 // 1) 펀드레이저 생성 모달 — "Start a fundraiser"
@@ -302,6 +281,28 @@ export function SupporterFundraisersSection({
   const [modalOpened, setModalOpened] = useState(false);
   const target = projectName ?? charityName;
 
+  // 실데이터 — 공개(승인된) 서포터 펀드레이저 (FE 3번: 목업 제거)
+  const [fundraisers, setFundraisers] = useState<PublicFundraiser[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!charitySlug) { setLoading(false); return; }
+    getPublicFundraisers(charitySlug)
+      .then((res) => {
+        if (cancelled) return;
+        let items = res.items ?? [];
+        // 프로젝트 상세에서는 해당 프로젝트 대상 펀드레이저만 (백엔드가 필터 안 하면 프론트에서)
+        if (projectSlug) {
+          items = items.filter((f) => !f.level || f.level === 'project');
+        }
+        setFundraisers(items);
+      })
+      .catch(() => { if (!cancelled) setFundraisers([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [charitySlug, projectSlug]);
+
   return (
     <Box mt={48}>
       <Group justify="space-between" mb={6}>
@@ -325,31 +326,41 @@ export function SupporterFundraisersSection({
         organisation before appearing here.
       </Text>
 
-      <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={16}>
-        {DEMO_PUBLIC_FUNDRAISERS.map((f) => (
-          <Card key={f.id} withBorder radius="lg" padding="lg">
-            <Group gap={10} mb={10}>
-              <Avatar radius="xl" color="sage">{f.owner.charAt(0)}</Avatar>
-              <Box style={{ flex: 1 }}>
-                <Text size="sm" fw={700} c="var(--bm-text-dark)" lineClamp={1}>{f.title}</Text>
-                <Text size="xs" c="var(--bm-text-muted)">by {f.owner} · supporting {target}</Text>
-              </Box>
-            </Group>
-            <Progress value={(f.raised / f.goal) * 100} color="sage" size="sm" radius="xl" mb={8} />
-            <Group justify="space-between">
-              <Text size="xs" c="var(--bm-text-muted)">
-                <strong>${f.raised.toLocaleString()}</strong> of ${f.goal.toLocaleString()}
-              </Text>
-              <Text size="xs" c="dimmed">{f.supporters} supporters</Text>
-            </Group>
-          </Card>
-        ))}
-      </SimpleGrid>
-
-      <Text size="xs" c="dimmed" mt={10} fs="italic">
-        Sample fundraisers shown for preview — live supporter fundraisers arrive with
-        the backend integration (요청서 v8.4).
-      </Text>
+      {loading ? (
+        <Text size="sm" c="dimmed" py={8}>Loading supporter fundraisers…</Text>
+      ) : fundraisers.length === 0 ? (
+        <Card withBorder radius="lg" padding="lg" ta="center">
+          <Text size="sm" c="var(--bm-text-muted)">
+            No supporter fundraisers yet — be the first to start one for {target}.
+          </Text>
+        </Card>
+      ) : (
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing={16}>
+          {fundraisers.map((f) => {
+            const raised = Math.round((f.raised_minor ?? 0) / 100);
+            const goal = Math.round((f.goal_minor ?? 0) / 100);
+            const owner = f.owner_name || 'Supporter';
+            return (
+              <Card key={f.id} withBorder radius="lg" padding="lg">
+                <Group gap={10} mb={10}>
+                  <Avatar radius="xl" color="sage">{owner.charAt(0)}</Avatar>
+                  <Box style={{ flex: 1 }}>
+                    <Text size="sm" fw={700} c="var(--bm-text-dark)" lineClamp={1}>{f.title}</Text>
+                    <Text size="xs" c="var(--bm-text-muted)">by {owner} · supporting {f.project_title || target}</Text>
+                  </Box>
+                </Group>
+                <Progress value={goal > 0 ? (raised / goal) * 100 : 0} color="sage" size="sm" radius="xl" mb={8} />
+                <Group justify="space-between">
+                  <Text size="xs" c="var(--bm-text-muted)">
+                    <strong>${raised.toLocaleString()}</strong>{goal > 0 ? ` of $${goal.toLocaleString()}` : ''}
+                  </Text>
+                  <Text size="xs" c="dimmed">{f.supporter_count ?? 0} supporters</Text>
+                </Group>
+              </Card>
+            );
+          })}
+        </SimpleGrid>
+      )}
 
       <FundraiserModal
         opened={modalOpened}

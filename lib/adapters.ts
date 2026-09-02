@@ -13,6 +13,7 @@ import {
   mediaUrl,
   type ApiCharityListItem,
   type ApiProjectListItem,
+  type ApiCharityDetailProject,
 } from '@/lib/api';
 
 const CATEGORY_IMAGE: Record<string, string> = {
@@ -68,6 +69,43 @@ export function adaptCharity(a: ApiCharityListItem): Organization {
     status: (a.claim_status as OrgStatus) ?? 'unclaimed',
     lastUpdated: a.profile_updated_at ?? undefined,
     interestCount: 0,
+  };
+}
+
+/**
+ * 단체 상세의 flat projects[] → AdaptedProject.
+ * 목록 API와 달리 중첩 charity 객체가 없으므로(FE 4번 원인), 카테고리/지역은 flat 필드에서 읽고
+ * 주최 단체 정보(이름/slug/id/Stripe 계정)는 부모 단체에서 주입한다.
+ */
+export function adaptCharityProject(
+  p: ApiCharityDetailProject,
+  org: { name: string; slug: string; id: number },
+  stripeAccountId?: string | null,
+): AdaptedProject {
+  const end = p.end_date ? new Date(p.end_date).getTime() : 0;
+  const daysLeft = end ? Math.max(0, Math.ceil((end - Date.now()) / 86400000)) : 0;
+  return {
+    id: String(p.id),
+    name: p.title,
+    slug: p.slug,
+    category: safeCategory(p.category),
+    region: safeRegion(p.region),
+    description: p.description ?? '',
+    longDescription: p.description ?? '',
+    image: categoryImage(p.category),
+    raised: Math.round((p.current_amount_minor ?? 0) / 100),
+    goal: Math.round((p.goal_amount_minor ?? 0) / 100),
+    donorCount: p.donor_count ?? 0,
+    daysLeft,
+    organizer: org.name,
+    verified: true,
+    featured: false,
+    trending: false,
+    createdAt: p.start_date ?? p.created_at ?? '',
+    stripeAccountId: stripeAccountId ?? undefined,
+    backendProjectId: p.id,
+    charitySlug: org.slug,
+    charityId: org.id,
   };
 }
 

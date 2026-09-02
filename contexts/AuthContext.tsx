@@ -13,6 +13,7 @@ import {
   getRegistration,
   postRegistration,
   type ServiceUser,
+  type ApiMeCharity,
 } from '@/lib/api';
 
 // ---------------------------------------------------------------------------
@@ -80,6 +81,8 @@ interface AuthContextType {
   serviceUser: ServiceUser | null;
   /** 서비스 DB 등록 여부 (로딩 중에는 undefined) */
   isRegistered: boolean | undefined;
+  /** 로그인 사용자의 소속 단체 (charity_admin 만; donor·platform_admin·미소속은 null) — 백엔드 2026-09-01 */
+  serviceCharity: ApiMeCharity | null;
   /** 사용자 역할 (데모 역할 우선, 실제 역할 fallback) */
   userRole: UserRole;
   signUp: (email: string, password: string, displayName: string) => Promise<void>;
@@ -109,6 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(!!isConfigured && !!auth);
   const [serviceUser, setServiceUser] = useState<ServiceUser | null>(null);
   const [isRegistered, setIsRegistered] = useState<boolean | undefined>(undefined);
+  const [serviceCharity, setServiceCharity] = useState<ApiMeCharity | null>(null);
   const [demoRole, setDemoRoleState] = useState<DemoRole>(null);
 
   // 데모 역할 전환
@@ -133,6 +137,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (!firebaseUser) {
           // 로그아웃 시 초기화
           setServiceUser(null);
+          setServiceCharity(null);
           setIsRegistered(undefined);
           setLoading(false);
           return;
@@ -144,6 +149,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
           if (regResult.registered) {
             setServiceUser(regResult.user);
+            setServiceCharity(regResult.charity ?? null); // 소속 단체 (없으면 null)
             setIsRegistered(true);
           } else {
             // 미등록 → Firebase 프로필로 자동 등록 (FE-001: 실제 표시이름 우선, 이메일 앞부분 폴백은 최후)
@@ -201,6 +207,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const regResult = await getRegistration();
       if (regResult.registered) {
         setServiceUser(regResult.user);
+        setServiceCharity(regResult.charity ?? null);
         setIsRegistered(true);
         return true;
       }
@@ -266,6 +273,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isFirebaseConfigured: isConfigured,
     serviceUser,
     isRegistered,
+    serviceCharity,
     userRole,
     signUp,
     retryRegistration,

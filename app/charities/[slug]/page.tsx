@@ -40,7 +40,7 @@ import { SupporterFundraisersSection } from '@/components/SupporterFundraisers';
 import { formatCurrency } from '@/data/campaigns';
 import type { Organization } from '@/data/organizations';
 import { getCharityBySlug, type ApiCharityDetail } from '@/lib/api';
-import { adaptCharity, adaptProject, type AdaptedProject } from '@/lib/adapters';
+import { adaptCharity, adaptCharityProject, type AdaptedProject } from '@/lib/adapters';
 import classes from './page.module.css';
 
 // 기관 직접 기부용 "fake" Campaign (기부 모달 호환) — stripe 계정 값 포함
@@ -92,7 +92,11 @@ export default function OrganizationDetailPage({
         if (cancelled) return;
         setDetail(res);
         setOrg(adaptCharity(res));
-        setOrgCampaigns((res.projects ?? []).map(adaptProject));
+        // 단체 상세의 projects[]는 flat 구조 — 부모 단체 정보 주입해 카테고리/주최명 정상화 (FE 4번)
+        const orgCtx = { name: res.display_name, slug: res.slug, id: res.id };
+        setOrgCampaigns(
+          (res.projects ?? []).map((p) => adaptCharityProject(p, orgCtx, res.stripe_account_id)),
+        );
       })
       .catch(() => { if (!cancelled) setFailed(true); })
       .finally(() => { if (!cancelled) setLoading(false); });

@@ -25,6 +25,7 @@ import {
 
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
+import Link from 'next/link';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthContext';
 import { AccountingTab } from '@/components/AccountingTab';
@@ -1592,32 +1593,58 @@ function DonationTiersSection({ plan }: { plan: CharityPlan }) {
 
 // ===================== Main Dashboard =====================
 function CharityDashboardContent() {
-  const { displayName, serviceUser, userRole, demoRole } = useAuth();
+  const { displayName, serviceCharity, userRole, demoRole } = useAuth();
 
-  // Determine charityId — from serviceUser or demo fallback
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const charityId = (serviceUser as any)?.charity_id as number ?? DEMO_CHARITY_ID;
+  // FE 1번: charityId 하드코딩(3) 제거 — 로그인 사용자의 소속 단체에서 가져온다.
+  //  데모 세션일 때만 데모 단체 ID 로 폴백한다.
+  const charityId = serviceCharity?.id ?? (demoRole ? DEMO_CHARITY_ID : null);
 
   const isCharityRole = userRole === 'charity_admin' || demoRole === 'charity' || demoRole === 'charity_paid';
 
-  // 데모에서만 플랜 구분 — 실제 유저는 백엔드 plan 필드 연동 전까지 전체 기능 유지
-  const plan = demoCharityPlan(demoRole) ?? 'paid';
-  const isFreePlan = plan === 'free';
+  // 플랜: 실계정은 백엔드 is_growth, 데모는 demoRole 기준. Growth(유료)면 전 기능, 무료면 일부 잠금.
+  const isGrowth = demoRole ? demoCharityPlan(demoRole) !== 'free' : !!serviceCharity?.is_growth;
+  const isFreePlan = !isGrowth;
+  const plan: CharityPlan = isFreePlan ? 'free' : 'paid';
+  const orgName = serviceCharity?.display_name ?? null;
   const lockIcon = <IconLock size={12} />;
+
+  // 소속 단체가 없으면(=charity_admin 인데 charity null, 또는 미로딩) 대시보드 데이터를 조회하지 않는다.
+  if (!charityId) {
+    return (
+      <>
+        <Header />
+        <main className={classes.page}>
+          <Container size="sm">
+            <Card padding="xl" radius="lg" withBorder mt={48} ta="center">
+              <Text fw={700} size="lg" c="var(--bm-text-dark)" mb={8}>No organisation linked yet</Text>
+              <Text size="sm" c="var(--bm-text-muted)" mb={16}>
+                Your account isn’t connected to an organisation. If you manage a charity,
+                claim your profile to access the dashboard.
+              </Text>
+              <Button component={Link} href="/charity/apply" color="sage" radius="xl">
+                Claim your profile
+              </Button>
+            </Card>
+          </Container>
+        </main>
+        <Footer />
+      </>
+    );
+  }
 
   return (
     <>
       <Header />
       <main className={classes.page}>
         <Container size="lg">
-          {/* Greeting */}
+          {/* Greeting — 단체명 우선 표시 (FE 2번: charity.display_name) */}
           <Group gap={16} mb={32}>
             <Avatar size={56} radius="xl" color="terracotta">
-              {displayName.charAt(0)}
+              {(orgName ?? displayName).charAt(0)}
             </Avatar>
             <Box>
               <Title order={2} className={classes.greeting}>
-                {displayName}
+                {orgName ?? displayName}
               </Title>
               <Group gap={8} mt={4}>
                 <Badge size="sm" variant="light" className={classes.orgBadge}
@@ -1625,7 +1652,7 @@ function CharityDashboardContent() {
                 >
                   Charity Admin
                 </Badge>
-                {demoCharityPlan(demoRole) && (
+                {(demoCharityPlan(demoRole) || serviceCharity) && (
                   <Badge
                     size="sm"
                     variant={isFreePlan ? 'light' : 'filled'}

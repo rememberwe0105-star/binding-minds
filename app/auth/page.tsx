@@ -14,7 +14,7 @@ import {
   Anchor,
   Alert,
 } from '@mantine/core';
-import { IconLeaf, IconBrandGoogle, IconAlertCircle, IconHeart, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
+import { IconLeaf, IconBrandGoogle, IconAlertCircle } from '@tabler/icons-react';
 import { useRouter } from 'next/navigation';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
@@ -53,7 +53,7 @@ export default function AuthPage() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const { logIn, signUp, signInWithGoogle, isFirebaseConfigured, setDemoRole, isDemoModeEnabled } = useAuth();
+  const { logIn, signUp, signInWithGoogle, isFirebaseConfigured } = useAuth();
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -99,24 +99,6 @@ export default function AuthPage() {
     setMode((prev) => (prev === 'login' ? 'signup' : 'login'));
     setError('');
   };
-
-  // ── Demo Role Simulation (no Firebase, no credentials) ──
-  const handleDemoRole = (role: 'donor' | 'charity' | 'charity_paid' | 'admin') => {
-    setDemoRole(role);
-    switch (role) {
-      case 'donor':
-        router.push('/dashboard');
-        break;
-      case 'charity':
-      case 'charity_paid':
-        router.push('/charity/dashboard');
-        break;
-      case 'admin':
-        router.push('/admin');
-        break;
-    }
-  };
-  // ── END Demo ──
 
   return (
     <>
@@ -266,105 +248,6 @@ export default function AuthPage() {
               </Anchor>
             </Text>
 
-            {/* ── 🧪 Demo Role Simulation (controlled by NEXT_PUBLIC_DEMO_MODE) ── */}
-            {isDemoModeEnabled && (
-              <>
-                <Divider
-                  label="demo environment"
-                  labelPosition="center"
-                  my={20}
-                  color="rgba(143, 151, 121, 0.15)"
-                  style={{ borderStyle: 'dashed' }}
-                />
-
-                <Text ta="center" size="xs" c="dimmed" mb={12}>
-                  No credentials needed — these simulate different user roles for UI testing only.
-                </Text>
-
-                {/* Donor Demo */}
-                <Button
-                  fullWidth
-                  variant="light"
-                  color="sage"
-                  size="md"
-                  radius="xl"
-                  leftSection={<IconHeart size={18} />}
-                  onClick={() => handleDemoRole('donor')}
-                  mb={8}
-                  styles={{
-                    root: {
-                      border: '1px dashed var(--bm-sage)',
-                      background: 'rgba(143, 151, 121, 0.06)',
-                    },
-                  }}
-                >
-                  Demo — Individual Donor
-                </Button>
-
-                {/* Charity Admin Demo — 무료/프리미엄 플랜 각각 시연 */}
-                <Button
-                  fullWidth
-                  variant="light"
-                  color="terracotta"
-                  size="md"
-                  radius="xl"
-                  leftSection={<IconBuilding size={18} />}
-                  onClick={() => handleDemoRole('charity')}
-                  mb={8}
-                  styles={{
-                    root: {
-                      border: '1px dashed var(--bm-terracotta, #b07552)',
-                      background: 'rgba(176, 117, 82, 0.06)',
-                    },
-                  }}
-                >
-                  Demo — Charity (Community Plan)
-                </Button>
-
-                <Button
-                  fullWidth
-                  variant="light"
-                  color="terracotta"
-                  size="md"
-                  radius="xl"
-                  leftSection={<IconBuilding size={18} />}
-                  onClick={() => handleDemoRole('charity_paid')}
-                  mb={8}
-                  styles={{
-                    root: {
-                      border: '1px solid var(--bm-terracotta, #b07552)',
-                      background: 'rgba(176, 117, 82, 0.12)',
-                    },
-                  }}
-                >
-                  Demo — Charity (Growth Plan) ✨
-                </Button>
-
-                {/* Platform Admin Demo */}
-                <Button
-                  fullWidth
-                  variant="light"
-                  color="blue"
-                  size="md"
-                  radius="xl"
-                  leftSection={<IconShieldCheck size={18} />}
-                  onClick={() => handleDemoRole('admin')}
-                  styles={{
-                    root: {
-                      border: '1px dashed var(--mantine-color-blue-4)',
-                      background: 'rgba(51, 154, 240, 0.06)',
-                    },
-                  }}
-                >
-                  Demo — Platform Admin
-                </Button>
-
-                <Text ta="center" size="xs" mt={8} c="dimmed">
-                  ⚠️ Demo sessions have no API access — UI preview only
-                </Text>
-              </>
-            )}
-            {/* ── END Demo ── */}
           </Box>
         </Container>
       </main>

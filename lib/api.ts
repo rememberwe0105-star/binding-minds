@@ -45,10 +45,24 @@ export interface ServiceUser {
   charity_id?: number;
 }
 
+/** GET /me/registration 응답의 charity 필드 — 소속 단체 (없으면 null: donor·platform_admin) */
+export interface ApiMeCharity {
+  id: number;
+  display_name: string;
+  slug: string;
+  plan: string;
+  /** Growth 전용 메뉴(정산·기부 티어·펀드레이저) 노출 판단 */
+  is_growth: boolean;
+  charity_status: string;
+  member_role: 'owner' | 'admin' | 'viewer';
+}
+
 /** GET /me/registration 응답 — 등록됨 */
 export interface RegistrationFound {
   registered: true;
   user: ServiceUser;
+  /** 백엔드 2026-09-01 신규 필드 — 소속 단체. donor·platform_admin 은 null */
+  charity?: ApiMeCharity | null;
 }
 
 /** GET /me/registration 응답 — 미등록 */
@@ -1011,6 +1025,36 @@ export async function createFundraiser(data: FundraiserCreate): Promise<{ id?: s
   });
 }
 
+/** 공개 서포터 펀드레이저 항목 (승인된 public 만) — GET /charities/:slug/fundraisers */
+export interface PublicFundraiser {
+  id: number | string;
+  title: string;
+  owner_name?: string;
+  level?: 'organisation' | 'project';
+  project_title?: string;
+  raised_minor?: number;
+  goal_minor?: number;
+  supporter_count?: number;
+  [key: string]: unknown;
+}
+
+export interface PublicFundraisersPage {
+  items: PublicFundraiser[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+/**
+ * 공개 서포터 펀드레이저 목록 (인증 불필요, 승인된 public 만 반환).
+ * 프로젝트/기관 상세 페이지의 "Supporter Fundraisers" 섹션에 사용.
+ */
+export async function getPublicFundraisers(slug: string): Promise<PublicFundraisersPage> {
+  return publicFetch<PublicFundraisersPage>(
+    `/api/v1/charities/${encodeURIComponent(slug)}/fundraisers`,
+  );
+}
+
 /** 기관 관리자 — 펀드레이저 목록 — 요청서 v8.4 */
 export async function getCharityFundraisers(): Promise<{ items: unknown[] }> {
   return gatedFetch({
@@ -1522,7 +1566,8 @@ export async function updateAdminSettings(
  * 관리자 알림 목록 조회
  */
 export async function getAdminNotifications(): Promise<AdminNotificationsResponse> {
-  return apiFetch<AdminNotificationsResponse>('/api/v1/admin/notifications');
+  // 백엔드에 /admin/notifications 경로 없음(404) — platform_admin 도 접근 가능한 공용 알림 API 사용
+  return apiFetch<AdminNotificationsResponse>('/api/v1/notifications');
 }
 
 /**
@@ -1532,7 +1577,7 @@ export async function markNotificationRead(
   notificationId: string,
 ): Promise<GenericOkResponse> {
   return apiFetch<GenericOkResponse>(
-    `/api/v1/admin/notifications/${notificationId}/read`,
+    `/api/v1/notifications/${notificationId}/read`,
     { method: 'PATCH' },
   );
 }
@@ -1542,7 +1587,7 @@ export async function markNotificationRead(
  */
 export async function markAllNotificationsRead(): Promise<GenericOkResponse> {
   return apiFetch<GenericOkResponse>(
-    '/api/v1/admin/notifications/read-all',
+    '/api/v1/notifications/read-all',
     { method: 'PATCH' },
   );
 }
@@ -1878,12 +1923,36 @@ export interface ApiProjectsPage {
   items: ApiProjectListItem[];
 }
 
+/**
+ * 단체 상세의 projects[] 항목 — 목록 API와 달리 flat 구조.
+ * 중첩 charity 객체가 없고 category/region 이 평면으로 온다 (백엔드 2026-09-01).
+ */
+export interface ApiCharityDetailProject {
+  id: number;
+  title: string;
+  slug: string;
+  description: string | null;
+  goal_amount_minor: number;
+  current_amount_minor: number;
+  currency_code: string;
+  project_status?: string;
+  start_date: string | null;
+  end_date: string | null;
+  created_at?: string | null;
+  donor_count: number;
+  category: string | null;
+  region: string | null;
+}
+
 /** 단체 상세 — 응답에 projects[] 포함 */
 export interface ApiCharityDetail extends ApiCharityListItem {
   contact_name?: string | null;
   contact_phone?: string | null;
-  projects?: ApiProjectListItem[];
+  projects?: ApiCharityDetailProject[];
 }
+
+/** 백엔드 pageSize 상한 (초과 요청 시 조용히 잘림) */
+const MAX_PAGE_SIZE = 100;
 
 /** GET /charities — 단체 목록 (FE-004) */
 export async function getCharities(
@@ -1891,11 +1960,30 @@ export async function getCharities(
 ): Promise<ApiCharitiesPage> {
   const q = new URLSearchParams();
   q.set('page', String(params.page ?? 1));
-  q.set('pageSize', String(params.pageSize ?? 100));
+  q.set('pageSize', String(Math.min(params.pageSize ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE)));
   if (params.sort) q.set('sort', params.sort);
   if (params.category) q.set('category', params.category);
   if (params.search) q.set('search', params.search);
   return publicFetch<ApiCharitiesPage>(`/api/v1/charities?${q.toString()}`);
+}
+
+/**
+ * 모든 단체를 페이지네이션으로 전부 가져온다 (pageSize 상한 100 안전 준수).
+ * 목록/탐색 화면에서 전체 목록이 필요할 때 사용 — 100곳 초과 시 조용히 잘리지 않도록.
+ */
+export async function getAllCharities(
+  params: { sort?: string; category?: string; search?: string } = {},
+): Promise<ApiCharityListItem[]> {
+  const items: ApiCharityListItem[] = [];
+  let page = 1;
+  for (;;) {
+    const res = await getCharities({ ...params, page, pageSize: MAX_PAGE_SIZE });
+    items.push(...res.items);
+    if (items.length >= (res.total ?? items.length) || res.items.length === 0) break;
+    page += 1;
+    if (page > 50) break; // 안전장치
+  }
+  return items;
 }
 
 /** GET /charities/:slug — 단체 상세 (FE-004) */
@@ -1909,11 +1997,27 @@ export async function getPublicProjects(
 ): Promise<ApiProjectsPage> {
   const q = new URLSearchParams();
   q.set('page', String(params.page ?? 1));
-  q.set('pageSize', String(params.pageSize ?? 100));
+  q.set('pageSize', String(Math.min(params.pageSize ?? MAX_PAGE_SIZE, MAX_PAGE_SIZE)));
   if (params.category) q.set('category', params.category);
   if (params.region) q.set('region', params.region);
   if (params.search) q.set('search', params.search);
   return publicFetch<ApiProjectsPage>(`/api/v1/projects?${q.toString()}`);
+}
+
+/** 모든 프로젝트를 페이지네이션으로 전부 가져온다 (pageSize 상한 100 준수). */
+export async function getAllPublicProjects(
+  params: { category?: string; region?: string; search?: string } = {},
+): Promise<ApiProjectListItem[]> {
+  const items: ApiProjectListItem[] = [];
+  let page = 1;
+  for (;;) {
+    const res = await getPublicProjects({ ...params, page, pageSize: MAX_PAGE_SIZE });
+    items.push(...res.items);
+    if (items.length >= (res.total ?? items.length) || res.items.length === 0) break;
+    page += 1;
+    if (page > 50) break;
+  }
+  return items;
 }
 
 /** GET /projects/:slug — 프로젝트 상세 (FE-009) */
