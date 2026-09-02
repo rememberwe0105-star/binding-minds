@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Notification, Button, Group, Text, Box } from '@mantine/core';
 import { IconAlertTriangle } from '@tabler/icons-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,10 +17,20 @@ export function RegistrationRecoveryBanner() {
   const [retrying, setRetrying] = useState(false);
   const [dismissed, setDismissed] = useState(false);
   const [failed, setFailed] = useState(false);
+  // FE 5번: /me/* 호출이 412(failed-precondition)를 반환하면 배너를 강제 노출한다.
+  const [forced, setForced] = useState(false);
 
-  // 데모 세션이거나, 로그인 안 했거나, 정상 등록됐거나, 닫았으면 숨김
+  useEffect(() => {
+    const onNeedsProfile = () => { setForced(true); setDismissed(false); };
+    window.addEventListener('dg:needs-profile-completion', onNeedsProfile);
+    return () => window.removeEventListener('dg:needs-profile-completion', onNeedsProfile);
+  }, []);
+
+  // 데모 세션이거나, 로그인 안 했거나, 닫았으면 숨김.
+  // 표시 조건: 서비스 DB 미등록(isRegistered===false) 또는 412 신호(forced)
   if (demoRole && isDemoModeEnabled) return null;
-  if (!user || isRegistered !== false || dismissed) return null;
+  if (!user || dismissed) return null;
+  if (isRegistered !== false && !forced) return null;
 
   const handleRetry = async () => {
     setRetrying(true);
@@ -28,7 +38,8 @@ export function RegistrationRecoveryBanner() {
     const ok = await retryRegistration();
     setRetrying(false);
     if (!ok) setFailed(true);
-    // 성공하면 isRegistered가 true로 바뀌어 배너가 자동으로 사라진다.
+    else setForced(false);
+    // 성공하면 isRegistered가 true로 바뀌고 forced도 해제되어 배너가 사라진다.
   };
 
   return (

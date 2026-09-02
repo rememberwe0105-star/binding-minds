@@ -654,6 +654,10 @@ export async function apiFetch<T = unknown>(
 
   // 에러 처리
   if (!res.ok) {
+    // FE 5번: 412 failed-precondition → 프로필 완성 필요 신호 (배너가 수신)
+    if (res.status === 412 && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('dg:needs-profile-completion'));
+    }
     const err = body?.error;
     const message = err?.message ?? `API 오류 (${res.status})`;
     const error = new Error(message) as Error & {
