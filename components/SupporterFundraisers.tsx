@@ -36,6 +36,7 @@ import {
   createFundraiser,
   updateFundraiserStatus,
   getPublicFundraisers,
+  getCharityFundraisers,
   BackendPendingError,
   type PublicFundraiser,
 } from '@/lib/api';
@@ -378,14 +379,6 @@ export function SupporterFundraisersSection({
 // 3) 기관 대시보드 "Supporter Fundraisers" 탭 (Growth 전용)
 // ============================================================
 
-const DEMO_DASHBOARD_FUNDRAISERS: DemoFundraiser[] = [
-  { id: 'fr-101', owner: 'Hana W.', title: "Hana's 40th Birthday — trees instead of gifts", level: 'project', target: 'Restore Native Forest', visibility: 'public', status: 'approved', raised: 640, goal: 1000, supporters: 18 },
-  { id: 'fr-102', owner: 'Te Rōpū Whānau', title: 'Our whānau half-marathon challenge', level: 'organisation', target: 'Organisation', visibility: 'public', status: 'approved', raised: 1240, goal: 2000, supporters: 32 },
-  { id: 'fr-103', owner: 'Jordan M.', title: 'Office bake sale — matched giving week', level: 'organisation', target: 'Organisation', visibility: 'public', status: 'pending', raised: 0, goal: 500, supporters: 0 },
-  { id: 'fr-104', owner: 'Aroha K.', title: "Grandma's memorial garden fund", level: 'project', target: 'Restore Native Forest', visibility: 'private', status: 'approved', raised: 380, goal: 800, supporters: 9 },
-  { id: 'fr-105', owner: 'Sam T.', title: 'Untitled fundraiser', level: 'organisation', target: 'Organisation', visibility: 'public', status: 'declined', raised: 0, goal: 300, supporters: 0 },
-];
-
 const STATUS_COLOR: Record<DemoFundraiser['status'], string> = {
   pending: 'yellow',
   approved: 'teal',
@@ -393,10 +386,40 @@ const STATUS_COLOR: Record<DemoFundraiser['status'], string> = {
 };
 
 export function SupporterFundraisersTab() {
-  const [items, setItems] = useState<DemoFundraiser[]>(DEMO_DASHBOARD_FUNDRAISERS);
+  // FE 3번: 목업 제거 — 로그인 단체의 실제 펀드레이저를 불러온다. 없으면 빈 상태.
+  const [items, setItems] = useState<DemoFundraiser[]>([]);
+  const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
   const [levelFilter, setLevelFilter] = useState<string | null>(null);
   const [pendingError, setPendingError] = useState<BackendPendingError | null>(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    getCharityFundraisers()
+      .then((res) => {
+        if (cancelled) return;
+        const mapped: DemoFundraiser[] = (res.items ?? []).map((raw) => {
+          const f = raw as Record<string, unknown>;
+          const num = (v: unknown) => (typeof v === 'number' ? v : 0);
+          return {
+            id: String(f.id ?? Math.random()),
+            owner: String(f.owner_name ?? 'Supporter'),
+            title: String(f.title ?? 'Fundraiser'),
+            level: (f.level === 'project' ? 'project' : 'organisation'),
+            target: String(f.project_title ?? 'Organisation'),
+            visibility: (f.visibility === 'private' ? 'private' : 'public'),
+            status: (['pending', 'approved', 'declined'].includes(String(f.status)) ? String(f.status) : 'approved') as DemoFundraiser['status'],
+            raised: Math.round(num(f.raised_minor) / 100),
+            goal: Math.round(num(f.goal_minor) / 100),
+            supporters: num(f.supporter_count),
+          };
+        });
+        setItems(mapped);
+      })
+      .catch(() => { /* 미구현/게이트 → 빈 상태 유지 (목업 표시 안 함) */ })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
 
   const filtered = items.filter((f) =>
     (!statusFilter || f.status === statusFilter) && (!levelFilter || f.level === levelFilter),
@@ -419,13 +442,19 @@ export function SupporterFundraisersTab() {
 
   return (
     <Stack gap={20} mt={20}>
-      <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" radius="md">
-        <Text size="xs" lh={1.6}>
-          <strong>Preview.</strong> Sample fundraisers shown. Approve/Decline already
-          calls the live API first — this tab switches to real data automatically once
-          the backend endpoints respond (요청서 v8.4).
-        </Text>
-      </Alert>
+      {loading && (
+        <Alert icon={<IconInfoCircle size={16} />} color="gray" variant="light" radius="md">
+          <Text size="xs" lh={1.6}>Loading supporter fundraisers…</Text>
+        </Alert>
+      )}
+      {!loading && items.length === 0 && (
+        <Alert icon={<IconInfoCircle size={16} />} color="blue" variant="light" radius="md">
+          <Text size="xs" lh={1.6}>
+            No supporter fundraisers yet. When supporters create a fundraiser for your
+            organisation, public ones will appear here for review.
+          </Text>
+        </Alert>
+      )}
 
       {/* 요약 통계 */}
       <SimpleGrid cols={{ base: 1, xs: 3 }} spacing={12}>
