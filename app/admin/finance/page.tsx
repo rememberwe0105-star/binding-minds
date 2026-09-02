@@ -88,7 +88,7 @@ export default function AdminFinancePage() {
   };
 
   return (
-    <ProtectedRoute allowedDemoRoles={['admin']}>
+    <ProtectedRoute allowedDemoRoles={['admin']} allowedRoles={['platform_admin']}>
       <Header />
       <main className={classes.page}>
         <Container size="xl" py={40}>

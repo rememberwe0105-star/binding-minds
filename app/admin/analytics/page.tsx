@@ -56,7 +56,7 @@ export default function AdminAnalyticsPage() {
   const avgMonthlyFee = totalFees / monthCount;
 
   return (
-    <ProtectedRoute allowedDemoRoles={['admin']}>
+    <ProtectedRoute allowedDemoRoles={['admin']} allowedRoles={['platform_admin']}>
       <Header />
       <main className={classes.page}>
         <Container size="xl" py={40}>

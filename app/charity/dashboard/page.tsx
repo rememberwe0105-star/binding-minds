@@ -1728,7 +1728,7 @@ function CharityDashboardContent() {
 
 export default function CharityDashboardPage() {
   return (
-    <ProtectedRoute>
+    <ProtectedRoute allowedRoles={['charity_admin']}>
       <CharityDashboardContent />
     </ProtectedRoute>
   );

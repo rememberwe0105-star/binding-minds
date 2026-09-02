@@ -36,7 +36,7 @@ const navLinks = [
 export function Header() {
   const [opened, { toggle, close }] = useDisclosure(false);
   const [scrolled, setScrolled] = useState(false);
-  const { user, loading, logOut, demoRole, displayName: authDisplayName, displayEmail: authDisplayEmail } = useAuth();
+  const { user, loading, logOut, demoRole, userRole, serviceCharity, displayName: authDisplayName, displayEmail: authDisplayEmail } = useAuth();
 
   // ── Rewards 후크 (로그인 상태에서만) ──
   const { currentTier, nextTier, unlockedCount, totalCount, loading: rewardsLoading } = useRewards();
@@ -200,7 +200,8 @@ export function Header() {
                     My Dashboard
                   </Menu.Item>
                 )}
-                {(!demoRole || demoRole.startsWith('charity')) && (
+                {/* Organisation Dashboard — 단체 관리자(또는 소속 단체 보유)에게만 */}
+                {(demoRole ? demoRole.startsWith('charity') : (userRole === 'charity_admin' || !!serviceCharity)) && (
                   <Menu.Item
                     leftSection={<IconBuilding size={16} />}
                     component={Link}
@@ -209,7 +210,8 @@ export function Header() {
                     Organisation Dashboard
                   </Menu.Item>
                 )}
-                {(!demoRole || demoRole === 'admin') && (
+                {/* Admin Panel — 플랫폼 관리자에게만 노출 */}
+                {(demoRole ? demoRole === 'admin' : userRole === 'platform_admin') && (
                   <Menu.Item
                     leftSection={<IconShieldCheck size={16} />}
                     component={Link}

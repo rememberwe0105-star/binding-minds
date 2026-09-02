@@ -100,7 +100,7 @@ export default function AdminDonorsPage() {
   const totalPages = Math.ceil(total / pageSize);
 
   return (
-    <ProtectedRoute allowedDemoRoles={['admin']}>
+    <ProtectedRoute allowedDemoRoles={['admin']} allowedRoles={['platform_admin']}>
       <Header />
       <main className={classes.page}>
         <Container size="xl" py={40}>

@@ -505,7 +505,7 @@ function AdminDonationsContent() {
 
 export default function AdminDonationsPage() {
   return (
-    <ProtectedRoute allowedDemoRoles={['admin']}>
+    <ProtectedRoute allowedDemoRoles={['admin']} allowedRoles={['platform_admin']}>
       <AdminDonationsContent />
     </ProtectedRoute>
   );
