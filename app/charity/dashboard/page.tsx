@@ -48,6 +48,8 @@ import {
   uploadCharityImages,
   uploadCharityDocument,
   publishDonationTiers,
+  getCharityBySlug,
+  mediaUrl,
   BackendPendingError,
   type CharityAnalytics,
   type CharityDonationItem,
@@ -753,6 +755,36 @@ function ProfileTab({ charityId }: { charityId: number }) {
   const [documents, setDocuments] = useState<UploadedFile[]>([]);
   const [galleryImages, setGalleryImages] = useState<UploadedImage[]>([]);
 
+  // 현재 저장된 로고/배너 (삭제 기능용) — 백엔드에서 로드
+  const { serviceCharity } = useAuth();
+  const [currentLogoUrl, setCurrentLogoUrl] = useState<string | null>(null);
+  const [currentBannerUrl, setCurrentBannerUrl] = useState<string | null>(null);
+  const [removeLogo, setRemoveLogo] = useState(false);
+  const [removeBanner, setRemoveBanner] = useState(false);
+
+  // 현재 프로필(이미지·텍스트) 로드해서 폼 프리필 + 기존 이미지 표시
+  useEffect(() => {
+    const slug = serviceCharity?.slug;
+    if (!slug) return;
+    let cancelled = false;
+    getCharityBySlug(slug)
+      .then((res) => {
+        if (cancelled) return;
+        setCurrentLogoUrl(res.logo_url ? mediaUrl(res.logo_url) : null);
+        setCurrentBannerUrl(res.banner_url ? mediaUrl(res.banner_url) : null);
+        // 텍스트 필드 프리필 (비어있을 때만)
+        setDisplayName((v) => v || res.display_name || '');
+        setDescription((v) => v || res.description || '');
+        setWebsiteUrl((v) => v || res.website_url || '');
+        setCategory((v) => v ?? res.category ?? null);
+        setRegion((v) => v ?? res.region ?? null);
+        setContactName((v) => v || res.contact_name || '');
+        setContactPhone((v) => v || res.contact_phone || '');
+      })
+      .catch(() => { /* 로드 실패 시 삭제 UI 미노출 */ });
+    return () => { cancelled = true; };
+  }, [serviceCharity?.slug]);
+
   const handleSave = async () => {
     setSaving(true);
     setError(null);
@@ -770,6 +802,9 @@ function ProfileTab({ charityId }: { charityId: number }) {
       if (region) updates.region = region;
       if (contactName) updates.contact_name = contactName;
       if (contactPhone) updates.contact_phone = contactPhone;
+      // 로고/배너 삭제 — 새 파일 업로드가 없을 때만 null 로 비운다 (업로드가 우선)
+      if (removeLogo && !logo?.file) updates.logo_url = null;
+      if (removeBanner && !banner?.file) updates.banner_url = null;
       const hasFileToUpload =
         !!logo?.file || !!banner?.file ||
         galleryImages.some((img) => img.file !== null) ||
@@ -836,6 +871,14 @@ function ProfileTab({ charityId }: { charityId: number }) {
         );
       }
 
+      // 저장 성공 후 상태 반영 — 삭제된 이미지는 화면에서도 비우고, 새로 올린 파일은 프리뷰 정리
+      if (removeLogo && !logo?.file) setCurrentLogoUrl(null);
+      if (removeBanner && !banner?.file) setCurrentBannerUrl(null);
+      if (logo?.file) { setCurrentLogoUrl(logo.previewUrl ?? null); setLogo(null); }
+      if (banner?.file) { setCurrentBannerUrl(banner.previewUrl ?? null); setBanner(null); }
+      setRemoveLogo(false);
+      setRemoveBanner(false);
+
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     } catch (err: unknown) {
@@ -856,27 +899,77 @@ function ProfileTab({ charityId }: { charityId: number }) {
           {/* Logo (Avatar variant) */}
           <Box>
             <Text size="sm" fw={500} mb={8} c="var(--bm-text-dark)">Logo</Text>
-            <ImageUpload
-              variant="avatar"
-              value={logo}
-              onChange={setLogo}
-              placeholder="Logo"
-              maxSizeMB={2}
-            />
+            {currentLogoUrl && !removeLogo && !logo?.file ? (
+              <Stack gap={8} align="center">
+                <Avatar src={currentLogoUrl} size={96} radius="50%" />
+                <Button
+                  size="xs"
+                  variant="light"
+                  color="red"
+                  radius="xl"
+                  leftSection={<IconTrash size={12} />}
+                  onClick={() => setRemoveLogo(true)}
+                >
+                  Remove logo
+                </Button>
+              </Stack>
+            ) : (
+              <>
+                <ImageUpload
+                  variant="avatar"
+                  value={logo}
+                  onChange={(v) => { setLogo(v); if (v?.file) setRemoveLogo(false); }}
+                  placeholder="Logo"
+                  maxSizeMB={2}
+                />
+                {removeLogo && !logo?.file && (
+                  <Text size="xs" c="red" ta="center" mt={6}>Logo will be removed when you save.</Text>
+                )}
+              </>
+            )}
             <Text size="xs" c="var(--bm-text-muted)" ta="center" mt={6}>Square, min 200×200px</Text>
           </Box>
 
           {/* Banner (Banner variant) */}
           <Box style={{ flex: 1, width: '100%' }}>
             <Text size="sm" fw={500} mb={8} c="var(--bm-text-dark)">Banner Image</Text>
-            <ImageUpload
-              variant="banner"
-              value={banner}
-              onChange={setBanner}
-              placeholder="Drop your banner image here"
-              hint="Recommended: 1200×400px. This appears at the top of your charity page."
-              maxSizeMB={2}
-            />
+            {currentBannerUrl && !removeBanner && !banner?.file ? (
+              <Box>
+                <Box
+                  style={{
+                    width: '100%', height: 140, borderRadius: 12, overflow: 'hidden',
+                    backgroundImage: `url(${currentBannerUrl})`, backgroundSize: 'cover',
+                    backgroundPosition: 'center', border: '1px solid var(--bm-border, #e6e3dc)',
+                  }}
+                />
+                <Group justify="flex-end" mt={8}>
+                  <Button
+                    size="xs"
+                    variant="light"
+                    color="red"
+                    radius="xl"
+                    leftSection={<IconTrash size={12} />}
+                    onClick={() => setRemoveBanner(true)}
+                  >
+                    Remove banner
+                  </Button>
+                </Group>
+              </Box>
+            ) : (
+              <>
+                <ImageUpload
+                  variant="banner"
+                  value={banner}
+                  onChange={(v) => { setBanner(v); if (v?.file) setRemoveBanner(false); }}
+                  placeholder="Drop your banner image here"
+                  hint="Recommended: 1200×400px. This appears at the top of your charity page."
+                  maxSizeMB={2}
+                />
+                {removeBanner && !banner?.file && (
+                  <Text size="xs" c="red" mt={6}>Banner will be removed when you save.</Text>
+                )}
+              </>
+            )}
           </Box>
         </Flex>
       </Card>
