@@ -83,8 +83,8 @@ export default function DonationTaxCreditsPage() {
               Donation Tax Credits
             </Title>
             <Text fz={19} c="var(--dg-hero-muted)" maw={640} mt={10} mx="auto" lh={1.7}>
-              A practical guide to New Zealand&apos;s 33.33% donation tax credit —
-              and how Dear Giver keeps your records ready for it.
+              A practical guide to claiming back 1/3 of eligible donations to approved donee
+              organisations in New Zealand — and how Dear Giver keeps your records ready for it.
             </Text>
           </Box>
         </Container>

@@ -31,6 +31,7 @@ import { useAuth, demoCharityPlan, type CharityPlan } from '@/contexts/AuthConte
 import { AccountingTab } from '@/components/AccountingTab';
 import { BackendPendingDialog } from '@/components/BackendPendingDialog';
 import { SupporterFundraisersTab } from '@/components/SupporterFundraisers';
+import { CharityMembersTab } from '@/components/CharityMembers';
 import { campaigns, CATEGORIES, REGIONS } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
@@ -1803,6 +1804,13 @@ function CharityDashboardContent() {
               >
                 Accounting
               </Tabs.Tab>
+              <Tabs.Tab
+                value="team"
+                leftSection={<IconUsersGroup size={16} />}
+                rightSection={isFreePlan ? lockIcon : undefined}
+              >
+                Users
+              </Tabs.Tab>
               <Tabs.Tab value="profile" leftSection={<IconSettings size={16} />}>Profile</Tabs.Tab>
             </Tabs.List>
 
@@ -1819,6 +1827,9 @@ function CharityDashboardContent() {
             </Tabs.Panel>
             <Tabs.Panel value="accounting">
               {isFreePlan ? <PlanLockedPanel feature="Accounting & Xero Sync" /> : <AccountingTab />}
+            </Tabs.Panel>
+            <Tabs.Panel value="team">
+              {isFreePlan ? <PlanLockedPanel feature="Users & Permissions" /> : <CharityMembersTab />}
             </Tabs.Panel>
             <Tabs.Panel value="profile">
               <ProfileTab charityId={charityId} />

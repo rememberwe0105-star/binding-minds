@@ -1070,6 +1070,72 @@ export async function getCharityFundraisers(): Promise<{ items: unknown[] }> {
   });
 }
 
+// ── 기관 팀 관리 (Users & Permissions) — Growth 전용 ──
+//
+// 지금은 owner/member 만 사용하지만, 나중에 finance/campaign_manager/admin 등으로
+// 권한을 세분화할 수 있도록 role 을 확장 가능한 유니온으로 정의한다.
+export type CharityMemberRole = 'owner' | 'admin' | 'member' | 'finance' | 'campaign_manager';
+
+export interface CharityMember {
+  id: number | string;
+  email: string;
+  name?: string;
+  member_role: CharityMemberRole;
+  status?: 'active' | 'invited' | 'pending';
+  invited_at?: string | null;
+  [key: string]: unknown;
+}
+
+export interface CharityMembersResponse {
+  members: CharityMember[];
+}
+
+/** 기관 팀원 목록 조회 (Owner/Member) */
+export async function getCharityMembers(): Promise<CharityMembersResponse> {
+  return gatedFetch({
+    feature: 'Team members (Users & Permissions)',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'GET',
+    path: '/api/v1/me/charity/members',
+    auth: true,
+  });
+}
+
+/** 팀원 초대 (이메일 + 역할) */
+export async function inviteCharityMember(data: { email: string; role: CharityMemberRole }): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Invite team member',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'POST',
+    path: '/api/v1/me/charity/members/invite',
+    body: data,
+    auth: true,
+  });
+}
+
+/** 팀원 역할 변경 */
+export async function updateCharityMemberRole(memberId: string | number, role: CharityMemberRole): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Update member role',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'PATCH',
+    path: `/api/v1/me/charity/members/${memberId}`,
+    body: { role },
+    auth: true,
+  });
+}
+
+/** 팀원 제거 (Owner 는 제거 불가 — UI에서 차단) */
+export async function removeCharityMember(memberId: string | number): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Remove team member',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'DELETE',
+    path: `/api/v1/me/charity/members/${memberId}`,
+    auth: true,
+  });
+}
+
 /** 기관 관리자 — 펀드레이저 승인/거절 — 요청서 v8.4 */
 export async function updateFundraiserStatus(
   id: string,
