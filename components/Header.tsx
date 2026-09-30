@@ -17,7 +17,7 @@ import {
   Box,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
-import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconGift, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
+import { IconLogout, IconLayoutDashboard, IconChevronDown, IconSettings, IconBuilding, IconShieldCheck } from '@tabler/icons-react';
 import NextImage from 'next/image';
 import Link from 'next/link';
 import { useAuth } from '@/contexts/AuthContext';
@@ -40,6 +40,12 @@ export function Header() {
 
   // ── Rewards 후크 (로그인 상태에서만) ──
   const { currentTier, nextTier, unlockedCount, totalCount, loading: rewardsLoading } = useRewards();
+
+  // #13/#14: 계정 드롭다운을 역할별로 구성 — 뱃지/My Dashboard/My Journey 는 도너 전용,
+  //  기관(charity)·관리자 계정에는 노출하지 않는다.
+  const isDonorView = demoRole
+    ? demoRole === 'donor'
+    : (userRole !== 'charity_admin' && userRole !== 'platform_admin' && !serviceCharity);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -158,8 +164,8 @@ export function Header() {
                 </UnstyledButton>
               </Menu.Target>
               <Menu.Dropdown>
-                {/* Tier card — 실제 로그인 시에만 */}
-                {!demoRole && !rewardsLoading && (
+                {/* Tier card — 도너 계정에만 (기관/관리자 제외) */}
+                {!demoRole && !rewardsLoading && isDonorView && (
                   <>
                     <div className={classes.tierCard}>
                       <Group gap={8} mb={6}>
@@ -190,8 +196,8 @@ export function Header() {
                 )}
                 <Menu.Label>{authDisplayEmail}{demoRole ? ` (${demoRole.replace('_', ' ')} demo)` : ''}</Menu.Label>
 
-                {/* 역할별 메뉴 항목 */}
-                {(!demoRole || demoRole === 'donor') && (
+                {/* 역할별 메뉴 항목 — My Dashboard 는 도너 전용 */}
+                {isDonorView && (
                   <Menu.Item
                     leftSection={<IconLayoutDashboard size={16} />}
                     component={Link}
@@ -220,15 +226,7 @@ export function Header() {
                     Admin Panel
                   </Menu.Item>
                 )}
-                {(!demoRole || demoRole === 'donor') && (
-                  <Menu.Item
-                    leftSection={<IconGift size={16} />}
-                    component={Link}
-                    href="/dashboard?tab=rewards"
-                  >
-                    My Journey
-                  </Menu.Item>
-                )}
+                {/* My Journey 메뉴 제거 — 도너 대시보드의 'My Journey' 탭과 중복 (#13) */}
                 <Menu.Item
                   leftSection={<IconSettings size={16} />}
                   component={Link}
