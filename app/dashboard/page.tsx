@@ -866,11 +866,14 @@ function TaxSummaryTab() {
         <Group justify="space-between" align="flex-end" wrap="wrap" gap={24} style={{ position: 'relative', zIndex: 1 }}>
           <Box>
             <Text size="sm" fw={600} c="rgba(255,255,255,0.6)" tt="uppercase" mb={4}>
-              Your Estimated Tax Refund
+              Your Estimated Donation Tax Credit
             </Text>
             <Text className={classes.taxRefundAmount}>{formatNZD(taxRefund)}</Text>
             <Text size="sm" c="rgba(255,255,255,0.6)" mt={8}>
-              Based on {formatNZD(totalDonated)} in qualifying NZD donations
+              Based on {formatNZD(totalDonated)} in completed NZD donations to approved donee organisations
+            </Text>
+            <Text size="xs" c="rgba(255,255,255,0.5)" mt={6}>
+              Estimated 1/3 credit — the final amount is confirmed by IRD when you claim.
             </Text>
           </Box>
 
