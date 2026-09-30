@@ -32,6 +32,8 @@ import { AccountingTab } from '@/components/AccountingTab';
 import { BackendPendingDialog } from '@/components/BackendPendingDialog';
 import { SupporterFundraisersTab } from '@/components/SupporterFundraisers';
 import { CharityMembersTab } from '@/components/CharityMembers';
+import { downloadReceiptPdf } from '@/lib/generateReceiptPdf';
+import type { DonationItem } from '@/lib/api';
 import { campaigns, CATEGORIES, REGIONS } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
@@ -317,13 +319,39 @@ function AnalyticsTab() {
 
 // ===================== Donations Tab =====================
 function DonationsTab({ charityId }: { charityId: number }) {
+  const { serviceCharity } = useAuth();
+  const orgName = serviceCharity?.display_name ?? 'Your organisation';
   const [filter, setFilter] = useState<string | null>(null);
   const [items, setItems] = useState<CharityDonationItem[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [receiptId, setReceiptId] = useState<number | null>(null); // 다운로드 중인 행
   const pageSize = 20;
+
+  // #8: 기관 명의로 발행된 영수증 PDF 다운로드 (완료된 기부만).
+  //  기부자용 IRD 영수증 템플릿을 재사용하되 기관명을 주입한다.
+  const handleReceipt = async (d: CharityDonationItem, index: number) => {
+    setReceiptId(d.id);
+    try {
+      const item = {
+        ...(d as unknown as DonationItem),
+        charity_display_name: orgName,
+        created_at: (d.paid_at ?? null) as string | null,
+      } as DonationItem;
+      await downloadReceiptPdf({
+        item,
+        donorName: d.is_anonymous ? 'Anonymous Donor' : (d.donor_name || 'Donor'),
+        donorEmail: d.donor_email ?? undefined,
+        index,
+      });
+    } catch (e) {
+      setError(e instanceof Error ? e.message : 'Failed to generate receipt.');
+    } finally {
+      setReceiptId(null);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -384,12 +412,13 @@ function DonationsTab({ charityId }: { charityId: number }) {
                     <Table.Th>Net Amount</Table.Th>
                     <Table.Th>Date</Table.Th>
                     <Table.Th>Status</Table.Th>
+                    <Table.Th>Receipt</Table.Th>
                   </Table.Tr>
                 </Table.Thead>
                 <Table.Tbody>
-                  {filtered.map(d => (
+                  {filtered.map((d, i) => (
                     <Table.Tr key={d.id}>
-                      <Table.Td><Text size="sm" fw={500}>{d.donor_name}</Text></Table.Td>
+                      <Table.Td><Text size="sm" fw={500}>{d.is_anonymous ? 'Anonymous' : d.donor_name}</Text></Table.Td>
                       <Table.Td><Text size="sm" fw={600}>{formatNZD(d.donation_amount_minor)}</Text></Table.Td>
                       <Table.Td><Text size="sm" c="var(--bm-sage-dark)" fw={600}>{formatNZD(d.charity_net_amount_minor)}</Text></Table.Td>
                       <Table.Td><Text size="sm" c="dimmed">{d.paid_at ? formatDate(d.paid_at) : '—'}</Text></Table.Td>
@@ -398,11 +427,30 @@ function DonationsTab({ charityId }: { charityId: number }) {
                           {statusLabel(d.donation_status)}
                         </Badge>
                       </Table.Td>
+                      <Table.Td>
+                        {d.donation_status === 'succeeded' ? (
+                          <Tooltip label="Download receipt (PDF)" withArrow>
+                            <ActionIcon
+                              variant="light"
+                              color="sage"
+                              radius="md"
+                              size="sm"
+                              loading={receiptId === d.id}
+                              onClick={() => handleReceipt(d, i)}
+                              aria-label="Download receipt"
+                            >
+                              <IconDownload size={15} />
+                            </ActionIcon>
+                          </Tooltip>
+                        ) : (
+                          <Text size="xs" c="dimmed">—</Text>
+                        )}
+                      </Table.Td>
                     </Table.Tr>
                   ))}
                   {filtered.length === 0 && (
                     <Table.Tr>
-                      <Table.Td colSpan={5} style={{ textAlign: 'center', padding: '32px 0' }}>
+                      <Table.Td colSpan={6} style={{ textAlign: 'center', padding: '32px 0' }}>
                         <Text c="var(--bm-text-muted)">No donations found.</Text>
                       </Table.Td>
                     </Table.Tr>
