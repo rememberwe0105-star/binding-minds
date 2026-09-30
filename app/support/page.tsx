@@ -32,7 +32,18 @@ import classes from './page.module.css';
 const faqs = [
   {
     q: 'How does Dear Giver work?',
-    a: 'Dear Giver connects you with verified charities across New Zealand. Browse campaigns, donate securely via Stripe, and we automatically generate your tax receipts for the 33.33% donation tax credit.',
+    a: (
+      <>
+        Dear Giver helps you discover approved donee organisations across New Zealand,
+        explore their work, and give securely through our platform. Donation receipts
+        issued by organisations are kept together with your giving records in one place,
+        making it easier to prepare a donation tax credit claim where eligible. Learn more
+        in our{' '}
+        <Link href="/donation-tax-credits" style={{ color: 'var(--bm-sage-dark)', fontWeight: 600 }}>
+          Donation Tax Credits guide
+        </Link>.
+      </>
+    ),
   },
   {
     q: 'Is my donation tax deductible?',

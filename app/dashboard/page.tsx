@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import {
   Container,
@@ -81,10 +81,16 @@ import {
   filterByTaxYear,
 } from '@/lib/generateTaxSummaryPdf';
 import { useFavorites } from '@/contexts/FavoritesContext';
-import { getCampaignBySlug, getProgress, formatCurrency } from '@/data/campaigns';
+import { getProgress, formatCurrency } from '@/data/campaigns';
 import type { Campaign } from '@/data/campaigns';
-import { getOrganizationBySlug } from '@/data/organizations';
 import type { Organization } from '@/data/organizations';
+import { getAllCharities, getAllPublicProjects, type DonationItem } from '@/lib/api';
+import { adaptCharity, adaptProject } from '@/lib/adapters';
+
+/** 완료/종결 상태(재결제 불필요): succeeded · refunded. 그 외(pending/checkout_created/failed/cancelled)는 재결제 가능 */
+function isCompletedStatus(s: string): boolean {
+  return s === 'succeeded' || s === 'refunded';
+}
 import classes from './page.module.css';
 
 // ── 모바일 PDF 안내 모달 ────────────────────────────────────
@@ -156,13 +162,40 @@ function formatDate(dateStr: string | null): string {
 
 // ===================== Overview 탭 (API 연동) =====================
 function OverviewTab() {
-  const { items, total, loading, error } = useApiDonations(5);
+  // #6: 통계는 완료된 기부만 반영해야 하므로 전체 내역을 받아 집계한다 (기존 5건만 조회 → 부정확)
+  const { items, loading, error } = useApiDonations(500);
 
   const succeededItems = items.filter((d) => d.donation_status === 'succeeded');
   const totalMinor = succeededItems.reduce((s, d) => s + d.donation_amount_minor, 0);
   const totalNZD = totalMinor / 100;
   const taxRefund = getEstimatedTaxRefund(totalNZD);
-  const uniqueCharities = new Set(items.map((d) => d.charity_display_name)).size;
+  // Charities Supported / Total Donations 는 완료(succeeded)된 기부만 카운트 (pending/cancelled 제외)
+  const uniqueCharities = new Set(succeededItems.map((d) => d.charity_display_name)).size;
+  const succeededCount = succeededItems.length;
+  const recentItems = items.slice(0, 5);
+
+  // #6(b): 미완료(pending/checkout_created/failed/cancelled) 기부는 해당 기관 페이지로 돌아가
+  //  다시 결제할 수 있도록 charity_id → slug 매핑을 만든다.
+  const [charitySlugById, setCharitySlugById] = useState<Record<number, string>>({});
+  const hasIncomplete = items.some((d) => !isCompletedStatus(d.donation_status));
+  useEffect(() => {
+    if (!hasIncomplete) return;
+    let cancelled = false;
+    getAllCharities()
+      .then((list) => {
+        if (cancelled) return;
+        const map: Record<number, string> = {};
+        list.forEach((c) => { map[c.id] = c.slug; });
+        setCharitySlugById(map);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, [hasIncomplete]);
+  const resumeHref = (d: DonationItem): string | null => {
+    if (isCompletedStatus(d.donation_status)) return null;
+    const slug = d.charity_id ? charitySlugById[d.charity_id] : undefined;
+    return slug ? `/charities/${slug}` : '/projects';
+  };
 
   if (loading) {
     return (
@@ -213,7 +246,7 @@ function OverviewTab() {
           <ThemeIcon size={40} radius="md" color="grape" variant="light" mb={12}>
             <IconCalendar size={20} />
           </ThemeIcon>
-          <Text className={classes.statValue}>{total}</Text>
+          <Text className={classes.statValue}>{succeededCount}</Text>
           <Text size="xs" c="var(--bm-text-muted)">Total Donations</Text>
         </Card>
       </SimpleGrid>
@@ -221,7 +254,7 @@ function OverviewTab() {
       {/* 최근 기부 */}
       <Card padding="lg" radius="lg" withBorder>
         <Text fw={700} size="sm" c="var(--bm-text-dark)" mb={16}>Recent Donations</Text>
-        {items.length === 0 ? (
+        {recentItems.length === 0 ? (
           <Box ta="center" py={40}>
             <IconMoodEmpty size={40} color="var(--bm-sage)" style={{ opacity: 0.3 }} />
             <Text c="var(--bm-text-muted)" mt={12}>No donations yet. Make your first donation!</Text>
@@ -231,26 +264,37 @@ function OverviewTab() {
             </Button>
           </Box>
         ) : (
-          items.map((d, i) => (
-            <div key={i} className={classes.recentItem}>
-              <Box>
-                <Text size="sm" fw={500} c="var(--bm-text-dark)">
-                  {d.charity_display_name || '(단체 미연결)'}
-                </Text>
-                <Text size="xs" c="var(--bm-text-muted)">
-                  {d.currency_code} · {formatDate(d.paid_at ?? d.created_at)}
-                </Text>
-              </Box>
-              <Box ta="right">
-                <Text size="sm" fw={700} c="var(--bm-sage-dark)">
-                  {formatMinor(d.donation_amount_minor, d.currency_code)}
-                </Text>
-                <Badge size="xs" color={statusColor(d.donation_status)} variant="light">
-                  {statusLabel(d.donation_status)}
-                </Badge>
-              </Box>
-            </div>
-          ))
+          recentItems.map((d, i) => {
+            const href = resumeHref(d);
+            const rowInner = (
+              <>
+                <Box>
+                  <Text size="sm" fw={500} c="var(--bm-text-dark)">
+                    {d.charity_display_name || '(단체 미연결)'}
+                  </Text>
+                  <Text size="xs" c="var(--bm-text-muted)">
+                    {d.currency_code} · {formatDate(d.paid_at ?? d.created_at)}
+                    {href && ' · Tap to complete payment'}
+                  </Text>
+                </Box>
+                <Box ta="right">
+                  <Text size="sm" fw={700} c="var(--bm-sage-dark)">
+                    {formatMinor(d.donation_amount_minor, d.currency_code)}
+                  </Text>
+                  <Badge size="xs" color={statusColor(d.donation_status)} variant="light">
+                    {statusLabel(d.donation_status)}
+                  </Badge>
+                </Box>
+              </>
+            );
+            return href ? (
+              <Link key={i} href={href} className={classes.recentItem} style={{ textDecoration: 'none', cursor: 'pointer' }}>
+                {rowInner}
+              </Link>
+            ) : (
+              <div key={i} className={classes.recentItem}>{rowInner}</div>
+            );
+          })
         )}
       </Card>
 
@@ -804,17 +848,12 @@ function TaxSummaryTab() {
     {
       step: '2',
       title: 'Log In to myIR',
-      desc: 'Visit ird.govt.nz and log in to your myIR account.',
+      desc: 'Visit Inland Revenue’s official website at ird.govt.nz and log in to your myIR account.',
     },
     {
       step: '3',
-      title: 'Claim Your Credit',
-      desc: 'Under "Income Tax", select "Donation Tax Credits" and enter your total NZD donations.',
-    },
-    {
-      step: '4',
-      title: 'Receive Your Refund',
-      desc: 'IRD processes claims within 4–8 weeks. Your refund will be deposited to your bank.',
+      title: 'Submit your claim',
+      desc: 'Select “Donation Tax Credit”, enter your receipt details, upload your files, and submit.',
     },
   ];
 
@@ -899,11 +938,16 @@ function TaxSummaryTab() {
         <Card padding="xl" radius="lg" withBorder className={classes.calculatorCard}>
           <Group gap={8} mb={16}>
             <IconCalculator size={20} color="var(--bm-sage-dark)" />
-            <Text fw={700} size="md" c="var(--bm-text-dark)">Tax Credit Calculator</Text>
+            <Text fw={700} size="md" c="var(--bm-text-dark)">Donation Tax Credit Calculator</Text>
           </Group>
-          <Text size="sm" c="var(--bm-text-muted)" mb={24}>
+          <Text size="sm" c="var(--bm-text-muted)" mb={12}>
             Slide to estimate your tax refund based on your annual donations.
           </Text>
+          <Box mb={20} p={10} style={{ background: 'rgba(74,124,113,0.06)', borderRadius: 8 }}>
+            <Text size="xs" c="var(--bm-text-muted)" lh={1.5}>
+              Estimate = 1/3 × personal eligible donations, up to your taxable income for the tax year.
+            </Text>
+          </Box>
 
           <Box mb={24}>
             <Text size="xs" fw={600} c="var(--bm-text-dark)" mb={8}>
@@ -953,6 +997,11 @@ function TaxSummaryTab() {
               That&apos;s {simIncome > 0 ? ((simRefund / simIncome) * 100).toFixed(1) : '0'}% of your income back
             </Text>
           </div>
+
+          <Text size="xs" c="var(--bm-text-muted)" mt={16} lh={1.5}>
+            Business/company donations are recorded separately and are not included in this
+            personal estimate.
+          </Text>
         </Card>
 
         {/* Tax Guide */}
@@ -962,8 +1011,8 @@ function TaxSummaryTab() {
             <Text fw={700} size="md" c="var(--bm-text-dark)">How to Claim</Text>
           </Group>
           <Text size="sm" c="var(--bm-text-muted)" mb={20}>
-            New Zealand offers a 33.33% tax credit on donations to approved charities.
-            Here&apos;s how to claim yours:
+            You may be able to claim back 1/3 of eligible donations made to approved donee
+            organisations in New Zealand.
           </Text>
 
           {taxGuide.map((item) => (
@@ -977,6 +1026,18 @@ function TaxSummaryTab() {
               </Box>
             </div>
           ))}
+
+          <Text
+            component={Link}
+            href="/donation-tax-credits"
+            size="sm"
+            fw={600}
+            c="var(--bm-terracotta)"
+            mt={16}
+            style={{ display: 'inline-block' }}
+          >
+            Learn more in our Donation Tax Credit guide →
+          </Text>
         </Card>
       </SimpleGrid>
     </>
@@ -1178,17 +1239,37 @@ function MyCausesTab() {
   const { items, loading } = useApiDonations(500);
   const [expandedCharity, setExpandedCharity] = useState<string | null>(null);
 
-  const savedOrgs = useMemo(() => {
-    return favorites.organizations
-      .map((slug) => getOrganizationBySlug(slug))
-      .filter(Boolean) as Organization[];
-  }, [favorites.organizations]);
+  // 즐겨찾기는 실API의 숫자 id를 저장한다 — 실데이터에서 id로 매칭 (구: 목업 slug 조회 → 항상 빈 결과 버그)
+  const [allOrgs, setAllOrgs] = useState<Organization[]>([]);
+  const [allProjects, setAllProjects] = useState<Campaign[]>([]);
 
-  const savedProjects = useMemo(() => {
-    return favorites.projects
-      .map((slug) => getCampaignBySlug(slug))
-      .filter(Boolean) as Campaign[];
-  }, [favorites.projects]);
+  useEffect(() => {
+    let cancelled = false;
+    const orgCount = favorites.organizations.length;
+    const projCount = favorites.projects.length;
+    if (orgCount === 0 && projCount === 0) return; // 저장된 항목 없으면 네트워크 생략
+    Promise.all([
+      orgCount > 0 ? getAllCharities() : Promise.resolve([]),
+      projCount > 0 ? getAllPublicProjects() : Promise.resolve([]),
+    ])
+      .then(([orgs, projs]) => {
+        if (cancelled) return;
+        setAllOrgs(orgs.map(adaptCharity));
+        setAllProjects(projs.map(adaptProject));
+      })
+      .catch(() => { /* 조회 실패 시 빈 목록 유지 */ });
+    return () => { cancelled = true; };
+  }, [favorites.organizations, favorites.projects]);
+
+  const savedOrgs = useMemo(
+    () => allOrgs.filter((o) => favorites.organizations.includes(o.id)),
+    [allOrgs, favorites.organizations],
+  );
+
+  const savedProjects = useMemo(
+    () => allProjects.filter((p) => favorites.projects.includes(p.id)),
+    [allProjects, favorites.projects],
+  );
 
   // ── 기관별 관계 데이터 구축 ──
   const charityRelationships = useMemo(() => {
