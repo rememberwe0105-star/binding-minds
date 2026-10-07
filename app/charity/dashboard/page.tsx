@@ -338,6 +338,7 @@ function DonationsTab({ charityId }: { charityId: number }) {
       const item = {
         ...(d as unknown as DonationItem),
         charity_display_name: orgName,
+        charity_id: charityId, // 영수증의 CC 등록번호 조회용
         created_at: (d.paid_at ?? null) as string | null,
       } as DonationItem;
       await downloadReceiptPdf({

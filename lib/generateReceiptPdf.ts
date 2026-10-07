@@ -9,7 +9,7 @@
  * @see https://www.ird.govt.nz/income-tax/income-tax-for-individuals/types-of-individual-income/donation-tax-credits
  */
 
-import type { DonationItem } from '@/lib/api';
+import { getAllCharities, type DonationItem } from '@/lib/api';
 
 // ─── 색상 (Dear Giver 브랜드) ────────────────────────────────────────────────
 const COLOR_TEAL_R = 74;
@@ -26,13 +26,35 @@ const COLOR_BG_LIGHT = [248, 251, 250] as const;
 // ─── 영수증 번호 생성 ────────────────────────────────────────────────────────
 function generateReceiptNo(item: DonationItem, index: number): string {
   if (item.receipt_no) return String(item.receipt_no);
-  // 자동 생성: DG-YYYYMMDD-NNNN
+  // 자동 생성: DG-YYYYMMDD-<기부ID> (ID가 없을 때만 목록 순번 사용)
+  //  목록 순번은 필터/페이지에 따라 바뀌므로 같은 기부가 다른 번호로 재발급되지 않도록 ID 우선.
   const dateStr = item.paid_at ?? item.created_at;
   const datePart = dateStr
     ? new Date(dateStr).toISOString().slice(0, 10).replace(/-/g, '')
     : 'UNKNOWN';
-  const seq = String(index + 1).padStart(4, '0');
+  const seq = item.id ? String(item.id).padStart(6, '0') : String(index + 1).padStart(4, '0');
   return `DG-${datePart}-${seq}`;
+}
+
+// ─── 기관 등록번호(CC) 조회 ──────────────────────────────────────────────────
+//  기부 내역 응답에는 등록번호가 없어서 공개 기관 목록(registration_no)에서 id로 찾는다.
+//  한 세션에서 여러 장 받을 수 있으므로 목록은 한 번만 불러 캐시한다.
+let registrationNoCache: Promise<Map<number, string>> | null = null;
+
+async function resolveRegistrationNo(item: DonationItem): Promise<string | null> {
+  if (item.cc_number) return String(item.cc_number);
+  if (!item.charity_id) return null;
+  if (!registrationNoCache) {
+    registrationNoCache = getAllCharities()
+      .then((list) => new Map(
+        list.filter((c) => c.registration_no).map((c) => [c.id, c.registration_no as string]),
+      ))
+      .catch(() => {
+        registrationNoCache = null; // 실패 시 다음 다운로드에서 재시도
+        return new Map<number, string>();
+      });
+  }
+  return (await registrationNoCache).get(item.charity_id) ?? null;
 }
 
 // ─── 금액 포맷 ───────────────────────────────────────────────────────────────
@@ -89,6 +111,7 @@ export async function downloadReceiptPdf(opts: ReceiptOptions): Promise<void> {
   const { jsPDF } = await import('jspdf');
 
   const { item, donorName, donorEmail, index = 0 } = opts;
+  const registrationNo = await resolveRegistrationNo(item);
   const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
 
   const W = 210; // A4 width mm
@@ -199,7 +222,7 @@ export async function downloadReceiptPdf(opts: ReceiptOptions): Promise<void> {
   y += 7;
 
   row('Charity Name:', item.charity_display_name || '(Organisation not linked)');
-  row('CC Registration No.:', 'Pending — Charity Services registered');
+  row('CC Registration No.:', registrationNo ?? 'Not available');
 
   y += 4;
   line(y);
