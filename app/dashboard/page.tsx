@@ -105,18 +105,18 @@ function MobilePdfNotice({
     <Modal
       opened={opened}
       onClose={onClose}
-      title="📄 PDF 다운로드 안내"
+      title="📄 Downloading PDFs"
       centered
       radius="lg"
       size="sm"
     >
       <Stack gap={16} pb={8}>
         <Text size="sm" c="var(--bm-text-dark)" lh={1.7}>
-          PDF 다운로드는 <strong>PC(컴퓨터) 환경</strong>에서 이용해 주세요.
+          PDF downloads work best on a <strong>desktop or laptop computer</strong>.
         </Text>
         <Text size="sm" c="var(--bm-text-muted)" lh={1.7}>
-          모바일 브라우저에서는 PDF 저장 방식이 기기마다 달라
-          정상적으로 저장되지 않을 수 있습니다.
+          Mobile browsers handle PDF saving differently, so the file may not save
+          correctly on your phone.
         </Text>
         <Box
           p={12}
@@ -127,11 +127,11 @@ function MobilePdfNotice({
           }}
         >
           <Text size="xs" c="var(--bm-sage-dark)" fw={600} mb={4}>
-            💡 이용 방법
+            💡 How to download
           </Text>
           <Text size="xs" c="var(--bm-text-muted)" lh={1.7}>
-            PC에서 <strong>binding-minds.vercel.app</strong>에 접속하신 후
-            대시보드 → Receipt Vault 또는 Donation Tax Credit 탭에서 다운로드해 주세요.
+            Sign in on a computer, then go to your dashboard → Receipt Vault or the
+            Donation Tax Credit tab to download.
           </Text>
         </Box>
         <Button
@@ -141,7 +141,7 @@ function MobilePdfNotice({
           fullWidth
           mt={4}
         >
-          확인
+          Got it
         </Button>
       </Stack>
     </Modal>
@@ -270,7 +270,7 @@ function OverviewTab() {
               <>
                 <Box>
                   <Text size="sm" fw={500} c="var(--bm-text-dark)">
-                    {d.charity_display_name || '(단체 미연결)'}
+                    {d.charity_display_name || '(Organisation not linked)'}
                   </Text>
                   <Text size="xs" c="var(--bm-text-muted)">
                     {d.currency_code} · {formatDate(d.paid_at ?? d.created_at)}
@@ -726,7 +726,7 @@ function DonationHistoryTab() {
                       <Table.Tr key={i}>
                         <Table.Td>
                           <Text size="sm" fw={500}>
-                            {d.charity_display_name || '(단체 미연결)'}
+                            {d.charity_display_name || '(Organisation not linked)'}
                           </Text>
                           {d.donor_type === 'organization' && (
                             <Badge size="xs" variant="light" color="blue" mt={2}>

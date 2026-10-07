@@ -862,7 +862,7 @@ function ProfileTab({ charityId }: { charityId: number }) {
         await updateCharityProfile(charityId, updates);
       } else if (!hasFileToUpload) {
         // 텍스트 변경도, 업로드할 파일도 없음
-        setError('수정할 필드를 하나 이상 지정하거나 이미지를 선택하세요.');
+        setError('Change at least one field or choose an image before saving.');
         setSaving(false);
         return;
       }

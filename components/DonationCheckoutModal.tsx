@@ -200,7 +200,7 @@ export function DonationCheckoutModal({ opened, onClose, campaign, frequency = '
         setIsLoading(false);
         return;
       }
-      const msg = err instanceof Error ? err.message : '결제를 시작할 수 없습니다. 다시 시도해주세요.';
+      const msg = err instanceof Error ? err.message : 'We couldn\'t start the payment. Please try again.';
       setApiError(msg);
       setIsLoading(false);
     }

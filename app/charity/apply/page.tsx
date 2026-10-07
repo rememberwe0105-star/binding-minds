@@ -176,7 +176,7 @@ export default function CharityApplyPage() {
       });
       setSubmitted(true);
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : '신청 중 오류가 발생했습니다. 다시 시도해주세요.';
+      const msg = err instanceof Error ? err.message : 'Something went wrong while submitting. Please try again.';
       setSubmitError(msg);
     } finally {
       setIsSubmitting(false);

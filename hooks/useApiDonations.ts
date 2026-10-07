@@ -42,7 +42,7 @@ export function useApiDonations(pageSize = 20): UseDonationsResult {
         if (!cancelled) setData(res);
       })
       .catch((err: Error) => {
-        if (!cancelled) setError(err.message ?? '기부 내역을 불러오지 못했습니다.');
+        if (!cancelled) setError(err.message ?? 'We couldn\'t load your donations. Please try again.');
       })
       .finally(() => {
         if (!cancelled) setLoading(false);

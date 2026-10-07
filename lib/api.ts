@@ -589,17 +589,96 @@ export interface NotificationPreferences {
 }
 
 // ---------------------------------------------------------------------------
+// 사용자용 에러 메시지 — 사이트는 영문 서비스이므로 화면에는 항상 영문 문구만 노출한다.
+//  · 백엔드 다운(게이트웨이 502 HTML/텍스트), 네트워크 실패, 한글 내부 메시지는
+//    상태코드 기반 영문 문구로 바꾸고, 기술적 원문은 error.detail 과 콘솔에만 남긴다.
+// ---------------------------------------------------------------------------
+
+const HANGUL_RE = /[ㄱ-ㆎ가-힣]/;
+
+export type ApiRequestError = Error & { code?: string; status?: number; detail?: string };
+
+/** 상태코드/서버 메시지 → 최종 사용자용 영문 메시지 */
+export function friendlyErrorMessage(status?: number, serverMessage?: string): string {
+  // 백엔드가 준 영문 메시지는 그대로 사용 (한글 내부 메시지는 노출하지 않음)
+  if (serverMessage && !HANGUL_RE.test(serverMessage)) return serverMessage;
+  if (!status) return "We couldn't reach our servers. Please check your connection and try again.";
+  if (status >= 500) return 'Our service is temporarily unavailable. Please try again in a moment.';
+  switch (status) {
+    case 400: return 'Some details look incorrect. Please check and try again.';
+    case 401: return 'Your session has expired. Please log in again.';
+    case 403: return "You don't have permission to do that.";
+    case 404: return "We couldn't find what you were looking for.";
+    case 409: return 'This already exists or conflicts with existing information.';
+    case 412: return 'Please finish setting up your account to continue.';
+    case 413: return 'That file is too large. Please choose a smaller file.';
+    case 429: return 'Too many requests. Please wait a moment and try again.';
+    default: return `Something went wrong (error ${status}). Please try again.`;
+  }
+}
+
+function buildApiError(
+  status: number | undefined,
+  serverMessage?: string,
+  code?: string,
+  detail?: string,
+): ApiRequestError {
+  const error = new Error(friendlyErrorMessage(status, serverMessage)) as ApiRequestError;
+  error.status = status;
+  error.code = code;
+  error.detail = detail ?? serverMessage; // 원문은 디버깅용으로 보존
+  return error;
+}
+
+/** fetch 래퍼 — 네트워크 실패(서버 무응답 등)를 사용자용 에러로 변환 */
+async function safeFetch(url: string, init: RequestInit): Promise<Response> {
+  try {
+    return await fetch(url, init);
+  } catch (e) {
+    console.error('[api] network error:', url, e);
+    throw buildApiError(undefined, undefined, 'network_error', e instanceof Error ? e.message : String(e));
+  }
+}
+
+/** 응답 파싱 + 에러 변환 — apiFetch / apiFetchMultipart / publicFetch 공통 */
+async function parseApiResponse<T>(res: Response): Promise<T> {
+  const text = await res.text();
+  let body: T & { error?: ApiError };
+  try {
+    body = (text ? JSON.parse(text) : {}) as T & { error?: ApiError };
+  } catch {
+    // JSON 이 아닌 응답 = 대개 백엔드 다운 시 게이트웨이(502)의 HTML/텍스트
+    console.error('[api] non-JSON response', res.status, text.slice(0, 200));
+    throw buildApiError(res.ok ? 502 : res.status, undefined, 'bad_response', text.slice(0, 200));
+  }
+
+  if (!res.ok) {
+    // FE 5번: 412 failed-precondition → 프로필 완성 필요 신호 (배너가 수신)
+    if (res.status === 412 && typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('dg:needs-profile-completion'));
+    }
+    const err = body?.error;
+    if (err?.message && HANGUL_RE.test(err.message)) {
+      console.warn(`[api] ${res.status} ${err.code ?? ''}: ${err.message}`);
+    }
+    throw buildApiError(res.status, err?.message, err?.code, err?.detail ?? err?.message);
+  }
+
+  return body as T;
+}
+
+// ---------------------------------------------------------------------------
 // 헬퍼: Firebase ID 토큰 획득
 // ---------------------------------------------------------------------------
 
 async function getIdToken(forceRefresh = false): Promise<string> {
   if (!auth) {
-    throw new Error('Firebase가 설정되지 않았습니다.');
+    throw new Error('Sign-in is not available right now. Please try again later.');
   }
 
   const user = auth.currentUser;
   if (!user) {
-    throw new Error('로그인이 필요합니다.');
+    throw new Error('Please log in to continue.');
   }
 
   return user.getIdToken(forceRefresh);
@@ -634,44 +713,16 @@ export async function apiFetch<T = unknown>(
     ...(options.headers as Record<string, string> ?? {}),
   };
 
-  let res = await fetch(url, { ...options, headers });
+  let res = await safeFetch(url, { ...options, headers });
 
   // 401 → 토큰 갱신 후 1회 재시도
   if (res.status === 401) {
     const freshToken = await getIdToken(true);
     headers.Authorization = `Bearer ${freshToken}`;
-    res = await fetch(url, { ...options, headers });
+    res = await safeFetch(url, { ...options, headers });
   }
 
-  // 응답 파싱
-  const text = await res.text();
-  let body: T & { error?: ApiError };
-  try {
-    body = JSON.parse(text);
-  } catch {
-    throw new Error(`서버 응답을 파싱할 수 없습니다: ${text.slice(0, 200)}`);
-  }
-
-  // 에러 처리
-  if (!res.ok) {
-    // FE 5번: 412 failed-precondition → 프로필 완성 필요 신호 (배너가 수신)
-    if (res.status === 412 && typeof window !== 'undefined') {
-      window.dispatchEvent(new CustomEvent('dg:needs-profile-completion'));
-    }
-    const err = body?.error;
-    const message = err?.message ?? `API 오류 (${res.status})`;
-    const error = new Error(message) as Error & {
-      code?: string;
-      status?: number;
-      detail?: string;
-    };
-    error.code = err?.code;
-    error.status = res.status;
-    error.detail = err?.detail;
-    throw error;
-  }
-
-  return body as T;
+  return parseApiResponse<T>(res);
 }
 
 /**
@@ -691,38 +742,16 @@ export async function apiFetchMultipart<T = unknown>(
     // NOTE: Do NOT set Content-Type — browser sets it with boundary for multipart
   };
 
-  let res = await fetch(url, { method, headers, body: formData });
+  let res = await safeFetch(url, { method, headers, body: formData });
 
   // 401 → token refresh + retry
   if (res.status === 401) {
     const freshToken = await getIdToken(true);
     headers.Authorization = `Bearer ${freshToken}`;
-    res = await fetch(url, { method, headers, body: formData });
+    res = await safeFetch(url, { method, headers, body: formData });
   }
 
-  const text = await res.text();
-  let body: T & { error?: ApiError };
-  try {
-    body = JSON.parse(text);
-  } catch {
-    throw new Error(`서버 응답을 파싱할 수 없습니다: ${text.slice(0, 200)}`);
-  }
-
-  if (!res.ok) {
-    const err = body?.error;
-    const message = err?.message ?? `API 오류 (${res.status})`;
-    const error = new Error(message) as Error & {
-      code?: string;
-      status?: number;
-      detail?: string;
-    };
-    error.code = err?.code;
-    error.status = res.status;
-    error.detail = err?.detail;
-    throw error;
-  }
-
-  return body as T;
+  return parseApiResponse<T>(res);
 }
 
 /**
@@ -739,31 +768,8 @@ export async function publicFetch<T = unknown>(
     ...(options.headers as Record<string, string> ?? {}),
   };
 
-  const res = await fetch(url, { ...options, headers });
-
-  const text = await res.text();
-  let body: T & { error?: ApiError };
-  try {
-    body = JSON.parse(text);
-  } catch {
-    throw new Error(`서버 응답을 파싱할 수 없습니다: ${text.slice(0, 200)}`);
-  }
-
-  if (!res.ok) {
-    const err = body?.error;
-    const message = err?.message ?? `API 오류 (${res.status})`;
-    const error = new Error(message) as Error & {
-      code?: string;
-      status?: number;
-      detail?: string;
-    };
-    error.code = err?.code;
-    error.status = res.status;
-    error.detail = err?.detail;
-    throw error;
-  }
-
-  return body as T;
+  const res = await safeFetch(url, { ...options, headers });
+  return parseApiResponse<T>(res);
 }
 
 // ---------------------------------------------------------------------------
@@ -912,7 +918,7 @@ export async function gatedFetch<T>(req: GatedRequest): Promise<T> {
     throw pending();
   }
   if (!res.ok) {
-    throw new Error(body.error?.message ?? `요청에 실패했습니다 (HTTP ${res.status})`);
+    throw buildApiError(res.status, body.error?.message, body.error?.code, body.error?.detail);
   }
   return body;
 }
