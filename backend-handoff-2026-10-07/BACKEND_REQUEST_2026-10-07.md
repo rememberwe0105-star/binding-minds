@@ -7,7 +7,14 @@
 - 백엔드 API: `http://libertron.iptime.org:8787/api/v1`
 - 프론트 배포: `https://binding-minds.vercel.app`
 - 프론트는 아래 경로·스펙으로 **이미 호출하도록 배선**돼 있습니다(404/405/501이면 "준비 중" 안내로 대체되는 게이트 패턴).
-  **엔드포인트가 열리는 즉시 프론트 수정 없이 실연동**됩니다.
+  **엔드포인트가 열리는 즉시 프론트 수정 없이 실연동**됩니다. (단, #10 감사 이메일은 현재 브라우저 저장 방식이라 API 확정 후 프론트 전환 작업이 함께 필요합니다.)
+- 프론트 저장소 접근이 가능하시면 호출 코드는 `lib/api.ts` 에 있습니다 (`gatedFetch` 로 시작하는 함수들 = 백엔드 대기 중인 기능).
+
+**첨부 (이 폴더)**
+| 파일 | 내용 |
+|---|---|
+| `01_users-permissions.jpg` | #3·#4 — 완성된 Users & permissions 화면 (API 연결 대상 필드 확인용) |
+| `02_donor-updates-email-settings.jpg` | #10 — 감사 이메일 설정 화면 ("Auto-saved locally" = 서버 저장 안 됨) |
 
 ---
 
@@ -26,6 +33,7 @@
 | 7 | P2 | 미완료 기부 결제 이어하기 | `POST /checkout/donations/:id/resume` (또는 `checkout_url`) | **404** |
 | 8 | P3 | 영수증 번호 서버 발급 · 기부내역에 기관 정보 | `/me/donations`, `/charities/:id/donations` | 필드 없음 |
 | 9 | P3 | (보안 참고) 공개 API의 `stripe_account_id` 노출 | `GET /charities`, `/charities/:slug` | 노출 중 |
+| 10 | **P1** | 기부 감사 이메일 자동 발송 (템플릿·설정 저장 + 발송) | `/charities/:id/email-templates`, `/me/charity/email-settings` | **404** — 화면은 "자동 발송 On"인데 실제 발송 없음 |
 
 참고로 정상 확인된 것: `/me/registration`, `/me/donations`, `/me/subscriptions`, `/me/charity/payouts`,
 `/me/charity/fundraisers`, `/fundraisers`, `/charities/:slug/fundraisers`, `/admin/settings`,
@@ -200,6 +208,48 @@ GET /api/v1/admin/activity?page=1&pageSize=10        (platform_admin 전용)
 
 ---
 
+## 10. (P1) 기부 감사 이메일 자동 발송
+
+**현황 (중요):** 기관 대시보드 **Donor Updates** 탭에서 기관이
+"Auto Thank-You Email: **On**", "Attach Receipt PDF: **On**", Reply-To 주소, 감사 메시지 템플릿(프로젝트별)을 설정할 수 있는데,
+**전부 브라우저(localStorage)에만 저장**되고 서버로 가지 않습니다. 즉 **기관은 감사 이메일이 나가는 줄 알지만 실제로는 아무 메일도 발송되지 않습니다.**
+(관련 엔드포인트 `GET /charities/:id/email-templates`, `/me/charity/email-settings` 모두 404) — 첨부 `02_donor-updates-email-settings.jpg`
+
+이 기능은 2026-06 요청서(`BACKEND_REQUEST_RECEIPT_EMAIL.md`)에 처음 있었고, 그중 아직 남은 부분만 정리했습니다.
+
+**① 설정 저장**
+```
+GET  /api/v1/me/charity/email-settings
+PUT  /api/v1/me/charity/email-settings
+  body/응답: { "auto_send_thank_you": true, "attach_receipt_pdf": true, "reply_to_email": "hello@org.nz" | null }
+```
+
+**② 템플릿 CRUD** (프론트 `lib/api.ts` 에 이미 이 경로로 함수가 있습니다)
+```
+GET    /api/v1/charities/:charityId/email-templates
+  → { "items": [ { "id": "t1", "title": "Thank You for Your Generosity",
+                   "body": "Dear {donor_name}, ...", "is_active": true,
+                   "applies_to": "general" | <project_id>, "created_at": "..." } ], "total": 1 }
+POST   /api/v1/charities/:charityId/email-templates      body: { title, body, is_active?, applies_to? }
+PUT    /api/v1/charities/:charityId/email-templates/:id
+DELETE /api/v1/charities/:charityId/email-templates/:id
+```
+- 플랜 제한: Community(무료) **템플릿 1개**, Growth **여러 개 + 프로젝트별 지정**
+- 해당 기관 소속(charity_admin)만 접근
+
+**③ 실제 발송 (핵심)** — Stripe `checkout.session.completed`(기부 `succeeded`) 처리 시:
+1. 기관의 `auto_send_thank_you` 가 true 면
+2. 템플릿 선택: 해당 **프로젝트 지정 활성 템플릿 → 없으면 general 활성 템플릿 → 없으면 기본 문구**
+3. 치환자 렌더: `{donor_name}`, `{amount}`, `{project_name}`, `{charity_name}`, `{date}` (NZ 시간대, NZD 표기)
+4. `attach_receipt_pdf` 가 true 면 영수증 PDF 첨부 (#8 의 `receipt_no` 와 같은 번호 사용 권장)
+5. `reply_to_email` 이 있으면 Reply-To 로 설정, 없으면 no-reply
+6. 익명 기부(`is_anonymous`)라도 기부자 본인에게는 발송 (기관에 이메일 노출은 하지 않음)
+7. 발송 결과를 기부 건에 기록 (`receipt_status: "emailed"` 등) — 기관 Donations 탭 표시용
+
+**결정 필요:** 이메일 발송 서비스(이전 요청서에선 Resend 추천)와 발신 주소(`noreply@deargiver.nz` 등) 도메인 인증.
+
+---
+
 ## 참고 — 프론트 측 반영 완료 (요청 아님)
 
 | 항목 | 처리 |
@@ -211,5 +261,7 @@ GET /api/v1/admin/activity?page=1&pageSize=10        (platform_admin 전용)
 | 서버 다운/에러 시 개발용 메시지 노출 방지 (영문 일반 문구) | 반영 |
 | 모바일에서 긴 기관명 버튼이 화면을 넘치던 문제 | 수정 |
 | 통계(Charities Supported / Total Donations)에서 pending 제외 | 수정 |
+| 영수증 PDF 기관 CC 등록번호 실제 값 표시 | 수정 |
+| Donor Updates 템플릿 대상에 다른 기관(데모) 프로젝트가 뜨던 문제 | 수정 (실제 기관 프로젝트로) |
 
-**우선순위:** 1(서버 안정성) → 2(기부금 영문) · 3·4(팀원/결제 포털) · 5(에러 영문) → 6·7 → 8·9
+**우선순위:** 1(서버 안정성) → 2(기부금 영문) · 10(감사 이메일) · 3·4(팀원/결제 포털) · 5(에러 영문) → 6·7 → 8·9
