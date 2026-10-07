@@ -34,7 +34,7 @@ import { SupporterFundraisersTab } from '@/components/SupporterFundraisers';
 import { CharityMembersTab } from '@/components/CharityMembers';
 import { downloadReceiptPdf } from '@/lib/generateReceiptPdf';
 import type { DonationItem } from '@/lib/api';
-import { campaigns, CATEGORIES, REGIONS } from '@/data/campaigns';
+import { CATEGORIES, REGIONS } from '@/data/campaigns';
 import { ImageUpload, DocumentUpload, type UploadedFile } from '@/components/ImageUpload';
 import { MultiImageUpload, type UploadedImage } from '@/components/MultiImageUpload';
 import {
@@ -1157,7 +1157,7 @@ function saveEmailSettings(settings: EmailSettings): void {
   try { localStorage.setItem(EMAIL_SETTINGS_KEY, JSON.stringify(settings)); } catch { /* ignore */ }
 }
 
-function DonorUpdatesTab({ plan }: { plan: CharityPlan }) {
+function DonorUpdatesTab({ plan, charityId }: { plan: CharityPlan; charityId: number }) {
   // Community(무료): 템플릿 1개 제한 / Growth(유료): 다중 템플릿 + 프로젝트별 연결
   const isGrowth = plan === 'paid';
 
@@ -1170,13 +1170,17 @@ function DonorUpdatesTab({ plan }: { plan: CharityPlan }) {
   const [formBody, setFormBody] = useState('');
   const [formAppliesTo, setFormAppliesTo] = useState('general');
 
-  // 데모 기관(Forest & Bird NZ)의 프로젝트 — 템플릿 적용 대상 선택지
+  // 템플릿 적용 대상 선택지 — 로그인한 기관의 실제 프로젝트
+  const [projectTitles, setProjectTitles] = useState<string[]>([]);
+  useEffect(() => {
+    getCharityProjects(charityId)
+      .then((res) => setProjectTitles(res.items.map((p) => p.title)))
+      .catch(() => setProjectTitles([]));
+  }, [charityId]);
   const projectOptions = useMemo(() => [
     { value: 'general', label: '🏛️ General — direct donations to your charity' },
-    ...campaigns
-      .filter((c) => c.organizer === 'Forest & Bird NZ')
-      .map((c) => ({ value: c.name, label: `📌 ${c.name}` })),
-  ], []);
+    ...projectTitles.map((t) => ({ value: t, label: `📌 ${t}` })),
+  ], [projectTitles]);
 
   const communityLimitReached = !isGrowth && templates.length >= 1;
   const [emailSettings, setEmailSettings] = useState<EmailSettings>(() => loadEmailSettings());
@@ -1870,7 +1874,7 @@ function CharityDashboardContent() {
             </Tabs.Panel>
             <Tabs.Panel value="projects"><ProjectsTab charityId={charityId} /></Tabs.Panel>
             {/* Community 플랜도 Donor Updates 접근 가능 — 템플릿 1개 제한 모드 */}
-            <Tabs.Panel value="updates"><DonorUpdatesTab plan={plan} /></Tabs.Panel>
+            <Tabs.Panel value="updates"><DonorUpdatesTab plan={plan} charityId={charityId} /></Tabs.Panel>
             <Tabs.Panel value="fundraisers">
               {isFreePlan ? <PlanLockedPanel feature="Supporter Fundraisers" /> : <SupporterFundraisersTab />}
             </Tabs.Panel>
