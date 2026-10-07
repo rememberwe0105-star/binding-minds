@@ -447,6 +447,7 @@ export default function OrganizationDetailPage({
                   radius="xl"
                   color="sage"
                   leftSection={<IconShieldCheck size={18} />}
+                  className={classes.donateBtn}
                 >
                   Claim Your Profile & Start Receiving Donations
                 </Button>
