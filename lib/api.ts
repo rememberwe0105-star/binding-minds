@@ -1089,11 +1089,17 @@ export interface CharityMember {
   member_role: CharityMemberRole;
   status?: 'active' | 'invited' | 'pending';
   invited_at?: string | null;
+  /** 마지막 활동 시각 — "Last active" 컬럼 */
+  last_active_at?: string | null;
   [key: string]: unknown;
 }
 
 export interface CharityMembersResponse {
   members: CharityMember[];
+  /** 플랜에 포함된 사용자 수 (예: Growth 3명) — "2 of 3 users included in your plan" */
+  seat_limit?: number;
+  /** 현재 사용 중인 좌석 수 (active + 초대 대기) */
+  seats_used?: number;
 }
 
 /** 기관 팀원 목록 조회 (Owner/Member) */
@@ -1131,7 +1137,29 @@ export async function updateCharityMemberRole(memberId: string | number, role: C
   });
 }
 
-/** 팀원 제거 (Owner 는 제거 불가 — UI에서 차단) */
+/** 초대 메일 재발송 (Pending 상태 팀원) */
+export async function resendCharityInvite(memberId: string | number): Promise<unknown> {
+  return gatedFetch({
+    feature: 'Resend team invite',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'POST',
+    path: `/api/v1/me/charity/members/${memberId}/resend`,
+    auth: true,
+  });
+}
+
+/** 기관 플랜·결제 관리 포털 URL (예: Stripe Customer Portal) — "View plan & billing" */
+export async function getCharityBillingPortal(): Promise<{ url: string }> {
+  return gatedFetch({
+    feature: 'Plan & billing portal',
+    doc: '요청서 · Growth 팀 관리',
+    method: 'POST',
+    path: '/api/v1/me/charity/billing/portal',
+    auth: true,
+  });
+}
+
+/** 팀원 제거 / 초대 취소 (Owner 는 제거 불가 — UI에서 차단) */
 export async function removeCharityMember(memberId: string | number): Promise<unknown> {
   return gatedFetch({
     feature: 'Remove team member',

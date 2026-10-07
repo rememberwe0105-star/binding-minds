@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, type ReactNode } from 'react';
 import { useMediaQuery } from '@mantine/hooks';
 import {
   Container,
@@ -62,6 +62,7 @@ import Link from 'next/link';
 import { Header } from '@/components/Header';
 import { Footer } from '@/components/Footer';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
+import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/AuthContext';
 import {
   formatNZD,
@@ -839,16 +840,29 @@ function TaxSummaryTab() {
     label: `${yr} Tax Year  (1 Apr ${yr - 1} – 31 Mar ${yr})`,
   }));
 
-  const taxGuide = [
+  const taxGuide: { step: string; title: string; desc: ReactNode }[] = [
     {
       step: '1',
-      title: 'Download Your Summary',
+      title: 'Download your summary',
       desc: 'Select your tax year and download the consolidated PDF from this page.',
     },
     {
       step: '2',
-      title: 'Log In to myIR',
-      desc: 'Visit Inland Revenue’s official website at ird.govt.nz and log in to your myIR account.',
+      title: 'Log into myIR',
+      desc: (
+        <>
+          Visit Inland Revenue’s official website at{' '}
+          <a
+            href="https://www.ird.govt.nz"
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: 'var(--bm-sage-dark)', fontWeight: 600, textDecoration: 'none' }}
+          >
+            ird.govt.nz
+          </a>{' '}
+          and log in to your myIR account.
+        </>
+      ),
     },
     {
       step: '3',
@@ -866,15 +880,20 @@ function TaxSummaryTab() {
         <Group justify="space-between" align="flex-end" wrap="wrap" gap={24} style={{ position: 'relative', zIndex: 1 }}>
           <Box>
             <Text size="sm" fw={600} c="rgba(255,255,255,0.6)" tt="uppercase" mb={4}>
-              Your Estimated Donation Tax Credit
+              Estimated Donation Tax Credit
             </Text>
             <Text className={classes.taxRefundAmount}>{formatNZD(taxRefund)}</Text>
-            <Text size="sm" c="rgba(255,255,255,0.6)" mt={8}>
-              Based on {formatNZD(totalDonated)} in completed NZD donations to approved donee organisations
+            <Text size="sm" c="rgba(255,255,255,0.88)" mt={8}>
+              Based on {formatNZD(totalDonated)} in eligible donations recorded on this platform
             </Text>
-            <Text size="xs" c="rgba(255,255,255,0.5)" mt={6}>
-              Estimated 1/3 credit — the final amount is confirmed by IRD when you claim.
-            </Text>
+            <Box mt={14} pt={12} style={{ borderTop: '1px solid rgba(255,255,255,0.15)' }}>
+              <Group gap={8} wrap="nowrap" align="flex-start">
+                <IconInfoCircle size={16} color="rgba(255,255,255,0.7)" style={{ flexShrink: 0, marginTop: 2 }} />
+                <Text size="sm" c="rgba(255,255,255,0.75)">
+                  Estimate only. Final eligibility and amount are confirmed by Inland Revenue.
+                </Text>
+              </Group>
+            </Box>
           </Box>
 
           {/* 연도 선택 + 다운로드 버튼 */}
@@ -1011,7 +1030,7 @@ function TaxSummaryTab() {
         <Card padding="xl" radius="lg" withBorder>
           <Group gap={8} mb={16}>
             <IconInfoCircle size={20} color="var(--bm-terracotta)" />
-            <Text fw={700} size="md" c="var(--bm-text-dark)">How to Claim</Text>
+            <Text fw={700} size="md" c="var(--bm-text-dark)">How to claim</Text>
           </Group>
           <Text size="sm" c="var(--bm-text-muted)" mb={20}>
             You may be able to claim back 1/3 of eligible donations made to approved donee
@@ -1035,7 +1054,7 @@ function TaxSummaryTab() {
             href="/donation-tax-credits"
             size="sm"
             fw={600}
-            c="var(--bm-terracotta)"
+            c="var(--bm-sage-dark)"
             mt={16}
             style={{ display: 'inline-block' }}
           >
@@ -1728,10 +1747,38 @@ function DashboardContent() {
   );
 }
 
+/**
+ * 기관(charity) 계정은 "Organisation Dashboard & Settings" 로만 구성한다 (클라이언트 요청).
+ * 도너 대시보드(Seedling 뱃지·My Journey 등)에 URL·"View My Dashboard" 등으로 들어오면
+ * 기관 대시보드로 보낸다.
+ */
+function DonorDashboardGuard({ children }: { children: ReactNode }) {
+  const { userRole, demoRole, serviceCharity } = useAuth();
+  const router = useRouter();
+  const isCharityAccount = demoRole
+    ? demoRole.startsWith('charity')
+    : userRole === 'charity_admin' || !!serviceCharity;
+
+  useEffect(() => {
+    if (isCharityAccount) router.replace('/charity/dashboard');
+  }, [isCharityAccount, router]);
+
+  if (isCharityAccount) {
+    return (
+      <Box ta="center" py={80}>
+        <Loader color="sage" />
+      </Box>
+    );
+  }
+  return <>{children}</>;
+}
+
 export default function DashboardPage() {
   return (
     <ProtectedRoute>
-      <DashboardContent />
+      <DonorDashboardGuard>
+        <DashboardContent />
+      </DonorDashboardGuard>
     </ProtectedRoute>
   );
 }
